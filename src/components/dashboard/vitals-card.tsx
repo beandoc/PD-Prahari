@@ -37,18 +37,41 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function VitalsCard({ vitals }: VitalsCardProps) {
-  const latestVitals = vitals[0];
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
+  // Handle case where there are no vitals data
+  if (!vitals || vitals.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gauge className="h-6 w-6" />
+            Vital Signs
+          </CardTitle>
+          <CardDescription>No vital signs data available.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex h-[350px] items-center justify-center rounded-lg bg-secondary/50 p-4 text-muted-foreground">
+            No vitals recorded for this patient yet.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const latestVitals = vitals[0];
 
   useEffect(() => {
     // This effect runs only on the client, after hydration, to prevent mismatch
-    setLastUpdated(
-      format(
-        new Date(latestVitals.measurementDateTime),
-        'MMMM d, yyyy HH:mm'
-      )
-    );
-  }, [latestVitals.measurementDateTime]);
+    if (latestVitals?.measurementDateTime) {
+      setLastUpdated(
+        format(
+          new Date(latestVitals.measurementDateTime),
+          'MMMM d, yyyy HH:mm'
+        )
+      );
+    }
+  }, [latestVitals?.measurementDateTime]);
 
   const chartData = vitals
     .map((v) => ({
@@ -65,8 +88,7 @@ export default function VitalsCard({ vitals }: VitalsCardProps) {
           Vital Signs
         </CardTitle>
         <CardDescription>
-          Last updated on{' '}
-          {lastUpdated ?? '...'}
+          Last updated on {lastUpdated ?? '...'}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
@@ -110,16 +132,35 @@ export default function VitalsCard({ vitals }: VitalsCardProps) {
 
         <div>
           <h4 className="mb-2 font-medium">Weight Trend</h4>
-           <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <ChartContainer config={chartConfig} className="h-[200px] w-full">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
               <CartesianGrid vertical={false} />
-              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
               <YAxis domain={['dataMin - 2', 'dataMax + 2']} hide />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent />}
+              />
               <defs>
                 <linearGradient id="fillWeight" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0.1}/>
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--chart-1))"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--chart-1))"
+                    stopOpacity={0.1}
+                  />
                 </linearGradient>
               </defs>
               <Area
