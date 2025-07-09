@@ -2,18 +2,17 @@
 'use client';
 
 import { allPatientData } from '@/data/mock-data';
+import type { Patient } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { generatePatientAlerts } from '@/lib/alerts';
-import type { Alert } from '@/lib/alerts';
 import Link from 'next/link';
-import { AlertTriangle, Droplets, TrendingUp, CheckCircle, XCircle, BarChart3 } from 'lucide-react';
-import { format, subDays, startOfMonth, differenceInDays } from 'date-fns';
+import { AlertTriangle, Droplets, TrendingUp, Users, CalendarX, CalendarCheck, UserPlus, ShieldAlert, TrendingDown, ListTodo, BarChart3 } from 'lucide-react';
+import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears } from 'date-fns';
 
 // --- Data Processing ---
-// Note: In a real app, this processing would be more robust and likely done on a server/API.
 
 // 1. Fluid Management Data (demonstrated for the first patient)
 const fluidData = allPatientData[0].vitals.map(vital => {
@@ -74,62 +73,65 @@ const patientsWithStatus = allPatientData.map(patient => {
     return 0;
 });
 
+// --- NEW KPI Calculations ---
+const today = new Date();
+const totalActivePDPatients = allPatientData.filter(p => p.currentStatus === 'Active PD').length;
+
+const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
+const thisWeekAppointments = allPatientData.filter(p => {
+    if (!p.clinicVisits?.nextAppointment) return false;
+    const apptDate = new Date(p.clinicVisits.nextAppointment);
+    return isWithinInterval(apptDate, { start: startOfThisWeek, end: endOfThisWeek });
+}).length;
+
+const startOfLastMonth = startOfMonth(subMonths(today, 1));
+const endOfThisMonth = startOfMonth(today); // end of last month is start of this month
+const newPDPatientsLastMonth = allPatientData.filter(p => {
+    const startDate = new Date(p.pdStartDate);
+    return isWithinInterval(startDate, { start: startOfLastMonth, end: endOfThisMonth });
+}).length;
+
+const oneYearAgo = subYears(today, 1);
+const activePeritonitisEpisodes = allPatientData.reduce((acc, patient) => {
+    const recentEpisodes = patient.peritonitisEpisodes.filter(ep => new Date(ep.diagnosisDate) >= oneYearAgo).length;
+    return acc + recentEpisodes;
+}, 0);
+
+const dropoutStatuses: Patient['currentStatus'][] = ['Deceased', 'Transferred to HD', 'Catheter Removed', 'Transplanted'];
+const dropouts = allPatientData.filter(p => dropoutStatuses.includes(p.currentStatus)).length;
+
+const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
+
+const missedVisits = 2; // Placeholder as mock data doesn't contain past appointments
 
 export default function AnalyticsPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
        <header className="space-y-1">
           <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
             <BarChart3 className="h-8 w-8 text-primary" />
             Clinic Analytics
           </h1>
           <p className="text-muted-foreground">
-            An overview of patient trends, compliance, and clinical risks.
+            A high-level overview of clinic performance and patient metrics.
           </p>
         </header>
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Logging Compliance (Last 30d)</CardTitle>
-                    <CardDescription>Patient: {allPatientData[0].firstName} {allPatientData[0].lastName}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center space-y-2">
-                    <div className="text-5xl font-bold text-green-600">
-                        {complianceRate.toFixed(0)}%
-                    </div>
-                    <p className="text-sm text-muted-foreground">Logged on {daysWithLogs} of the last 30 days.</p>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Exchange Adherence (Last 30d)</CardTitle>
-                    <CardDescription>Based on days with any logs.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center space-y-2">
-                     <div className="text-5xl font-bold text-blue-600">
-                        {totalExchangesDone} / {totalExchangesExpected}
-                    </div>
-                    <p className="text-sm text-muted-foreground">Total exchanges performed vs. expected.</p>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Active Alerts</CardTitle>
-                    <CardDescription>Across all patients in the clinic.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center space-x-6">
-                    <div className="text-center">
-                        <div className="text-4xl font-bold text-red-500">{patientsWithStatus.filter(p => p.status === 'critical').length}</div>
-                        <p className="text-sm font-medium text-red-500">Critical</p>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-4xl font-bold text-yellow-500">{patientsWithStatus.filter(p => p.status === 'warning').length}</div>
-                        <p className="text-sm font-medium text-yellow-500">Warning</p>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle>Clinic-Wide KPIs</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><Users className="h-6 w-6 text-blue-500 mx-auto mb-2" /><p className="text-3xl font-bold">{totalActivePDPatients}</p><p className="text-sm text-muted-foreground">Total PD Patients</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarX className="h-6 w-6 text-red-500 mx-auto mb-2" /><p className="text-3xl font-bold">{missedVisits}</p><p className="text-sm text-muted-foreground">Missed Visits (2mo)</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarCheck className="h-6 w-6 text-green-500 mx-auto mb-2" /><p className="text-3xl font-bold">{thisWeekAppointments}</p><p className="text-sm text-muted-foreground">This Week's Appts</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><UserPlus className="h-6 w-6 text-indigo-500 mx-auto mb-2" /><p className="text-3xl font-bold">{newPDPatientsLastMonth}</p><p className="text-sm text-muted-foreground">New Patients (1mo)</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><ShieldAlert className="h-6 w-6 text-yellow-500 mx-auto mb-2" /><p className="text-3xl font-bold">{activePeritonitisEpisodes}</p><p className="text-sm text-muted-foreground">Peritonitis (1yr)</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><TrendingDown className="h-6 w-6 text-gray-600 mx-auto mb-2" /><p className="text-3xl font-bold">{dropouts}</p><p className="text-sm text-muted-foreground">Dropouts</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><ListTodo className="h-6 w-6 text-purple-500 mx-auto mb-2" /><p className="text-3xl font-bold">{awaitingInsertion}</p><p className="text-sm text-muted-foreground">Awaiting Insertion</p></div>
+            </CardContent>
+        </Card>
 
         <div className="grid gap-6 lg:grid-cols-2">
             <Card>

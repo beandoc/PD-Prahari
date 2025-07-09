@@ -20,7 +20,7 @@ export interface Patient {
   pdStartDate: string;
   underlyingKidneyDisease: string;
   comorbidities?: string[];
-  currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased';
+  currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased' | 'Awaiting Catheter' | 'Catheter Removed';
   lastUpdated?: string;
   distanceFromPDCenterKM?: number;
   educationLevel?: string;

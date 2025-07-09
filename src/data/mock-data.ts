@@ -121,7 +121,7 @@ export const allPatientData: PatientData[] = [
     distanceFromPDCenterKM: 5,
     educationLevel: 'High School',
     underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
-    currentStatus: 'Active PD',
+    currentStatus: 'Transferred to HD',
     physician: 'Dr. Garcia, Chris',
     vitals: [{ vitalId: 'VIT-003', measurementDateTime: '2024-07-28T09:00:00Z', systolicBP: 185, diastolicBP: 95, heartRateBPM: 68, temperatureCelsius: 37.0, weightKG: 80, respiratoryRateBPM: 18, fluidStatusNotes: 'Mild ankle edema' }],
     labResults: [
@@ -130,7 +130,6 @@ export const allPatientData: PatientData[] = [
     ],
     pdEvents: [ 
         { exchangeId: 'PD-003', exchangeDateTime: '2024-07-20T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2250, ultrafiltrationML: 50, isEffluentCloudy: false, recordedBy: 'Patient' },
-        { exchangeId: 'PD-004', exchangeDateTime: '2024-07-19T16:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2180, ultrafiltrationML: -20, isEffluentCloudy: false, recordedBy: 'Patient', complications: 'Mild abdominal pain during drain.' }
     ],
     peritonitisEpisodes: [],
     medications: [{ medicationId: 'MED-003', medicationName: 'Amlodipine', dosage: '5mg', frequency: 'Once daily', startDate: '2021-06-15', prescribingDoctor: 'Dr. Garcia, Chris', status: 'ok' }],
@@ -138,7 +137,7 @@ export const allPatientData: PatientData[] = [
     pdAdequacy: [{ testId: 'KT-002', testDate: '2024-07-01', totalKtV: 1.6, peritonealKtV: 1.5, notes: 'Borderline adequate.'}],
     patientReportedOutcomes: [{ surveyId: 'PRO-002', surveyDate: '2024-07-01', surveyTool: 'KDQOL-36', score: 65, summary: 'Patient reports feeling well but has concerns about fluid retention.' }],
     nutritionLifestyle: { dailyProtein: { current: 55, target: 70 }, fluidRestriction: { current: 1.4, limit: 1.8 }, caloriesToday: { current: 2100, target: 2200 }, handgripStrength: { value: 35, unit: 'kg', status: 'Improving' }},
-    clinicVisits: { nextAppointment: '2024-12-20T11:00:00Z', lastVisitSummary: 'Blood pressure slightly elevated. Continue monitoring.' },
+    clinicVisits: { nextAppointment: '2024-08-01T11:00:00Z', lastVisitSummary: 'Blood pressure slightly elevated. Continue monitoring.' },
     patientEducation: [{ id: 'edu1', title: 'PD Technique Videos', description: 'Step-by-step exchange process', icon: 'Video' }]
   },
   {
@@ -157,16 +156,16 @@ export const allPatientData: PatientData[] = [
     physician: 'Dr. Pong, Jay',
     vitals: [
         { vitalId: 'VIT-004', measurementDateTime: '2024-07-28T07:30:00Z', systolicBP: 125, diastolicBP: 78, heartRateBPM: 80, temperatureCelsius: 36.7, weightKG: 68, respiratoryRateBPM: 16, fluidStatusNotes: 'No edema' },
-        { vitalId: 'VIT-005', measurementDateTime: '2024-07-20T07:30:00Z', systolicBP: 122, diastolicBP: 75, heartRateBPM: 78, temperatureCelsius: 36.6, weightKG: 60, respiratoryRateBPM: 16, fluidStatusNotes: 'No edema' }
     ],
     labResults: [
         { labResultId: 'LAB-004', resultDateTime: '2024-07-24T08:00:00Z', testName: 'Hemoglobin', resultValue: 10.5, units: 'g/dL', referenceRangeLow: 12.0, referenceRangeHigh: 15.5 },
-        { labResultId: 'LAB-008', resultDateTime: '2024-07-24T08:00:00Z', testName: 'Albumin', resultValue: 3.9, units: 'g/dL', referenceRangeLow: 3.4, referenceRangeHigh: 5.4 },
     ],
     pdEvents: [
         { exchangeId: 'PD-005', exchangeDateTime: '2024-07-28T06:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 1800, dwellTimeHours: 4, drainVolumeML: 1900, ultrafiltrationML: 100, isEffluentCloudy: true, recordedBy: 'Patient' }
     ],
-    peritonitisEpisodes: [],
+    peritonitisEpisodes: [
+      { episodeId: 'PER-002', diagnosisDate: '2024-05-15', organismIsolated: 'Pseudomonas aeruginosa', treatmentRegimen: 'Ceftazidime IP', outcome: 'Resolved', resolutionDate: '2024-06-05' }
+    ],
     medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', prescribingDoctor: 'Dr. Pong, Jay', status: 'warning' }],
     urineOutputLogs: [{ logId: 'UO-004', logDate: '2024-07-28', volumeML: 700 }],
     pdAdequacy: [{ testId: 'KT-003', testDate: '2024-05-15', totalKtV: 1.9, peritonealKtV: 1.3, notes: 'Good total clearance, significant contribution from RKF.'}],
@@ -174,5 +173,56 @@ export const allPatientData: PatientData[] = [
     nutritionLifestyle: { dailyProtein: { current: 50, target: 55 }, fluidRestriction: { current: 1.1, limit: 1.2 }, caloriesToday: { current: 1700, target: 1800 }, handgripStrength: { value: 25, unit: 'kg', status: 'Stable' }},
     clinicVisits: { nextAppointment: '2025-01-10T09:00:00Z', lastVisitSummary: 'Anemia management discussed. Continue EPO.' },
     patientEducation: [{ id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }]
+  },
+  {
+    patientId: 'PAT-004',
+    nephroId: 'NPH-34564',
+    firstName: 'David',
+    lastName: 'Chen',
+    dateOfBirth: '1992-03-22',
+    gender: 'Male',
+    pdStartDate: '2024-07-05', // New patient last month
+    pdExchangeType: 'Self',
+    underlyingKidneyDisease: 'IgA Nephropathy',
+    currentStatus: 'Active PD',
+    physician: 'Dr. Garcia, Chris',
+    vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
+    nutritionLifestyle: { dailyProtein: { current: 0, target: 75 }, fluidRestriction: { current: 0, limit: 2.0 }, caloriesToday: { current: 0, target: 2500 }, handgripStrength: { value: 40, unit: 'kg', status: 'Good' }},
+    clinicVisits: { nextAppointment: '2024-08-15T14:00:00Z', lastVisitSummary: 'Initial PD training completed.' },
+    patientEducation: []
+  },
+  {
+    patientId: 'PAT-005',
+    nephroId: 'NPH-34565',
+    firstName: 'Maria',
+    lastName: 'Rodriguez',
+    dateOfBirth: '1965-11-30',
+    gender: 'Female',
+    pdStartDate: '2020-01-10',
+    pdExchangeType: 'Assisted',
+    underlyingKidneyDisease: 'Diabetic Nephropathy',
+    currentStatus: 'Deceased', // Dropout
+    physician: 'Dr. Pong, Jay',
+    vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
+    nutritionLifestyle: { dailyProtein: { current: 0, target: 60 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 1800 }, handgripStrength: { value: 22, unit: 'kg', status: 'Poor' }},
+    clinicVisits: { nextAppointment: '', lastVisitSummary: 'Patient expired.' },
+    patientEducation: []
+  },
+  {
+    patientId: 'PAT-006',
+    nephroId: 'NPH-34566',
+    firstName: 'Saanvi',
+    lastName: 'Patel',
+    dateOfBirth: '1978-09-01',
+    gender: 'Female',
+    pdStartDate: '', // Not started yet
+    pdExchangeType: 'Self',
+    underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
+    currentStatus: 'Awaiting Catheter', // Under counselling
+    physician: 'Dr. Abdullah, Majed',
+    vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
+    nutritionLifestyle: { dailyProtein: { current: 0, target: 65 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 2000 }, handgripStrength: { value: 30, unit: 'kg', status: 'Stable' }},
+    clinicVisits: { nextAppointment: '2024-08-20T09:30:00Z', lastVisitSummary: 'Pre-PD counselling session.' },
+    patientEducation: []
   }
 ];
