@@ -10,6 +10,7 @@ import {
   History,
   User,
   Menu,
+  LayoutDashboard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { allPatientData } from '@/data/mock-data';
 
 const patientNavLinks = [
+  { href: '/patient-portal', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/patient-portal/daily-log', label: 'Daily Log', icon: FileText },
   { href: '/patient-portal/history', label: 'Log History', icon: History },
   { href: '/patient-portal/profile', label: 'My Profile', icon: User },
