@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -37,6 +38,17 @@ const chartConfig = {
 
 export default function VitalsCard({ vitals }: VitalsCardProps) {
   const latestVitals = vitals[0];
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
+  useEffect(() => {
+    // This effect runs only on the client, after hydration, to prevent mismatch
+    setLastUpdated(
+      format(
+        new Date(latestVitals.measurementDateTime),
+        'MMMM d, yyyy HH:mm'
+      )
+    );
+  }, [latestVitals.measurementDateTime]);
 
   const chartData = vitals
     .map((v) => ({
@@ -54,10 +66,7 @@ export default function VitalsCard({ vitals }: VitalsCardProps) {
         </CardTitle>
         <CardDescription>
           Last updated on{' '}
-          {format(
-            new Date(latestVitals.measurementDateTime),
-            'MMMM d, yyyy HH:mm'
-          )}
+          {lastUpdated ?? '...'}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
