@@ -32,7 +32,7 @@ export default function MedicationsCard({ medications }: MedicationsCardProps) {
             )}>
               <div>
                 <p className="font-semibold">{med.medicationName}</p>
-                <p className="text-sm text-muted-foreground">{med.dosage}</p>
+                <p className="text-sm text-muted-foreground">{med.dosage} {med.frequency}</p>
               </div>
               {med.status === 'ok' && <CheckCircle className="h-5 w-5 text-green-500" />}
               {med.status === 'warning' && <AlertTriangle className="h-5 w-5 text-yellow-600 fill-yellow-400" />}

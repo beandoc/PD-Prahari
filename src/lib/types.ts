@@ -7,6 +7,40 @@ export interface Patient {
   currentStatus: string;
 }
 
+export interface Vital {
+  vitalId: string;
+  measurementDateTime: string;
+  systolicBP?: number;
+  diastolicBP?: number;
+  heartRateBPM?: number;
+  temperatureCelsius?: number;
+  weightKG?: number;
+  respiratoryRateBPM?: number;
+  fluidStatusNotes?: string;
+}
+
+export interface LabResult {
+  labResultId: string;
+  resultDateTime: string;
+  testName: string;
+  resultValue: number;
+  units: string;
+  referenceRangeLow?: number;
+  referenceRangeHigh?: number;
+}
+
+export interface PDEvent {
+  exchangeId: string;
+  exchangeDateTime: string;
+  dialysateType: string;
+  fillVolumeML: number;
+  dwellTimeHours: number;
+  drainVolumeML: number;
+  ultrafiltrationML: number;
+  complications?: string;
+  recordedBy?: string;
+}
+
 export interface PeritonitisTrackingData {
   lastEpisode: string;
   lastEpisodeNote: string;
@@ -20,6 +54,9 @@ export interface Medication {
   medicationId: string;
   medicationName: string;
   dosage: string;
+  frequency: string;
+  startDate: string;
+  endDate?: string | null;
   status: 'ok' | 'warning';
 }
 
@@ -52,6 +89,10 @@ export interface PatientData {
   underlyingKidneyDisease: string;
   currentStatus: string;
   
+  vitals: Vital[];
+  labResults: LabResult[];
+  pdEvents: PDEvent[];
+
   peritonitisTracking: PeritonitisTrackingData;
   medications: Medication[];
   nutritionLifestyle: NutritionLifestyleData;
