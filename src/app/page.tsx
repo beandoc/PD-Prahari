@@ -35,8 +35,16 @@ export default function LoginPage() {
           </Card>
         </div>
       </div>
-      <div className="flex items-center justify-center py-12 px-4">
-        <div className="mx-auto grid w-[380px] gap-6">
+      <div className="relative flex items-center justify-center py-12 px-4">
+        <Image
+          src="https://placehold.co/500x500.png"
+          alt="Department Logo Watermark"
+          width={500}
+          height={500}
+          data-ai-hint="nephrology department logo"
+          className="absolute inset-0 h-full w-full object-contain opacity-10"
+        />
+        <div className="relative mx-auto grid w-[380px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Nephrologist Login</h1>
             <p className="text-balance text-muted-foreground">
