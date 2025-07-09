@@ -107,137 +107,183 @@ export default function DoctorDashboard() {
   }).length;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="lg:col-span-2 space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">{totalPatients}</div>
-                    <p className="text-xs text-muted-foreground">managed in this clinic</p>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
-                    <AlertTriangle className="h-4 w-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">{patientsWithCriticalAlerts}</div>
-                    <p className="text-xs text-muted-foreground">require immediate attention</p>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Images for Review</CardTitle>
-                    <Camera className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">+{imagesForReview}</div>
-                    <p className="text-xs text-muted-foreground">newly uploaded photos</p>
-                </CardContent>
-            </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Not Logged Today</CardTitle>
-                    <ClipboardX className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">{nonCompliantToday}</div>
-                    <p className="text-xs text-muted-foreground">patients missed today's log</p>
-                </CardContent>
-            </Card>
-        </div>
-        <Tabs defaultValue="clinical">
-          <TabsList>
-            <TabsTrigger value="clinical">Clinical</TabsTrigger>
-            <TabsTrigger value="adequacy">Adequacy</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="clinic_settings">Clinic Settings</TabsTrigger>
-          </TabsList>
-          <TabsContent value="clinical">
-            <Card>
-              <CardHeader>
-                  <div className="flex items-center justify-between">
-                      <div>
-                          <CardTitle>Patients</CardTitle>
-                          <CardDescription>
-                              A list of patients under your care. Total: {allPatientData.length}
-                          </CardDescription>
-                      </div>
-                      <div className="flex items-center gap-2">
-                          <div className="relative">
-                              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                              <Input type="search" placeholder="Patient Search..." className="pl-8" />
+    <div className="space-y-6">
+       <header>
+            <h1 className="text-3xl font-bold">Hello Dr. Sachin</h1>
+            <p className="text-muted-foreground">Here is a summary of your clinic's activity today.</p>
+        </header>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{totalPatients}</div>
+                        <p className="text-xs text-muted-foreground">managed in this clinic</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{patientsWithCriticalAlerts}</div>
+                        <p className="text-xs text-muted-foreground">require immediate attention</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Images for Review</CardTitle>
+                        <Camera className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">+{imagesForReview}</div>
+                        <p className="text-xs text-muted-foreground">newly uploaded photos</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Not Logged Today</CardTitle>
+                        <ClipboardX className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{nonCompliantToday}</div>
+                        <p className="text-xs text-muted-foreground">patients missed today's log</p>
+                    </CardContent>
+                </Card>
+            </div>
+            <Tabs defaultValue="clinical">
+              <TabsList>
+                <TabsTrigger value="clinical">Clinical</TabsTrigger>
+                <TabsTrigger value="adequacy">Adequacy</TabsTrigger>
+                <TabsTrigger value="reports">Reports</TabsTrigger>
+                <TabsTrigger value="clinic_settings">Clinic Settings</TabsTrigger>
+              </TabsList>
+              <TabsContent value="clinical">
+                <Card>
+                  <CardHeader>
+                      <div className="flex items-center justify-between">
+                          <div>
+                              <CardTitle>Patients</CardTitle>
+                              <CardDescription>
+                                  A list of patients under your care. Total: {allPatientData.length}
+                              </CardDescription>
                           </div>
-                          <Select>
-                              <SelectTrigger className="w-[180px]">
-                                  <SelectValue placeholder="Attending Physician" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                  <SelectItem value="all">All</SelectItem>
-                                  <SelectItem value="garcia">Dr. Garcia, Chris</SelectItem>
-                                  <SelectItem value="pong">Dr. Pong, Jay</SelectItem>
-                                  <SelectItem value="abdullah">Dr. Abdullah, Majed</SelectItem>
-                              </SelectContent>
-                          </Select>
+                          <div className="flex items-center gap-2">
+                              <div className="relative">
+                                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                  <Input type="search" placeholder="Patient Search..." className="pl-8" />
+                              </div>
+                              <Select>
+                                  <SelectTrigger className="w-[180px]">
+                                      <SelectValue placeholder="Attending Physician" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      <SelectItem value="all">All</SelectItem>
+                                      <SelectItem value="garcia">Dr. Garcia, Chris</SelectItem>
+                                      <SelectItem value="pong">Dr. Pong, Jay</SelectItem>
+                                      <SelectItem value="abdullah">Dr. Abdullah, Majed</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                          </div>
                       </div>
-                  </div>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-lg">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[250px]">Patient</TableHead>
-                        <TableHead>Physician</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Alerts</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {allPatientData.map(patient => {
-                        const alerts = generatePatientAlerts(patient);
-                        return (
-                        <TableRow key={patient.patientId} className={alerts.filter(a => a.severity === 'critical').length > 0 ? 'bg-red-50/50' : (alerts.length > 0 ? 'bg-yellow-50/50' : '')}>
-                          <TableCell>
-                            <Link href={`/dashboard/patients/${patient.patientId}`} className="font-medium hover:underline">
-                                {patient.lastName}, {patient.firstName}
-                            </Link>
-                            <div className="text-sm text-muted-foreground">{patient.nephroId}</div>
-                          </TableCell>
-                          <TableCell>
-                             <div className="text-sm text-muted-foreground">{patient.physician}</div>
-                          </TableCell>
-                           <TableCell>
-                            <Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{patient.currentStatus}</Badge>
-                          </TableCell>
-                          <TableCell>
-                             <AlertsCell alerts={alerts} />
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link href={`/dashboard/patients/${patient.patientId}`}>View</Link>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      )})}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-      <div className="lg:col-span-1 space-y-6">
-        <CalendarCard />
-        <NotificationsCard />
-      </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border rounded-lg">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[250px]">Patient</TableHead>
+                            <TableHead>Physician</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Alerts</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {allPatientData.map(patient => {
+                            const alerts = generatePatientAlerts(patient);
+                            return (
+                            <TableRow key={patient.patientId} className={alerts.filter(a => a.severity === 'critical').length > 0 ? 'bg-red-50/50' : (alerts.length > 0 ? 'bg-yellow-50/50' : '')}>
+                              <TableCell>
+                                <Link href={`/dashboard/patients/${patient.patientId}`} className="font-medium hover:underline">
+                                    {patient.lastName}, {patient.firstName}
+                                </Link>
+                                <div className="text-sm text-muted-foreground">{patient.nephroId}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm text-muted-foreground">{patient.physician}</div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{patient.currentStatus}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <AlertsCell alerts={alerts} />
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="ghost" size="sm" asChild>
+                                  <Link href={`/dashboard/patients/${patient.patientId}`}>View</Link>
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          )})}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+               <TabsContent value="adequacy">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Adequacy</CardTitle>
+                            <CardDescription>
+                            Review patient dialysis adequacy metrics.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">Adequacy data and visualizations will be displayed here.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="reports">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Reports</CardTitle>
+                            <CardDescription>
+                            Generate and view clinical reports.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">Report generation options will be available here.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="clinic_settings">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Clinic Settings</CardTitle>
+                            <CardDescription>
+                            Manage clinic-wide settings and configurations.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">Settings for the clinic will be managed from this section.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+          </div>
+          <div className="lg:col-span-1 space-y-6">
+            <CalendarCard />
+            <NotificationsCard />
+          </div>
+        </div>
     </div>
   );
 }
