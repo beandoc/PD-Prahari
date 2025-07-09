@@ -1,12 +1,15 @@
-
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function CalendarCard() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(undefined);
+
+  useEffect(() => {
+    setDate(new Date());
+  }, []);
 
   return (
     <Card>
