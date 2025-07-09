@@ -34,6 +34,12 @@ export interface Prescription {
   dwellTimeHours: number;
   dwellVolumeML: number;
   exchangeTimeMinutes: number;
+  regimen?: Array<{
+    name: string;
+    dialysateType: string;
+    fillVolumeML: number;
+    dwellTimeHours: number;
+  }>;
 }
 
 export interface PDEvent {

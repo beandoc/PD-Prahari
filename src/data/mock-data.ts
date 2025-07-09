@@ -41,6 +41,12 @@ export const allPatientData: PatientData[] = [
       dwellTimeHours: 4,
       dwellVolumeML: 2000,
       exchangeTimeMinutes: 30,
+      regimen: [
+        { name: 'Exchange 1 (Morning)', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4 },
+        { name: 'Exchange 2 (Mid-day)', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4 },
+        { name: 'Exchange 3 (Evening)', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4 },
+        { name: 'Exchange 4 (Night)', dialysateType: 'Icodextrin 7.5%', fillVolumeML: 2000, dwellTimeHours: 8 },
+      ]
     },
     contactInfo: {
       clinicName: 'Riyadh Central Dialysis Center',

@@ -44,13 +44,40 @@ export default function PdLogsPage() {
                             <CardTitle>Current Prescription</CardTitle>
                         </CardHeader>
                         <CardContent>
-                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                                 <div><p className="text-sm text-muted-foreground mb-1">Exchange</p><p className="font-medium">{prescription.exchange}</p></div>
                                 <div><p className="text-sm text-muted-foreground mb-1">PD Strength</p><p className="font-medium">{prescription.pdStrength}</p></div>
                                 <div><p className="text-sm text-muted-foreground mb-1">Dwell Time</p><p className="font-medium">{prescription.dwellTimeHours} hours</p></div>
                                 <div><p className="text-sm text-muted-foreground mb-1">Dwell Vol</p><p className="font-medium">{prescription.dwellVolumeML} mL</p></div>
                                 <div><p className="text-sm text-muted-foreground mb-1">Exchange Time</p><p className="font-medium">{prescription.exchangeTimeMinutes} mins</p></div>
                             </div>
+                            {prescription.regimen && (
+                                <>
+                                    <h4 className="font-semibold text-lg mt-4 mb-2">Prescribed Regimen Details</h4>
+                                    <div className="border rounded-lg">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Exchange</TableHead>
+                                                    <TableHead>Dialysate</TableHead>
+                                                    <TableHead>Fill Volume</TableHead>
+                                                    <TableHead>Dwell Time</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {prescription.regimen.map((item, index) => (
+                                                    <TableRow key={index}>
+                                                        <TableCell className="font-medium">{item.name}</TableCell>
+                                                        <TableCell>{item.dialysateType}</TableCell>
+                                                        <TableCell>{item.fillVolumeML} mL</TableCell>
+                                                        <TableCell>{item.dwellTimeHours} hours</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>
