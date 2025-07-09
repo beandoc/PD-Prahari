@@ -4,56 +4,42 @@ export interface Patient {
   lastName: string;
   dateOfBirth: string;
   gender: 'Male' | 'Female' | 'Other';
-  pdStartDate: string;
-  underlyingKidneyDisease: string;
-  currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased';
+  currentStatus: string;
 }
 
-export interface PDEvent {
-  exchangeId: string;
-  patientId: string;
-  exchangeDateTime: string;
-  dialysateType: string;
-  fillVolumeML: number;
-  dwellTimeHours: number;
-  drainVolumeML: number;
-  ultrafiltrationML: number;
-  complications: string;
-  recordedBy: 'Patient' | 'Nurse' | 'Automated Machine';
-}
-
-export interface Vital {
-  vitalId: string;
-  patientId: string;
-  measurementDateTime: string;
-  systolicBP?: number;
-  diastolicBP?: number;
-  heartRateBPM?: number;
-  temperatureCelsius?: number;
-  weightKG?: number;
-  respiratoryRateBPM?: number;
-  fluidStatusNotes?: string;
-}
-
-export interface LabResult {
-  labResultId: string;
-  patientId: string;
-  resultDateTime: string;
-  testName: string;
-  resultValue: number;
-  units: string;
-  referenceRangeLow?: number;
-  referenceRangeHigh?: number;
+export interface PeritonitisTrackingData {
+  lastEpisode: string;
+  lastEpisodeNote: string;
+  infectionRate: number;
+  riskStatus: 'Low' | 'Medium' | 'High';
+  riskTarget: string;
+  preventionChecklist: { id: string; text: string; completed: boolean }[];
 }
 
 export interface Medication {
   medicationId: string;
-  patientId: string;
   medicationName: string;
   dosage: string;
-  frequency: string;
-  startDate: string;
-  endDate?: string | null;
+  status: 'ok' | 'warning';
+}
+
+export interface NutritionLifestyleData {
+  dailyProtein: { current: number; target: number };
+  fluidRestriction: { current: number; limit: number };
+  caloriesToday: { current: number; target: number };
+  handgripStrength: { value: number; unit: string; status: string };
+}
+
+export interface ClinicVisitData {
+  nextAppointment: string;
+  lastVisitSummary: string;
+}
+
+export interface EducationTopic {
+  id: string;
+  title: string;
+  description: string;
+  icon: 'Video' | 'ShieldCheck' | 'Apple';
 }
 
 export interface PatientData {
@@ -64,9 +50,11 @@ export interface PatientData {
   gender: 'Male' | 'Female' | 'Other';
   pdStartDate: string;
   underlyingKidneyDisease: string;
-  currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased';
-  vitals: Vital[];
-  labResults: LabResult[];
-  pdEvents: PDEvent[];
+  currentStatus: string;
+  
+  peritonitisTracking: PeritonitisTrackingData;
   medications: Medication[];
+  nutritionLifestyle: NutritionLifestyleData;
+  clinicVisits: ClinicVisitData;
+  patientEducation: EducationTopic[];
 }
