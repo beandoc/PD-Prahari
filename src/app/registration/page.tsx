@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
+  // Demographics
   firstName: z.string().min(1, { message: 'First name is required.' }),
   lastName: z.string().min(1, { message: 'Last name is required.' }),
   nephroId: z.string().min(1, { message: 'Nephro ID is required.' }),
@@ -41,6 +42,18 @@ const formSchema = z.object({
     required_error: 'Date of birth is required.',
   }),
   gender: z.string().min(1, { message: 'Gender is required.' }),
+  
+  // Contact
+  contactPhone: z.string().min(1, { message: 'Contact phone is required.' }),
+  addressLine1: z.string().min(1, { message: 'Address is required.' }),
+  city: z.string().min(1, { message: 'City is required.' }),
+  postalCode: z.string().min(1, { message: 'Postal code is required.' }),
+  
+  // Emergency Contact
+  emergencyContactName: z.string().min(1, { message: 'Emergency contact name is required.' }),
+  emergencyContactPhone: z.string().min(1, { message: 'Emergency contact phone is required.' }),
+
+  // Clinical
   physician: z.string().min(1, { message: 'Attending physician is required.' }),
   underlyingKidneyDisease: z.string().min(1, { message: 'This field is required.' }),
   pdStartDate: z.date({
@@ -59,6 +72,13 @@ export default function ClinicianPatientRegistrationPage() {
       firstName: '',
       lastName: '',
       nephroId: '',
+      contactPhone: '',
+      addressLine1: '',
+      city: '',
+      postalCode: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      underlyingKidneyDisease: '',
     },
   });
 
@@ -98,7 +118,7 @@ export default function ClinicianPatientRegistrationPage() {
                         <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input placeholder="Enter last name" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                      <FormField control={form.control} name="nephroId" render={({ field }) => (
-                        <FormItem><FormLabel>Nephro ID</FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Nephro ID / UHID</FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="dateOfBirth" render={({ field }) => (
                         <FormItem className="flex flex-col"><FormLabel>Date of Birth</FormLabel>
@@ -121,6 +141,38 @@ export default function ClinicianPatientRegistrationPage() {
                                 <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
                             </Select><FormMessage />
                         </FormItem>
+                    )} />
+                 </div>
+              </section>
+
+              {/* Contact Information Section */}
+              <section>
+                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Contact Information</h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <FormField control={form.control} name="contactPhone" render={({ field }) => (
+                        <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="addressLine1" render={({ field }) => (
+                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="city" render={({ field }) => (
+                        <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="Enter city" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                     <FormField control={form.control} name="postalCode" render={({ field }) => (
+                        <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                 </div>
+              </section>
+
+              {/* Emergency Contact Section */}
+               <section>
+                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Emergency Contact / Guardian</h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField control={form.control} name="emergencyContactName" render={({ field }) => (
+                        <FormItem><FormLabel>Contact Name</FormLabel><FormControl><Input placeholder="Enter guardian/contact name" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="emergencyContactPhone" render={({ field }) => (
+                        <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter guardian/contact phone" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                  </div>
               </section>
