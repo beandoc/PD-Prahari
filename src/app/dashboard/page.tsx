@@ -73,7 +73,7 @@ export default function DoctorDashboard() {
   const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
 
   return (
-    <div className="p-4 md:p-8">
+    <>
       <Tabs defaultValue="clinical">
         <TabsList className="mb-4">
           <TabsTrigger value="clinical">Clinical</TabsTrigger>
@@ -175,6 +175,6 @@ export default function DoctorDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </>
   );
 }

@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 const formSchema = z.object({
   patientName: z.string().min(1, { message: 'Patient name is required.' }),
@@ -60,7 +61,7 @@ export default function PatientRegistrationPage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-            <div className="grid grid-cols-1 gap-x-8 gap-y-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
                 <FormField
                     control={form.control}
                     name="patientName"
@@ -188,11 +189,15 @@ export default function PatientRegistrationPage() {
                     )}
                 />
             </div>
-            <Button type="submit" className="bg-[#1fa5b4] hover:bg-[#1b93a1] text-white font-bold py-2 px-8 rounded-md float-right">Register Patient</Button>
+            <div className="flex items-center justify-end gap-4 pt-4">
+                <Link href="/" className="text-sm underline text-gray-300 hover:text-white">
+                    Already have an account? Login
+                </Link>
+                <Button type="submit" className="bg-[#1fa5b4] hover:bg-[#1b93a1] text-white font-bold py-2 px-8 rounded-md">Register Patient</Button>
+            </div>
           </form>
         </Form>
       </div>
     </div>
   );
 }
-

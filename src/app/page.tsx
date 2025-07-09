@@ -11,16 +11,22 @@ export default function LoginPage() {
       <div className="hidden bg-muted lg:flex lg:flex-col lg:items-center lg:justify-center p-8">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold">
-              PD <span className="text-accent">PRAHARI</span>
-            </h1>
-            <p className="text-xl mt-2 text-primary">Securing Care</p>
+            <div className="flex justify-center items-center gap-2 mb-2">
+                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#1E40AF" strokeWidth="1.5"/>
+                    <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <h1 className="text-4xl font-bold">
+                ShareSource
+                </h1>
+            </div>
+            <p className="text-xl mt-2 text-muted-foreground">Your Companion in Kidney Care</p>
           </div>
           <Card>
             <CardContent className="p-4">
               <Image
                 src="https://placehold.co/400x400.png"
-                alt="PD Prahari app icon"
+                alt="Kidney care illustration"
                 width="400"
                 height="400"
                 data-ai-hint="kidney care"
@@ -28,61 +34,37 @@ export default function LoginPage() {
               />
             </CardContent>
           </Card>
-          <div className="text-center mt-8">
-            <p className="text-xl font-medium text-destructive">
-              Your Companion in Kidney Care
-            </p>
-          </div>
         </div>
       </div>
       <div className="flex items-center justify-center py-12 px-4">
         <div className="mx-auto grid w-[380px] gap-6">
-          <div className="text-right">
-            <h2 className="text-lg font-semibold">Dashboard</h2>
-            <p className="text-sm text-muted-foreground">
-              Access your account to view dashboard.
-            </p>
-          </div>
-          <div className="grid gap-2">
-            <h1 className="text-3xl font-bold">Login with your credentials</h1>
+          <div className="grid gap-2 text-center">
+            <h1 className="text-3xl font-bold">Login</h1>
             <p className="text-balance text-muted-foreground">
-              Explore patient profiles and treatment data.
+              Enter your credentials to access your account
             </p>
           </div>
           <div className="grid gap-4">
-            <Input id="fullname" type="text" placeholder="Your full name" required />
-            <Input id="username" type="text" placeholder="Your unique username" required />
             <div className="relative">
-              <Input id="password" type="password" placeholder="Password" required className="pr-10" />
-              <User className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input id="username" type="text" placeholder="Username" required className="pl-10" />
+              <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
             <div className="relative">
-              <Input id="repeat-password" type="password" placeholder="Repeat password" required className="pr-10" />
-              <Lock className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input id="password" type="password" placeholder="Password" required className="pl-10" />
+              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
-            <Button type="submit" className="w-full">
-              Sign Up
+            <Button type="submit" className="w-full" asChild>
+               <Link href="/dashboard">Login</Link>
             </Button>
-
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  or connect as
-                </span>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/dashboard">Guest</Link>
-              </Button>
-              <Button variant="outline" className="w-full">
-                Admin
-              </Button>
-            </div>
+             <Button variant="outline" className="w-full" asChild>
+                <Link href="/dashboard">Login as Guest</Link>
+            </Button>
+          </div>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{' '}
+            <Link href="/registration" className="underline">
+              Sign up
+            </Link>
           </div>
         </div>
       </div>

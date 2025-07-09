@@ -1,8 +1,19 @@
+'use client';
 
-import Link from "next/link"
-import { CircleUser } from "lucide-react"
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  BarChart3,
+  CircleUser,
+  Droplets,
+  LayoutGrid,
+  LifeBuoy,
+  LogOut,
+  Settings,
+  Menu,
+} from 'lucide-react';
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,38 +21,139 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
+
+
+const navLinks = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
+  { href: '/dashboard/pd-logs', label: 'PD Logs', icon: Droplets },
+  { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
+];
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-lg font-semibold md:text-base"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="#1E40AF" strokeWidth="1.5"/>
-                <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            <span className="sr-only">ShareSource</span>
-          </Link>
-          <span className="text-xl font-bold">ShareSource</span>
-           <Link
-            href="/dashboard/sharesource"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            About Sharesource
-          </Link>
-        </nav>
-        <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-          <div className="ml-auto flex-1 sm:flex-initial">
-            {/* Search can go here if needed globally */}
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <div className="hidden border-r bg-muted/40 md:block">
+        <div className="flex h-full max-h-screen flex-col gap-2">
+          <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#1E40AF" strokeWidth="1.5"/>
+                    <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              <span className="">ShareSource</span>
+            </Link>
+          </div>
+          <div className="flex-1">
+            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              {navLinks.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                    pathname === href && 'bg-muted text-primary'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+          <div className="mt-auto p-4">
+             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                <Link
+                  href="#"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                >
+                  <LifeBuoy className="h-4 w-4" />
+                  Support
+                </Link>
+             </nav>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col">
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 md:hidden"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="flex flex-col">
+              <nav className="grid gap-2 text-lg font-medium">
+                <Link
+                  href="#"
+                  className="flex items-center gap-2 text-lg font-semibold mb-4"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" stroke="#1E40AF" strokeWidth="1.5"/>
+                      <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <span className="">ShareSource</span>
+                </Link>
+                {navLinks.map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
+                       pathname === href && 'bg-muted text-foreground'
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+               <div className="mt-auto">
+                 <nav className="grid gap-2 text-lg font-medium">
+                    <Link
+                      href="#"
+                      className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                    >
+                      <Settings className="h-5 w-5" />
+                      Settings
+                    </Link>
+                    <Link
+                      href="#"
+                      className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                    >
+                      <LifeBuoy className="h-5 w-5" />
+                      Support
+                    </Link>
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <div className="w-full flex-1">
+            {/* Can add breadcrumbs here */}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -56,14 +168,16 @@ export default function DashboardLayout({
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+               <DropdownMenuItem asChild>
+                <Link href="/">Logout</Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-      </header>
-      <main className="flex flex-1 flex-col bg-muted/40">
-        {children}
-      </main>
+        </header>
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
+          {children}
+        </main>
+      </div>
     </div>
-  )
+  );
 }
