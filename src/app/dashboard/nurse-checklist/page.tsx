@@ -13,6 +13,12 @@ const ChecklistItem = ({ id, label }: { id: string, label: string }) => (
     </div>
 );
 
+const SubList = ({ items }: { items: string[] }) => (
+    <ul className="list-disc list-inside pl-4 space-y-1 mt-1">
+        {items.map((item, index) => <li key={index} className="text-sm">{item}</li>)}
+    </ul>
+);
+
 
 export default function NurseChecklistPage() {
     return (
@@ -59,6 +65,69 @@ export default function NurseChecklistPage() {
                                      <ChecklistItem id="c12" label="Assess exit site and tunnel for trauma, swelling, or signs of infection." />
                                      <ChecklistItem id="c13" label="Instruct patient on their daily exit site and catheter care routine." />
                                      <ChecklistItem id="c14" label="Perform low volume PD exchanges to 'break in' the catheter and ensure proper function." />
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="month1-week1">
+                                <AccordionTrigger className="text-lg font-semibold">Month 1: Week 1</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="w1-1" label="Evaluate patient's preferred learning style to individualize training: auditory, visual, or kinesthetic." />
+                                    <ChecklistItem id="w1-2" label="Discuss individual training needs (days/time) based on work/life schedule." />
+                                    <ChecklistItem id="w1-3" label="Educate patient on potential concerns: Constipation, Pericatheter leaks, Flow dysfunction, Suspected contamination." />
+                                    <ChecklistItem id="w1-4" label="Review hand hygiene and aseptic technique." />
+                                    <ChecklistItem id="w1-5" label="Instruct patient on keeping the PD environment clean." />
+                                    <ChecklistItem id="w1-6" label="Provide continued exit site care instructions." />
+                                    <ChecklistItem id="w1-7" label="Design an individualized PD prescription." />
+                                    <ChecklistItem id="w1-8" label="Ensure patient is added to MyBaxter Customer Service Portal." />
+                                    <ChecklistItem id="w1-9" label="Arrange for 24-hour urine collection and baseline bloodwork." />
+                                    <ChecklistItem id="w1-10" label="Discuss integrating home life to PD routine (clinic review, supplies, home visits)." />
+                                    <ChecklistItem id="w1-11" label="Order PD supplies for home delivery." />
+                                    <ChecklistItem id="w1-12" label="Schedule next week’s appointments for dressing change/flush." />
+                                    <ChecklistItem id="w1-13" label="Assess patient treatments using remote patient management if on an enabled APD device." />
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="month1-week2">
+                                <AccordionTrigger className="text-lg font-semibold">Month 1: Week 2</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="w2-1" label="Proactively contact patient to provide support and evaluation." />
+                                    <ChecklistItem id="w2-2" label="Assess individual support needed (work, home, school, family/lifestyle)." />
+                                    <ChecklistItem id="w2-3" label="Identify where your patient is on the grief cycle." />
+                                    <ChecklistItem id="w2-4" label="Explain the importance of waste-disposal." />
+                                    <ChecklistItem id="w2-5" label="Review how to assess effluent for cloudiness." />
+                                    <ChecklistItem id="w2-6" label="Assess exit site and tunnel for trauma, s/s infection." />
+                                    <ChecklistItem id="w2-7" label="Review peritonitis and antibiotic protocol, including how to manage after hours." />
+                                    <ChecklistItem id="w2-8" label="Review clinic’s after-hours policy regarding possible contamination and on-call contact info." />
+                                    <ChecklistItem id="w2-9" label="Assess any barriers (modality related: peritonitis, catheter, exit site and tunnel infections)." />
+                                    <ChecklistItem id="w2-10" label="Schedule next week’s appointments." />
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="month1-week3">
+                                <AccordionTrigger className="text-lg font-semibold">Month 1: Week 3</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="w3-1" label="Proactively contact patient to provide support and evaluation and congratulate them on their PD journey." />
+                                    <ChecklistItem id="w3-2" label="Schedule next week’s appointments and schedule a PET test between 4-8 weeks." />
+                                    <ChecklistItem id="w3-3" label="Have patient take inventory of home supplies." />
+                                    <div>
+                                        <ChecklistItem id="w3-4" label="Review the importance of retraining including:" />
+                                        <SubList items={[
+                                            "Dialysis exchange procedures",
+                                            "Hand-washing techniques",
+                                            "Recognition of signs and symptoms of peritonitis",
+                                            "Recognition of contamination and the appropriate response to it",
+                                            "Exit site care"
+                                        ]} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="month1-week4">
+                                <AccordionTrigger className="text-lg font-semibold">Month 1: Week 4</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="w4-1" label="Proactively contact patient to provide support and evaluation." />
+                                    <ChecklistItem id="w4-2" label="Discuss patient’s sleep patterns and getting a good night’s sleep on PD." />
+                                    <ChecklistItem id="w4-3" label="Discuss patient’s exercise schedule and its importance to wellness." />
+                                    <ChecklistItem id="w4-4" label="Discuss any individual support needs: Work/Home/Family/School/Lifestyle." />
+                                    <ChecklistItem id="w4-5" label="Schedule next week’s appointments." />
+                                    <ChecklistItem id="w4-6" label="Remind patient of upcoming specimen collection procedure." />
+                                    <ChecklistItem id="w4-7" label="Review mobile ordering with patient and order supplies as needed." />
                                 </AccordionContent>
                             </AccordionItem>
                              <AccordionItem value="item-4">
