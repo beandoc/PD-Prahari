@@ -1,5 +1,5 @@
-'use server';
 
+import * as React from 'react';
 import type { PatientData, PDEvent, Vital } from '@/lib/types';
 import { differenceInDays, subDays } from 'date-fns';
 import { AlertTriangle, Droplet, Thermometer, Weight, MessageSquare, Camera } from 'lucide-react';
@@ -41,7 +41,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
         id: `cloudy-${event.exchangeId}`,
         severity: 'critical',
         message: 'Cloudy PD fluid reported.',
-        icon: <Droplet className="h-4 w-4 text-yellow-500" />,
+        icon: React.createElement(Droplet, { className: "h-4 w-4 text-yellow-500" }),
       });
     }
   });
@@ -52,7 +52,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
       id: `edema-${latestVital.vitalId}`,
       severity: 'warning',
       message: `Fluid status notes: ${latestVital.fluidStatusNotes}`,
-      icon: <Weight className="h-4 w-4 text-blue-500" />,
+      icon: React.createElement(Weight, { className: "h-4 w-4 text-blue-500" }),
     });
   }
 
@@ -62,7 +62,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
       id: `fever-${latestVital.vitalId}`,
       severity: 'critical',
       message: `Fever detected: ${latestVital.temperatureCelsius}°C.`,
-      icon: <Thermometer className="h-4 w-4 text-red-500" />,
+      icon: React.createElement(Thermometer, { className: "h-4 w-4 text-red-500" }),
     });
   }
 
@@ -86,7 +86,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
           id: 'text-keywords',
           severity: 'warning',
           message: `Concerning keywords found in notes: ${[...foundKeywords].join(', ')}.`,
-          icon: <MessageSquare className="h-4 w-4 text-orange-500" />,
+          icon: React.createElement(MessageSquare, { className: "h-4 w-4 text-orange-500" }),
       });
   }
 
@@ -97,7 +97,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
       id: `high-bp-${latestVital.vitalId}`,
       severity: 'critical',
       message: `High BP recorded: ${latestVital.systolicBP}/${latestVital.diastolicBP} mmHg.`,
-      icon: <AlertTriangle className="h-4 w-4 text-red-600" />,
+      icon: React.createElement(AlertTriangle, { className: "h-4 w-4 text-red-600" }),
     });
   }
 
@@ -109,7 +109,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
               id: 'missed-logs',
               severity: 'warning',
               message: `No PD logs for ${daysSinceLastLog} days.`,
-              icon: <AlertTriangle className="h-4 w-4 text-gray-500" />,
+              icon: React.createElement(AlertTriangle, { className: "h-4 w-4 text-gray-500" }),
           });
       }
   } else {
@@ -117,7 +117,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
             id: 'no-logs',
             severity: 'warning',
             message: `No PD logs ever recorded for this patient.`,
-            icon: <AlertTriangle className="h-4 w-4 text-gray-500" />,
+            icon: React.createElement(AlertTriangle, { className: "h-4 w-4 text-gray-500" }),
         });
   }
 
@@ -132,7 +132,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
         id: `urine-drop-${latestLog.logId}`,
         severity: 'warning',
         message: `Urine output dropped to ${latestLog.volumeML}mL (baseline avg: ${baseline.toFixed(0)}mL).`,
-        icon: <Droplet className="h-4 w-4 text-blue-400" />,
+        icon: React.createElement(Droplet, { className: "h-4 w-4 text-blue-400" }),
       });
     }
   }
@@ -148,7 +148,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
               id: `weight-change-${latestVital.vitalId}`,
               severity: 'warning',
               message: `Significant weight change of ${(weightChange * 100).toFixed(0)}% detected.`,
-              icon: <Weight className="h-4 w-4 text-orange-500" />,
+              icon: React.createElement(Weight, { className: "h-4 w-4 text-orange-500" }),
           });
         }
       }
@@ -160,7 +160,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
           id: 'image-review',
           severity: 'warning',
           message: 'New image uploaded for review.',
-          icon: <Camera className="h-4 w-4 text-purple-500" />
+          icon: React.createElement(Camera, { className: "h-4 w-4 text-purple-500" })
       });
   }
 
@@ -175,7 +175,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
           id: 'non-compliance',
           severity: 'warning',
           message: `Patient may be non-compliant (logged ${eventsYesterday}/${prescriptionExchanges} exchanges yesterday).`,
-          icon: <AlertTriangle className="h-4 w-4 text-orange-400" />
+          icon: React.createElement(AlertTriangle, { className: "h-4 w-4 text-orange-400" })
       });
   }
   
