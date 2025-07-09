@@ -1,7 +1,7 @@
 
 import { allPatientData } from '@/data/mock-data';
 import PatientHeader from '@/components/dashboard/patient-header';
-import PeritonitisTrackingCard from '@/components/dashboard/PeritonitisTrackingCard';
+import PeritonitisHistoryCard from '@/components/dashboard/PeritonitisTrackingCard';
 import MedicationsCard from '@/components/dashboard/medications-card';
 import NutritionLifestyleCard from '@/components/dashboard/NutritionLifestyleCard';
 import ClinicVisitsCard from '@/components/dashboard/ClinicVisitsCard';
@@ -30,7 +30,7 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                  <MedicationsCard medications={patientData.medications} />
-                 <PeritonitisTrackingCard data={patientData.peritonitisTracking} />
+                 <PeritonitisHistoryCard episodes={patientData.peritonitisEpisodes} />
             </div>
         </div>
         <div className="lg:col-span-1 space-y-6">

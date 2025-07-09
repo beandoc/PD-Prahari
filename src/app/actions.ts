@@ -1,3 +1,4 @@
+
 'use server';
 
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
@@ -31,6 +32,8 @@ function formatDataForAI(patientData: PatientData) {
       DwellTimeHours: p.dwellTimeHours,
       DrainVolumeML: p.drainVolumeML,
       UltrafiltrationML: p.ultrafiltrationML,
+      InflowTimeMinutes: p.inflowTimeMinutes,
+      OutflowTimeMinutes: p.outflowTimeMinutes,
       Complications: p.complications,
       Notes: `Recorded by ${p.recordedBy}`,
     })),
@@ -40,6 +43,14 @@ function formatDataForAI(patientData: PatientData) {
       Frequency: m.frequency,
       StartDate: m.startDate,
       EndDate: m.endDate || null,
+      PrescribingDoctor: m.prescribingDoctor,
+    })),
+    peritonitisEpisodes: patientData.peritonitisEpisodes.map(p => ({
+        DiagnosisDate: p.diagnosisDate,
+        OrganismIsolated: p.organismIsolated,
+        TreatmentRegimen: p.treatmentRegimen,
+        Outcome: p.outcome,
+        ResolutionDate: p.resolutionDate,
     })),
   };
 }

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Provides medication adjustment suggestions based on patient data.
@@ -42,6 +43,8 @@ const MedicationAdjustmentInputSchema = z.object({
       DwellTimeHours: z.number().describe('Duration the dialysate remained in the peritoneum (hours)'),
       DrainVolumeML: z.number().describe('Volume of fluid drained (mL)'),
       UltrafiltrationML: z.number().describe('Calculated ultrafiltration volume (mL)'),
+      InflowTimeMinutes: z.number().optional().describe('Duration of dialysate inflow in minutes'),
+      OutflowTimeMinutes: z.number().optional().describe('Duration of dialysate outflow in minutes'),
       Complications: z.string().optional().describe('Complications during the exchange (e.g., Pain, Leakage)'),
       Notes: z.string().optional().describe('Additional notes on the exchange'),
     })
@@ -53,8 +56,18 @@ const MedicationAdjustmentInputSchema = z.object({
       Frequency: z.string().describe('Frequency of the medication (e.g., Once daily, BID)'),
       StartDate: z.string().describe('Date the medication was started'),
       EndDate: z.string().nullable().describe('Date the medication was stopped (nullable if ongoing)'),
+      PrescribingDoctor: z.string().optional().describe('The name of the prescribing doctor.'),
     })
   ).describe('A list of the patient medications.'),
+  peritonitisEpisodes: z.array(
+      z.object({
+        DiagnosisDate: z.string().describe('Date of peritonitis diagnosis.'),
+        OrganismIsolated: z.string().describe('The organism isolated from the culture.'),
+        TreatmentRegimen: z.string().describe('The treatment regimen for the episode.'),
+        Outcome: z.string().describe('The outcome of the episode.'),
+        ResolutionDate: z.string().optional().describe('The date the episode was resolved.'),
+      })
+  ).describe('A list of the patient peritonitis episodes.'),
 }).describe('The data needed to generate medication adjustment suggestions.');
 
 export type MedicationAdjustmentInput = z.infer<typeof MedicationAdjustmentInputSchema>;
@@ -79,7 +92,7 @@ const prompt = ai.definePrompt({
   name: 'medicationAdjustmentSuggestionsPrompt',
   input: {schema: MedicationAdjustmentInputSchema},
   output: {schema: MedicationAdjustmentOutputSchema},
-  prompt: `You are an experienced clinician specializing in peritoneal dialysis. Your task is to analyze the provided patient data and suggest potential medication adjustments to optimize their treatment plan.  Provide reasoning for each suggestion based on the provided clinical history.
+  prompt: `You are an experienced clinician specializing in peritoneal dialysis. Your task is to analyze the provided patient data and suggest potential medication adjustments to optimize their treatment plan. Provide reasoning for each suggestion based on the provided clinical history.
 
 Patient ID: {{{patientId}}}
 
@@ -98,9 +111,18 @@ PD Exchange Data:
   - ExchangeDateTime: {{{ExchangeDateTime}}}, DialysateType: {{{DialysateType}}}, FillVolumeML: {{{FillVolumeML}}}, DwellTimeHours: {{{DwellTimeHours}}}, DrainVolumeML: {{{DrainVolumeML}}}, UltrafiltrationML: {{{UltrafiltrationML}}}, Complications: {{{Complications}}}, Notes: {{{Notes}}}
 {{/each}}
 
+Peritonitis History:
+{{#if peritonitisEpisodes}}
+{{#each peritonitisEpisodes}}
+  - Diagnosis: {{{DiagnosisDate}}}, Organism: {{{OrganismIsolated}}}, Outcome: {{{Outcome}}}, Treatment: {{{TreatmentRegimen}}}
+{{/each}}
+{{else}}
+  - No history of peritonitis.
+{{/if}}
+
 Medications:
 {{#each medications}}
-  - MedicationName: {{{MedicationName}}}, Dosage: {{{Dosage}}}, Frequency: {{{Frequency}}}, StartDate: {{{StartDate}}}, EndDate: {{{EndDate}}}
+  - MedicationName: {{{MedicationName}}}, Dosage: {{{Dosage}}}, Frequency: {{{Frequency}}}, StartDate: {{{StartDate}}}, EndDate: {{{EndDate}}}, Prescribed by: {{{PrescribingDoctor}}}
 {{/each}}
 
 Based on this information, provide medication adjustment suggestions with reasoning.`,

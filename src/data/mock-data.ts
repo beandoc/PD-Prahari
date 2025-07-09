@@ -8,10 +8,21 @@ export const allPatientData: PatientData[] = [
     lastName: 'Talal',
     dateOfBirth: '1980-01-07',
     gender: 'Male',
+    contactPhone: '555-0101',
+    contactEmail: 'abdul.talal@example.com',
+    addressLine1: '123 Oasis Drive',
+    city: 'Riyadh',
+    stateProvince: 'Riyadh Province',
+    postalCode: '11564',
+    country: 'Saudi Arabia',
+    emergencyContactName: 'Fatima Talal',
+    emergencyContactPhone: '555-0102',
     pdStartDate: '2022-01-20',
     underlyingKidneyDisease: 'Diabetic Nephropathy',
+    comorbidities: ['Hypertension', 'Type 2 Diabetes'],
     currentStatus: 'Active PD',
     physician: 'Dr. Abdullah, Majed',
+    lastUpdated: '2024-07-28T10:00:00Z',
     vitals: [
       {
         vitalId: 'VIT-001',
@@ -63,6 +74,8 @@ export const allPatientData: PatientData[] = [
         dwellTimeHours: 4,
         drainVolumeML: 2150,
         ultrafiltrationML: 150,
+        inflowTimeMinutes: 10,
+        outflowTimeMinutes: 15,
         recordedBy: 'Patient',
         complications: 'Mild pain on drain',
       },
@@ -74,21 +87,21 @@ export const allPatientData: PatientData[] = [
         dwellTimeHours: 8,
         drainVolumeML: 2200,
         ultrafiltrationML: 200,
+        inflowTimeMinutes: 12,
+        outflowTimeMinutes: 20,
         recordedBy: 'Patient',
       },
     ],
-    peritonitisTracking: {
-      lastEpisode: '2023-11-10',
-      lastEpisodeNote: 'Resolved with antibiotics',
-      infectionRate: 0.8,
-      riskStatus: 'Medium',
-      riskTarget: '< 1 episode/year',
-      preventionChecklist: [
-        { id: 'pc1', text: 'Hand hygiene training completed', completed: true },
-        { id: 'pc2', text: 'Exit site care up to date', completed: true },
-        { id: 'pc3', text: 'Last catheter inspection: Normal', completed: true },
-      ],
-    },
+    peritonitisEpisodes: [
+      {
+        episodeId: 'PER-001',
+        diagnosisDate: '2023-11-10',
+        organismIsolated: 'Staphylococcus epidermidis',
+        treatmentRegimen: 'Vancomycin IP',
+        outcome: 'Resolved',
+        resolutionDate: '2023-11-24',
+      },
+    ],
     medications: [
       {
         medicationId: 'MED-001',
@@ -96,6 +109,7 @@ export const allPatientData: PatientData[] = [
         dosage: '10mg',
         frequency: 'Once daily',
         startDate: '2022-01-20',
+        prescribingDoctor: 'Dr. Abdullah, Majed',
         status: 'ok',
       },
     ],
@@ -131,8 +145,8 @@ export const allPatientData: PatientData[] = [
         { exchangeId: 'PD-003', exchangeDateTime: '2024-07-28T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2250, ultrafiltrationML: 50, recordedBy: 'Patient' },
         { exchangeId: 'PD-004', exchangeDateTime: '2024-07-27T16:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2180, ultrafiltrationML: -20, recordedBy: 'Patient', complications: 'Negative UF' }
     ],
-    peritonitisTracking: { lastEpisode: 'None recorded', lastEpisodeNote: 'No infections in past 24 months', infectionRate: 0.0, riskStatus: 'Low', riskTarget: '< 1 episode/year', preventionChecklist: [{ id: 'pc1', text: 'Hand hygiene training completed', completed: true }, { id: 'pc2', text: 'Exit site care up to date', completed: true }, { id: 'pc3', text: 'Last catheter inspection: Normal', completed: true }]},
-    medications: [{ medicationId: 'MED-003', medicationName: 'Amlodipine', dosage: '5mg', frequency: 'Once daily', startDate: '2021-06-15', status: 'ok' }],
+    peritonitisEpisodes: [],
+    medications: [{ medicationId: 'MED-003', medicationName: 'Amlodipine', dosage: '5mg', frequency: 'Once daily', startDate: '2021-06-15', prescribingDoctor: 'Dr. Garcia, Chris', status: 'ok' }],
     nutritionLifestyle: { dailyProtein: { current: 55, target: 70 }, fluidRestriction: { current: 1.4, limit: 1.8 }, caloriesToday: { current: 2100, target: 2200 }, handgripStrength: { value: 35, unit: 'kg', status: 'Improving' }},
     clinicVisits: { nextAppointment: '2024-12-20T11:00:00Z', lastVisitSummary: 'Blood pressure slightly elevated. Continue monitoring.' },
     patientEducation: [{ id: 'edu1', title: 'PD Technique Videos', description: 'Step-by-step exchange process', icon: 'Video' }]
@@ -152,8 +166,8 @@ export const allPatientData: PatientData[] = [
     pdEvents: [
         { exchangeId: 'PD-005', exchangeDateTime: '2024-07-28T06:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 1800, dwellTimeHours: 4, drainVolumeML: 1900, ultrafiltrationML: 100, recordedBy: 'Patient' }
     ],
-    peritonitisTracking: { lastEpisode: 'None recorded', lastEpisodeNote: 'No infections recorded', infectionRate: 0.0, riskStatus: 'Low', riskTarget: '< 1 episode/year', preventionChecklist: [{ id: 'pc1', text: 'Hand hygiene training completed', completed: true }, { id: 'pc2', text: 'Exit site care up to date', completed: true }, { id: 'pc3', text: 'Last catheter inspection: Normal', completed: true }]},
-    medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', status: 'warning' }],
+    peritonitisEpisodes: [],
+    medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', prescribingDoctor: 'Dr. Pong, Jay', status: 'warning' }],
     nutritionLifestyle: { dailyProtein: { current: 50, target: 55 }, fluidRestriction: { current: 1.1, limit: 1.2 }, caloriesToday: { current: 1700, target: 1800 }, handgripStrength: { value: 25, unit: 'kg', status: 'Stable' }},
     clinicVisits: { nextAppointment: '2025-01-10T09:00:00Z', lastVisitSummary: 'Anemia management discussed. Continue EPO.' },
     patientEducation: [{ id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }]

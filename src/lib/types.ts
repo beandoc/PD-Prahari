@@ -1,12 +1,11 @@
 
-export interface Patient {
-  patientId: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  gender: 'Male' | 'Female' | 'Other';
-  currentStatus: string;
-  physician: string;
+export interface PeritonitisEpisode {
+  episodeId: string;
+  diagnosisDate: string;
+  organismIsolated: string;
+  treatmentRegimen: string;
+  outcome: 'Resolved' | 'Catheter Removal' | 'Transferred to HD' | 'Deceased';
+  resolutionDate?: string;
 }
 
 export interface Vital {
@@ -39,17 +38,11 @@ export interface PDEvent {
   dwellTimeHours: number;
   drainVolumeML: number;
   ultrafiltrationML: number;
+  inflowTimeMinutes?: number;
+  outflowTimeMinutes?: number;
+  solutionBatchNumber?: string;
   complications?: string;
-  recordedBy?: string;
-}
-
-export interface PeritonitisTrackingData {
-  lastEpisode: string;
-  lastEpisodeNote: string;
-  infectionRate: number;
-  riskStatus: 'Low' | 'Medium' | 'High';
-  riskTarget: string;
-  preventionChecklist: { id: string; text: string; completed: boolean }[];
+  recordedBy?: 'Patient' | 'Nurse' | 'Automated Machine';
 }
 
 export interface Medication {
@@ -59,6 +52,7 @@ export interface Medication {
   frequency: string;
   startDate: string;
   endDate?: string | null;
+  prescribingDoctor?: string;
   status: 'ok' | 'warning';
 }
 
@@ -82,22 +76,37 @@ export interface EducationTopic {
 }
 
 export interface PatientData {
+  // Patient Demographics
   patientId: string;
   firstName: string;
-  lastName: string;
+  lastName:string;
   dateOfBirth: string;
   gender: 'Male' | 'Female' | 'Other';
+  contactPhone?: string;
+  contactEmail?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  stateProvince?: string;
+  postalCode?: string;
+  country?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  physician: string; // From spec: PrimaryNephrologist
   pdStartDate: string;
   underlyingKidneyDisease: string;
-  currentStatus: string;
-  physician: string;
-  
+  comorbidities?: string[];
+  currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased';
+  lastUpdated?: string;
+
+  // Clinical Data Arrays
   vitals: Vital[];
   labResults: LabResult[];
   pdEvents: PDEvent[];
-
-  peritonitisTracking: PeritonitisTrackingData;
   medications: Medication[];
+  peritonitisEpisodes: PeritonitisEpisode[];
+
+  // Data for UI components (keeping for now to avoid breaking UI)
   nutritionLifestyle: NutritionLifestyleData;
   clinicVisits: ClinicVisitData;
   patientEducation: EducationTopic[];
