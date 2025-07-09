@@ -77,7 +77,7 @@ export default function DoctorDashboard() {
       <Tabs defaultValue="clinical">
         <TabsList className="mb-4">
           <TabsTrigger value="clinical">Clinical</TabsTrigger>
-          <TabsTrigger value="adequest">Adequest</TabsTrigger>
+          <TabsTrigger value="adequacy">Adequacy</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="clinic_settings">Clinic Settings</TabsTrigger>
         </TabsList>

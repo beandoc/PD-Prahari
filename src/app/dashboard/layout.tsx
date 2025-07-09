@@ -32,6 +32,12 @@ export default function DashboardLayout({
             <span className="sr-only">ShareSource</span>
           </Link>
           <span className="text-xl font-bold">ShareSource</span>
+           <Link
+            href="/dashboard/sharesource"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            About Sharesource
+          </Link>
         </nav>
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
           <div className="ml-auto flex-1 sm:flex-initial">
