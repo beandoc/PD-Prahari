@@ -93,6 +93,7 @@ export default function ClinicianPatientRegistrationPage() {
       emergencyContactEmail: '',
       emergencyContactWhatsapp: '',
       underlyingKidneyDisease: '',
+      physician: '',
     },
   });
 
@@ -356,3 +357,5 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
+
+    
