@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation';
 import {
   Stethoscope,
   CircleUser,
-  LogOut,
   FileText,
   History,
   User,
   Menu,
   LayoutDashboard,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -69,9 +69,9 @@ export default function PatientPortalLayout({
           </div>
           <div className="mt-auto p-4 border-t">
              <Button asChild variant="secondary" className="w-full">
-                <Link href="/">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout & Exit
+                <Link href="/dashboard">
+                    <Users className="mr-2 h-4 w-4" />
+                    Clinician View
                 </Link>
               </Button>
            </div>
@@ -115,9 +115,9 @@ export default function PatientPortalLayout({
               </nav>
                <div className="mt-auto">
                  <Button variant="secondary" className="w-full" asChild>
-                    <Link href="/">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Logout & Exit
+                    <Link href="/dashboard">
+                        <Users className="mr-2 h-4 w-4" />
+                        Clinician View
                     </Link>
                 </Button>
               </div>

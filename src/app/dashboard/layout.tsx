@@ -16,6 +16,7 @@ import {
   BookOpen,
   Stethoscope,
   ClipboardCheck,
+  HeartPulse,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ const navLinks = [
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
   { href: '/dashboard/education', label: 'Education', icon: BookOpen },
   { href: '/dashboard/nurse-checklist', label: 'Nurse Checklist', icon: ClipboardCheck },
+  { href: '/patient-portal', label: 'Patient Portal', icon: HeartPulse },
 ];
 
 export default function DashboardLayout({
