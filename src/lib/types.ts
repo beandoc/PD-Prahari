@@ -1,4 +1,5 @@
 
+
 export interface Patient {
   patientId: string;
   nephroId: string;
@@ -25,6 +26,14 @@ export interface Patient {
   distanceFromPDCenterKM?: number;
   educationLevel?: string;
   pdExchangeType: 'Assisted' | 'Self';
+}
+
+export interface Prescription {
+  exchange: string;
+  pdStrength: string;
+  dwellTimeHours: number;
+  dwellVolumeML: number;
+  exchangeTimeMinutes: number;
 }
 
 export interface PDEvent {
@@ -136,6 +145,7 @@ export interface EducationTopic {
 
 export interface PatientData extends Patient {
   // Clinical Data Arrays
+  prescription: Prescription;
   vitals: Vital[];
   labResults: LabResult[];
   pdEvents: PDEvent[];

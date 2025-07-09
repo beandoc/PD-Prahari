@@ -27,6 +27,13 @@ export const allPatientData: PatientData[] = [
     currentStatus: 'Active PD',
     physician: 'Dr. Abdullah, Majed',
     lastUpdated: '2024-07-28T10:00:00Z',
+    prescription: {
+      exchange: '4x Daily',
+      pdStrength: 'Mixed Dextrose',
+      dwellTimeHours: 4,
+      dwellVolumeML: 2000,
+      exchangeTimeMinutes: 30,
+    },
     vitals: [
       {
         vitalId: 'VIT-001',
@@ -123,6 +130,13 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
     currentStatus: 'Transferred to HD',
     physician: 'Dr. Garcia, Chris',
+    prescription: {
+      exchange: '3x Daily',
+      pdStrength: 'Dextrose 2.5%',
+      dwellTimeHours: 5,
+      dwellVolumeML: 2500,
+      exchangeTimeMinutes: 40,
+    },
     vitals: [{ vitalId: 'VIT-003', measurementDateTime: '2024-07-28T09:00:00Z', systolicBP: 185, diastolicBP: 95, heartRateBPM: 68, temperatureCelsius: 37.0, weightKG: 80, respiratoryRateBPM: 18, fluidStatusNotes: 'Mild ankle edema' }],
     labResults: [
         { labResultId: 'LAB-003', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Creatinine', resultValue: 8.1, units: 'mg/dL', referenceRangeLow: 0.7, referenceRangeHigh: 1.3 },
@@ -154,6 +168,13 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'Polycystic Kidney Disease',
     currentStatus: 'Active PD',
     physician: 'Dr. Pong, Jay',
+    prescription: {
+      exchange: '4x Daily',
+      pdStrength: 'Dextrose 1.5%',
+      dwellTimeHours: 4,
+      dwellVolumeML: 1800,
+      exchangeTimeMinutes: 30,
+    },
     vitals: [
         { vitalId: 'VIT-004', measurementDateTime: '2024-07-28T07:30:00Z', systolicBP: 125, diastolicBP: 78, heartRateBPM: 80, temperatureCelsius: 36.7, weightKG: 68, respiratoryRateBPM: 16, fluidStatusNotes: 'No edema' },
     ],
@@ -186,6 +207,13 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'IgA Nephropathy',
     currentStatus: 'Active PD',
     physician: 'Dr. Garcia, Chris',
+    prescription: {
+      exchange: '4x Daily',
+      pdStrength: 'Dextrose 1.5%',
+      dwellTimeHours: 4,
+      dwellVolumeML: 2000,
+      exchangeTimeMinutes: 30,
+    },
     vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
     nutritionLifestyle: { dailyProtein: { current: 0, target: 75 }, fluidRestriction: { current: 0, limit: 2.0 }, caloriesToday: { current: 0, target: 2500 }, handgripStrength: { value: 40, unit: 'kg', status: 'Good' }},
     clinicVisits: { nextAppointment: '2024-08-15T14:00:00Z', lastVisitSummary: 'Initial PD training completed.' },
@@ -203,6 +231,13 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'Diabetic Nephropathy',
     currentStatus: 'Deceased', // Dropout
     physician: 'Dr. Pong, Jay',
+    prescription: {
+      exchange: '4x Daily',
+      pdStrength: 'Mixed Dextrose',
+      dwellTimeHours: 4,
+      dwellVolumeML: 2000,
+      exchangeTimeMinutes: 30,
+    },
     vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
     nutritionLifestyle: { dailyProtein: { current: 0, target: 60 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 1800 }, handgripStrength: { value: 22, unit: 'kg', status: 'Poor' }},
     clinicVisits: { nextAppointment: '', lastVisitSummary: 'Patient expired.' },
@@ -220,6 +255,13 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
     currentStatus: 'Awaiting Catheter', // Under counselling
     physician: 'Dr. Abdullah, Majed',
+    prescription: {
+      exchange: 'Pending',
+      pdStrength: 'Pending',
+      dwellTimeHours: 0,
+      dwellVolumeML: 0,
+      exchangeTimeMinutes: 0,
+    },
     vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
     nutritionLifestyle: { dailyProtein: { current: 0, target: 65 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 2000 }, handgripStrength: { value: 30, unit: 'kg', status: 'Stable' }},
     clinicVisits: { nextAppointment: '2024-08-20T09:30:00Z', lastVisitSummary: 'Pre-PD counselling session.' },

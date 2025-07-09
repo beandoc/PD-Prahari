@@ -1,15 +1,22 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { PlusCircle, Trash2, Camera, Droplets, HeartPulse, Weight, Thermometer, FlaskConical, Clock, Zap, Activity } from 'lucide-react';
+import { PlusCircle, Trash2, Camera, Droplets, HeartPulse, Weight, Thermometer, FlaskConical, Clock, Zap, Activity, CalendarIcon, AlertTriangle, BriefcaseMedical } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { allPatientData } from '@/data/mock-data';
+import type { PDEvent } from '@/lib/types';
+import { format, isSameDay, subDays } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 
 interface ExchangeLog {
@@ -26,9 +33,15 @@ interface ExchangeLog {
 }
 
 export default function PatientDailyLogPage() {
+  const [date, setDate] = useState<Date>(new Date());
   const [exchanges, setExchanges] = useState<ExchangeLog[]>([
     { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', inflowTime: '', outflowTime: '', alarms: '', notes: '', isCloudy: false },
   ]);
+  const [ufAlert, setUfAlert] = useState<string | null>(null);
+
+  // For demonstration, we'll use the first patient's data
+  const patientData = allPatientData[0];
+  const { prescription, pdEvents: historicalEvents } = patientData;
 
   const addExchange = () => {
     setExchanges([...exchanges, { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', inflowTime: '', outflowTime: '', alarms: '', notes: '', isCloudy: false }]);
@@ -50,14 +63,102 @@ export default function PatientDailyLogPage() {
     }
     return null;
   };
+
+  useEffect(() => {
+    // UF drop calculation logic
+    const todayTotalUf = exchanges.reduce((acc, ex) => {
+      const uf = calculateUF(ex.fillVolume, ex.drainVolume);
+      return acc + (uf || 0);
+    }, 0);
+
+    if (todayTotalUf === 0 && exchanges.every(e => e.drainVolume === '')) {
+        setUfAlert(null);
+        return;
+    }
+
+    const sevenDaysAgo = subDays(date, 7);
+    const relevantHistoricalEvents = historicalEvents.filter(event => {
+        const eventDate = new Date(event.exchangeDateTime);
+        return eventDate >= sevenDaysAgo && eventDate < date;
+    });
+    
+    const dailyUfHistory: Record<string, number> = {};
+    relevantHistoricalEvents.forEach(event => {
+        const day = format(new Date(event.exchangeDateTime), 'yyyy-MM-dd');
+        dailyUfHistory[day] = (dailyUfHistory[day] || 0) + event.ultrafiltrationML;
+    });
+
+    const historicalUfValues = Object.values(dailyUfHistory);
+    if(historicalUfValues.length < 3) { // Not enough data for a reliable baseline
+        setUfAlert(null);
+        return;
+    }
+
+    const averageHistoricalUf = historicalUfValues.reduce((sum, val) => sum + val, 0) / historicalUfValues.length;
+
+    if (averageHistoricalUf > 0 && todayTotalUf < averageHistoricalUf * 0.7) {
+      setUfAlert(`Today's total ultrafiltration of ${todayTotalUf}mL is more than a 30% drop from your recent average of ${Math.round(averageHistoricalUf)}mL. Please monitor your symptoms and contact your clinic if you feel unwell.`);
+    } else {
+      setUfAlert(null);
+    }
+  }, [exchanges, date, historicalEvents]);
   
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        <header className="text-center">
+        <header>
           <h1 className="text-3xl font-bold text-gray-800">My Daily Log</h1>
           <p className="text-muted-foreground mt-2">You're doing great! Consistent tracking is key to your health.</p>
         </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-1 space-y-2">
+                <Label className="font-semibold">Logging for date:</Label>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date ? format(date, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={(d) => setDate(d || new Date())}
+                            initialFocus
+                            disabled={(d) => d > new Date()}
+                        />
+                    </PopoverContent>
+                </Popover>
+            </div>
+            <Card className="md:col-span-2">
+                 <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                        <BriefcaseMedical className="h-5 w-5 text-primary" /> My PD Prescription
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                        <div><p className="text-muted-foreground">Exchange</p><p className="font-medium">{prescription.exchange}</p></div>
+                        <div><p className="text-muted-foreground">PD Strength</p><p className="font-medium">{prescription.pdStrength}</p></div>
+                        <div><p className="text-muted-foreground">Dwell Time</p><p className="font-medium">{prescription.dwellTimeHours} hours</p></div>
+                        <div><p className="text-muted-foreground">Dwell Vol</p><p className="font-medium">{prescription.dwellVolumeML} mL</p></div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+        
+        {ufAlert && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Ultrafiltration Alert</AlertTitle>
+            <AlertDescription>{ufAlert}</AlertDescription>
+          </Alert>
+        )}
 
         <Card>
           <CardHeader>
@@ -92,10 +193,18 @@ export default function PatientDailyLogPage() {
                     <Input id="urine-output" placeholder="e.g., 500" type="number" />
                 </div>
             </div>
+            <div className="space-y-4">
+                <Label className="font-semibold">Are you experiencing any of the following?</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                   <div className="flex items-center space-x-2"><Switch id="nausea" /><Label htmlFor="nausea">Nausea</Label></div>
+                   <div className="flex items-center space-x-2"><Switch id="swelling" /><Label htmlFor="swelling">Swelling (legs/face)</Label></div>
+                   <div className="flex items-center space-x-2"><Switch id="pain-abdomen" /><Label htmlFor="pain-abdomen">Abdominal Pain</Label></div>
+                </div>
+            </div>
              <div className="grid grid-cols-1">
                 <div className="space-y-2">
-                    <Label htmlFor="symptoms">New or Worsening Symptoms (General)</Label>
-                    <Textarea id="symptoms" placeholder="e.g., feeling tired, exit site pain, swelling in ankles, vomiting, fever..." />
+                    <Label htmlFor="symptoms">Any other symptoms or notes?</Label>
+                    <Textarea id="symptoms" placeholder="e.g., feeling tired, exit site pain, vomiting, fever..." />
                 </div>
             </div>
           </CardContent>
@@ -158,12 +267,12 @@ export default function PatientDailyLogPage() {
                      </div>
                   </div>
                   <div className="flex items-center justify-between p-2 rounded-md bg-gray-50">
-                     {uf !== null && (
+                     {uf !== null ? (
                         <div className="text-sm font-medium">
                             <span>Ultrafiltration (UF):</span>
                             <span className={uf >= 0 ? 'text-green-600' : 'text-red-600'}> {uf} mL</span>
                         </div>
-                    )}
+                    ) : <div />}
                     <div className="flex items-center space-x-2">
                         <Switch id={`cloudy-${exchange.id}`} checked={exchange.isCloudy} onCheckedChange={(checked) => handleExchangeChange(exchange.id, 'isCloudy', checked)} />
                         <Label htmlFor={`cloudy-${exchange.id}`} className="font-semibold text-yellow-600">Is fluid cloudy?</Label>
@@ -183,16 +292,6 @@ export default function PatientDailyLogPage() {
             <Button variant="outline" onClick={addExchange} className="w-full">
               <PlusCircle className="mr-2 h-4 w-4" /> Add another exchange
             </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Activity className="text-green-500" /> Daily Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Label htmlFor="daily-activity">Describe your general activity level today</Label>
-            <Textarea id="daily-activity" placeholder="e.g., Light housework, went for a short walk, rested most of the day..." className="mt-2" />
           </CardContent>
         </Card>
 
@@ -216,11 +315,9 @@ export default function PatientDailyLogPage() {
         </Card>
 
         <div className="flex justify-end pt-4">
-            <Button size="lg">Submit Daily Log</Button>
+            <Button size="lg">Submit Log for {format(date, "PPP")}</Button>
         </div>
       </div>
     </div>
   );
 }
-
-    

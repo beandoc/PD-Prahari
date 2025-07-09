@@ -18,8 +18,8 @@ export default function PdLogsPage() {
     
     // Use the first patient's data as a default for this page
     const patientData = allPatientData[0];
+    const { prescription, pdEvents } = patientData;
 
-    const pdEvents = patientData.pdEvents;
     const pageCount = Math.ceil(pdEvents.length / pageSize);
     const paginatedEvents = pdEvents.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
     const startItem = pdEvents.length > 0 ? pageIndex * pageSize + 1 : 0;
@@ -45,11 +45,11 @@ export default function PdLogsPage() {
                         </CardHeader>
                         <CardContent>
                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                                <div><p className="text-sm text-muted-foreground mb-1">Exchange</p><p className="font-medium">4x Daily</p></div>
-                                <div><p className="text-sm text-muted-foreground mb-1">PD Strength</p><p className="font-medium">Mixed Dextrose</p></div>
-                                <div><p className="text-sm text-muted-foreground mb-1">Dwell Time</p><p className="font-medium">4 hours</p></div>
-                                <div><p className="text-sm text-muted-foreground mb-1">Dwell Vol</p><p className="font-medium">2000 mL</p></div>
-                                <div><p className="text-sm text-muted-foreground mb-1">Exchange Time</p><p className="font-medium">30 mins</p></div>
+                                <div><p className="text-sm text-muted-foreground mb-1">Exchange</p><p className="font-medium">{prescription.exchange}</p></div>
+                                <div><p className="text-sm text-muted-foreground mb-1">PD Strength</p><p className="font-medium">{prescription.pdStrength}</p></div>
+                                <div><p className="text-sm text-muted-foreground mb-1">Dwell Time</p><p className="font-medium">{prescription.dwellTimeHours} hours</p></div>
+                                <div><p className="text-sm text-muted-foreground mb-1">Dwell Vol</p><p className="font-medium">{prescription.dwellVolumeML} mL</p></div>
+                                <div><p className="text-sm text-muted-foreground mb-1">Exchange Time</p><p className="font-medium">{prescription.exchangeTimeMinutes} mins</p></div>
                             </div>
                         </CardContent>
                     </Card>
