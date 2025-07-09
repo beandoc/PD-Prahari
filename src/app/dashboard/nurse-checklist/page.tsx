@@ -130,6 +130,105 @@ export default function NurseChecklistPage() {
                                     <ChecklistItem id="w4-7" label="Review mobile ordering with patient and order supplies as needed." />
                                 </AccordionContent>
                             </AccordionItem>
+                            <AccordionItem value="month2-week5">
+                                <AccordionTrigger className="text-lg font-semibold">Month 2: Week 5 (Monthly Evaluation)</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <div>
+                                        <ChecklistItem id="m2w5-1" label="Conduct monthly evaluation of the patient, including:" />
+                                        <SubList items={[
+                                            "Bloodwork to assess for appropriateness of the PD prescription including dwell time and dialysate tonicity",
+                                            "Review of fluid balance: BP, Temp, Weight, Vital signs",
+                                            "Assess any changes in Residual Kidney Function (RKF)",
+                                            "Assessment of nutritional status; estimation of dietary protein intake",
+                                            "Review of hand hygiene and aseptic technique and reminders of proper exit site care",
+                                            "Ensure catheter is secure",
+                                            "Compliance with treatment plan",
+                                            "Retraining needs",
+                                        ]} />
+                                    </div>
+                                    <ChecklistItem id="m2w5-2" label="Perform PET evaluation for baseline peritoneal membrane transport characteristics." />
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="month2-week6">
+                                <AccordionTrigger className="text-lg font-semibold">Month 2: Week 6</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="m2w6-1" label="Assess how is the patient coping and if additional support is needed (Social Worker to conduct a formal 'coping evaluation')." />
+                                    <ChecklistItem id="m2w6-2" label="Introduce patient to a peer mentor." />
+                                    <ChecklistItem id="m2w6-3" label="Review PET results and determine if it needs to be repeated." />
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="month2-week7">
+                                <AccordionTrigger className="text-lg font-semibold">Month 2: Week 7</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                     <ChecklistItem id="m2w7-1" label="Proactively contact patient to provide support, evaluation, and congratulations." />
+                                     <ChecklistItem id="m2w7-2" label="Review patient’s support system and provide online support/resource tools." />
+                                     <ChecklistItem id="m2w7-3" label="Identify and document where patient is on the grief cycle; assess for depression and anxiety." />
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="month2-week8">
+                                <AccordionTrigger className="text-lg font-semibold">Month 2: Week 8</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                     <ChecklistItem id="m2w8-1" label="Proactively contact patient to provide support and evaluation." />
+                                     <ChecklistItem id="m2w8-2" label="Discuss employment and traveling while on PD." />
+                                     <ChecklistItem id="m2w8-3" label="Readdress any system-related barriers (e.g., education, training)." />
+                                     <ChecklistItem id="m2w8-4" label="Discuss any individual support needs: Work/Home/Family/School/Lifestyle." />
+                                </AccordionContent>
+                            </AccordionItem>
+                              <AccordionItem value="month3-week9">
+                                <AccordionTrigger className="text-lg font-semibold">Month 3: Week 9 (Monthly Evaluation)</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                     <div>
+                                        <ChecklistItem id="m3w9-1" label="Conduct monthly evaluation of the patient, including:" />
+                                        <SubList items={[
+                                            "Bloodwork to assess for appropriateness of the PD prescription",
+                                            "Review of fluid balance: BP, Temp, Weight, Vital signs",
+                                            "Assess any changes in Residual Kidney Function (RKF)",
+                                            "Assessment of nutritional status; estimation of dietary protein intake",
+                                            "Review of hand hygiene, aseptic technique, and exit site care",
+                                            "Ensure catheter is secure",
+                                            "Compliance with treatment plan and retraining needs",
+                                            "Check PD supplies"
+                                        ]} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="month3-week10">
+                                <AccordionTrigger className="text-lg font-semibold">Month 3: Week 10</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="m3w10-1" label="Complete a home visit in the first 90 days of PD therapy or by completion of patient training." />
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="month3-week11">
+                                <AccordionTrigger className="text-lg font-semibold">Month 3: Week 11</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="m3w11-1" label="Proactively contact patient to provide support, evaluation, and congratulations." />
+                                    <ChecklistItem id="m3w11-2" label="Discuss having intimate relationships while on PD." />
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="month3-week12">
+                                <AccordionTrigger className="text-lg font-semibold">Month 3: Week 12</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="m3w12-1" label="Set up a 'refresher' training session for the patient." />
+                                    <div>
+                                        <ChecklistItem id="m3w12-2" label="Review the importance of retraining including:" />
+                                        <SubList items={[
+                                            "Dialysis exchange procedures",
+                                            "Hand-washing techniques",
+                                            "Recognition of signs and symptoms of peritonitis",
+                                            "Recognition of contamination and the appropriate response to it",
+                                            "Exit site care"
+                                        ]} />
+                                    </div>
+                                     <ChecklistItem id="m3w12-3" label="Discuss any individual support needs: Work/Home/Family/School/Lifestyle." />
+                                     <ChecklistItem id="m3w12-4" label="Readdress any patient-related barriers (burnout, distance, nutrition, Kt/V)." />
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="month3-week13">
+                                <AccordionTrigger className="text-lg font-semibold">Month 3: Week 13</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="m3w13-1" label="Proactively contact patient and congratulate them on completing the first 90 days. Assure them that you will continue to provide guidance and support." />
+                                </AccordionContent>
+                            </AccordionItem>
                              <AccordionItem value="item-4">
                                 <AccordionTrigger className="text-lg font-semibold">Ongoing Support & Resources</AccordionTrigger>
                                 <AccordionContent className="pl-2 space-y-2">
