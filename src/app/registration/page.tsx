@@ -251,7 +251,21 @@ export default function ClinicianPatientRegistrationPage() {
                             <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter guardian/contact phone" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="emergencyContactRelation" render={({ field }) => (
-                            <FormItem><FormLabel>Relation with Guardian</FormLabel><FormControl><Input placeholder="e.g., Father, Spouse" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Relation with Guardian</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a relation" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Father">Father</SelectItem>
+                                        <SelectItem value="Mother">Mother</SelectItem>
+                                        <SelectItem value="Husband">Husband</SelectItem>
+                                        <SelectItem value="Wife">Wife</SelectItem>
+                                        <SelectItem value="Son">Son</SelectItem>
+                                        <SelectItem value="Daughter">Daughter</SelectItem>
+                                        <SelectItem value="Guardian">Guardian</SelectItem>
+                                        <SelectItem value="Other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select><FormMessage />
+                            </FormItem>
                         )} />
                          <FormField control={form.control} name="emergencyContactEmail" render={({ field }) => (
                             <FormItem><FormLabel>Contact Email (Optional)</FormLabel><FormControl><Input placeholder="Enter guardian/contact email" {...field} /></FormControl><FormMessage /></FormItem>
