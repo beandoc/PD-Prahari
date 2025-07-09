@@ -16,6 +16,7 @@ import {
   BookOpen,
   ClipboardCheck,
   HeartPulse,
+  UserPlus,
 } from 'lucide-react';
 import { KidneyIcon } from '@/components/kidney-icon';
 
@@ -43,6 +44,7 @@ const navLinks = [
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
   { href: '/dashboard/education', label: 'Education', icon: BookOpen },
   { href: '/dashboard/nurse-checklist', label: 'Nurse Checklist', icon: ClipboardCheck },
+  { href: '/registration', label: 'Register Patient', icon: UserPlus },
   { href: '/patient-portal', label: 'Patient Portal', icon: HeartPulse },
 ];
 

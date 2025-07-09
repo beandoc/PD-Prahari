@@ -8,6 +8,7 @@ import {
   Users,
   Camera,
   ClipboardX,
+  PlusCircle,
 } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
 import type { PatientData } from '@/lib/types';
@@ -190,6 +191,12 @@ export default function DoctorDashboard() {
                                       <SelectItem value="abdullah">Dr. Abdullah, Majed</SelectItem>
                                   </SelectContent>
                               </Select>
+                               <Button asChild>
+                                <Link href="/registration">
+                                  <PlusCircle className="mr-2 h-4 w-4" />
+                                  Add Patient
+                                </Link>
+                              </Button>
                           </div>
                       </div>
                   </CardHeader>
