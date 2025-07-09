@@ -15,6 +15,7 @@ import {
   Video,
   BookOpen,
   Stethoscope,
+  ClipboardCheck,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ const navLinks = [
   { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
   { href: '/dashboard/education', label: 'Education', icon: BookOpen },
+  { href: '/dashboard/nurse-checklist', label: 'Nurse Checklist', icon: ClipboardCheck },
 ];
 
 export default function DashboardLayout({
