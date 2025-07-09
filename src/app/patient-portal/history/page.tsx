@@ -1,30 +1,122 @@
 
+'use client';
+
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { History, BarChart } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart } from 'recharts';
+import { Droplets, History, TrendingUp } from 'lucide-react';
+import { allPatientData } from '@/data/mock-data';
+import { format, startOfDay } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export default function LogHistoryPage() {
+    const patientData = allPatientData[0];
+
+    const { dailyUfData, paginatedEvents } = useMemo(() => {
+        const events = [...patientData.pdEvents].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
+        
+        const dailyUf: Record<string, number> = {};
+        
+        events.forEach(event => {
+            const day = format(startOfDay(new Date(event.exchangeDateTime)), 'yyyy-MM-dd');
+            dailyUf[day] = (dailyUf[day] || 0) + event.ultrafiltrationML;
+        });
+        
+        const dailyUfData = Object.entries(dailyUf)
+            .map(([date, uf]) => ({
+                date: format(new Date(date), 'MMM d'),
+                uf
+            }))
+            .slice(0, 30) // Show last 30 days
+            .reverse();
+
+        return {
+            dailyUfData,
+            paginatedEvents: events.slice(0, 20) // Show last 20 events in table
+        }
+    }, [patientData.pdEvents]);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
        <header>
-          <h1 className="text-3xl font-bold text-gray-800">Log History</h1>
-          <p className="text-muted-foreground mt-2">A record of all your previously submitted daily logs.</p>
+          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2"><History />Log History</h1>
+          <p className="text-muted-foreground mt-2">A record of your previously submitted daily logs and health trends.</p>
         </header>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <History className="h-6 w-6 text-primary" />
-            Coming Soon!
+            <TrendingUp className="h-6 w-6 text-primary" />
+            Daily Ultrafiltration Trend (Last 30 Days)
           </CardTitle>
           <CardDescription>
-            This feature is currently under development. Soon, you will be able to review all your past entries here.
+            This chart shows the total fluid removed each day. Consistent UF is important for your health.
            </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-slate-50 rounded-lg border border-dashed">
-            <BarChart className="h-12 w-12 mb-4" />
-            <p className="font-semibold">Your historical data will be visualized here.</p>
-            <p className="text-sm mt-1">Track your progress over time with charts and tables of your vitals, UF, and more.</p>
-          </div>
+          {dailyUfData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={dailyUfData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis label={{ value: 'Total UF (mL)', angle: -90, position: 'insideLeft' }}/>
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="uf" stroke="hsl(var(--primary))" name="Total Daily UF (mL)" activeDot={{ r: 8 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-slate-50 rounded-lg border border-dashed">
+              <BarChart className="h-12 w-12 mb-4" />
+              <p className="font-semibold">Not enough data to display a trend.</p>
+              <p className="text-sm mt-1">Start logging your exchanges to see your progress here.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Droplets className="h-6 w-6 text-blue-500" />
+            Recent Exchange Logs
+          </CardTitle>
+          <CardDescription>
+            A detailed view of your most recent PD exchange logs.
+           </CardDescription>
+        </CardHeader>
+        <CardContent>
+             <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>PD Strength</TableHead>
+                            <TableHead className="text-right">Dwell (hr)</TableHead>
+                            <TableHead className="text-right">Fill (mL)</TableHead>
+                            <TableHead className="text-right">Drain (mL)</TableHead>
+                            <TableHead className="text-right">UF (mL)</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {paginatedEvents.length > 0 ? paginatedEvents.map(event => (
+                            <TableRow key={event.exchangeId}>
+                                <TableCell className="py-3">{format(new Date(event.exchangeDateTime), 'yyyy-MM-dd HH:mm')}</TableCell>
+                                <TableCell className="py-3">{event.dialysateType}</TableCell>
+                                <TableCell className="py-3 text-right">{event.dwellTimeHours}</TableCell>
+                                <TableCell className="py-3 text-right">{event.fillVolumeML}</TableCell>
+                                <TableCell className="py-3 text-right">{event.drainVolumeML}</TableCell>
+                                <TableCell className={cn("py-3 text-right font-semibold", event.ultrafiltrationML >=0 ? 'text-green-600' : 'text-red-600')}>{event.ultrafiltrationML}</TableCell>
+                            </TableRow>
+                        )) : (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center py-16 text-muted-foreground">No PD logs found.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </CardContent>
       </Card>
     </div>
