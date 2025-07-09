@@ -7,12 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
-import { PlusCircle, Trash2, Camera, Droplets, HeartPulse, Weight, Thermometer, FlaskConical } from 'lucide-react';
+import { PlusCircle, Trash2, Camera, Droplets, HeartPulse, Weight, Thermometer, FlaskConical, Clock, Zap, Activity } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// ... form logic using react-hook-form could be added later
-// For now, let's build the UI with useState
 
 interface ExchangeLog {
   id: number;
@@ -20,20 +17,27 @@ interface ExchangeLog {
   fillVolume: string;
   drainVolume: string;
   dwellTime: string;
+  inflowTime: string;
+  outflowTime: string;
+  alarms: string;
   notes: string;
 }
 
 export default function PatientDailyLogPage() {
   const [exchanges, setExchanges] = useState<ExchangeLog[]>([
-    { id: 1, dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', notes: '' },
+    { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', inflowTime: '', outflowTime: '', alarms: '', notes: '' },
   ]);
 
   const addExchange = () => {
-    setExchanges([...exchanges, { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', notes: '' }]);
+    setExchanges([...exchanges, { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', inflowTime: '', outflowTime: '', alarms: '', notes: '' }]);
   };
 
   const removeExchange = (id: number) => {
     setExchanges(exchanges.filter(e => e.id !== id));
+  };
+  
+  const handleExchangeChange = (id: number, field: keyof Omit<ExchangeLog, 'id'>, value: string) => {
+    setExchanges(exchanges.map(ex => ex.id === id ? { ...ex, [field]: value } : ex));
   };
 
   const calculateUF = (fill: string, drain: string) => {
@@ -68,22 +72,28 @@ export default function PatientDailyLogPage() {
                 <Input id="diastolic-bp" placeholder="e.g., 80" type="number" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="weight"><Weight className="inline h-4 w-4 mr-1" />Weight (kg)</Label>
-                <Input id="weight" placeholder="e.g., 70.5" type="number" step="0.1" />
+                <Label htmlFor="pulse"><HeartPulse className="inline h-4 w-4 mr-1" />Pulse (BPM)</Label>
+                <Input id="pulse" placeholder="e.g., 72" type="number" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="temp"><Thermometer className="inline h-4 w-4 mr-1" />Temp (°C)</Label>
-                <Input id="temp" placeholder="e.g., 36.6" type="number" step="0.1" />
+                <Label htmlFor="weight"><Weight className="inline h-4 w-4 mr-1" />Weight (kg)</Label>
+                <Input id="weight" placeholder="e.g., 70.5" type="number" step="0.1" />
               </div>
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="urine-output"><FlaskConical className="inline h-4 w-4 mr-1" />Total Urine Output (mL)</Label>
-                    <Input id="urine-output" placeholder="e.g., 500" type="number" />
+                    <Label htmlFor="temp"><Thermometer className="inline h-4 w-4 mr-1" />Temp (°C)</Label>
+                    <Input id="temp" placeholder="e.g., 36.6" type="number" step="0.1" />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="symptoms">New or Worsening Symptoms</Label>
-                    <Textarea id="symptoms" placeholder="e.g., feeling tired, exit site pain..." />
+                    <Label htmlFor="urine-output"><FlaskConical className="inline h-4 w-4 mr-1" />Total Urine Output (24h, mL)</Label>
+                    <Input id="urine-output" placeholder="e.g., 500" type="number" />
+                </div>
+            </div>
+             <div className="grid grid-cols-1">
+                <div className="space-y-2">
+                    <Label htmlFor="symptoms">New or Worsening Symptoms (General)</Label>
+                    <Textarea id="symptoms" placeholder="e.g., feeling tired, exit site pain, swelling in ankles..." />
                 </div>
             </div>
           </CardContent>
@@ -92,15 +102,15 @@ export default function PatientDailyLogPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Droplets className="text-blue-500" /> PD Exchanges</CardTitle>
-            <CardDescription>Log each PD exchange you perform today.</CardDescription>
+            <CardDescription>Log each PD exchange you perform today. Number of exchanges: {exchanges.length}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {exchanges.map((exchange, index) => {
               const uf = calculateUF(exchange.fillVolume, exchange.drainVolume);
               return (
-                <div key={exchange.id} className="p-4 border rounded-lg space-y-4 relative bg-white">
+                <div key={exchange.id} className="p-4 border rounded-lg space-y-4 relative bg-white shadow-sm">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-semibold">Exchange {index + 1}</h3>
+                    <h3 className="font-semibold text-lg">Exchange {index + 1}</h3>
                     {exchanges.length > 1 && (
                       <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 hover:text-red-600" onClick={() => removeExchange(exchange.id)}>
                         <Trash2 className="h-4 w-4" />
@@ -109,9 +119,9 @@ export default function PatientDailyLogPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                      <div className="space-y-2">
-                      <Label>Dialysate Type</Label>
-                      <Select defaultValue={exchange.dialysateType}>
-                        <SelectTrigger>
+                      <Label htmlFor={`dialysate-${exchange.id}`}>Dialysate Type</Label>
+                      <Select value={exchange.dialysateType} onValueChange={(value) => handleExchangeChange(exchange.id, 'dialysateType', value)}>
+                        <SelectTrigger id={`dialysate-${exchange.id}`}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -124,12 +134,26 @@ export default function PatientDailyLogPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={`fill-${exchange.id}`}>Fill Volume (mL)</Label>
-                      <Input id={`fill-${exchange.id}`} placeholder="e.g., 2000" type="number" onChange={e => setExchanges(exchanges.map(ex => ex.id === exchange.id ? {...ex, fillVolume: e.target.value} : ex))} />
+                      <Input id={`fill-${exchange.id}`} value={exchange.fillVolume} placeholder="e.g., 2000" type="number" onChange={e => handleExchangeChange(exchange.id, 'fillVolume', e.target.value)} />
                     </div>
                      <div className="space-y-2">
                       <Label htmlFor={`drain-${exchange.id}`}>Drain Volume (mL)</Label>
-                      <Input id={`drain-${exchange.id}`} placeholder="e.g., 2150" type="number" onChange={e => setExchanges(exchanges.map(ex => ex.id === exchange.id ? {...ex, drainVolume: e.target.value} : ex))} />
+                      <Input id={`drain-${exchange.id}`} value={exchange.drainVolume} placeholder="e.g., 2150" type="number" onChange={e => handleExchangeChange(exchange.id, 'drainVolume', e.target.value)} />
                     </div>
+                  </div>
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div className="space-y-2">
+                       <Label htmlFor={`dwell-${exchange.id}`}><Clock className="inline h-4 w-4 mr-1" />Dwell Time (hours)</Label>
+                       <Input id={`dwell-${exchange.id}`} value={exchange.dwellTime} placeholder="e.g., 4" type="number" onChange={e => handleExchangeChange(exchange.id, 'dwellTime', e.target.value)} />
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor={`inflow-${exchange.id}`}>Inflow Time (mins)</Label>
+                       <Input id={`inflow-${exchange.id}`} value={exchange.inflowTime} placeholder="e.g., 10" type="number" onChange={e => handleExchangeChange(exchange.id, 'inflowTime', e.target.value)} />
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor={`outflow-${exchange.id}`}>Outflow Time (mins)</Label>
+                       <Input id={`outflow-${exchange.id}`} value={exchange.outflowTime} placeholder="e.g., 15" type="number" onChange={e => handleExchangeChange(exchange.id, 'outflowTime', e.target.value)} />
+                     </div>
                   </div>
                    {uf !== null && (
                         <div className="text-sm font-medium p-2 rounded-md bg-gray-100 flex justify-between">
@@ -137,12 +161,30 @@ export default function PatientDailyLogPage() {
                             <span className={uf >= 0 ? 'text-green-600' : 'text-red-600'}>{uf} mL</span>
                         </div>
                     )}
+                    <div className="space-y-2">
+                       <Label htmlFor={`alarms-${exchange.id}`}><Zap className="inline h-4 w-4 mr-1" />Alarms & Response</Label>
+                       <Textarea id={`alarms-${exchange.id}`} value={exchange.alarms} placeholder="Describe any alarms that occurred and what you did." onChange={e => handleExchangeChange(exchange.id, 'alarms', e.target.value)} />
+                    </div>
+                     <div className="space-y-2">
+                       <Label htmlFor={`notes-${exchange.id}`}>Symptoms During Exchange</Label>
+                       <Textarea id={`notes-${exchange.id}`} value={exchange.notes} placeholder="e.g., mild pain, feeling of fullness, leakage..." onChange={e => handleExchangeChange(exchange.id, 'notes', e.target.value)} />
+                    </div>
                 </div>
               );
             })}
             <Button variant="outline" onClick={addExchange} className="w-full">
               <PlusCircle className="mr-2 h-4 w-4" /> Add another exchange
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Activity className="text-green-500" /> Daily Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Label htmlFor="daily-activity">Describe your general activity level today</Label>
+            <Textarea id="daily-activity" placeholder="e.g., Light housework, went for a short walk, rested most of the day..." className="mt-2" />
           </CardContent>
         </Card>
 
