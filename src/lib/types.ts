@@ -98,6 +98,14 @@ export interface EducationTopic {
   icon: 'Video' | 'ShieldCheck' | 'Apple';
 }
 
+export interface UploadedImage {
+  imageId: string;
+  type: 'exit-site' | 'fluid-bag';
+  uploadDate: string;
+  imageUrl: string;
+  requiresReview: boolean;
+}
+
 export interface PatientData {
   // Patient Demographics
   patientId: string;
@@ -135,6 +143,7 @@ export interface PatientData {
   urineOutputLogs: UrineOutputLog[];
   pdAdequacy: PDAdequacy[];
   patientReportedOutcomes: PROSurvey[];
+  uploadedImages?: UploadedImage[];
 
   // Data for UI components (keeping for now to avoid breaking UI)
   nutritionLifestyle: NutritionLifestyleData;

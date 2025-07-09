@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Trash2, Camera, Droplets, HeartPulse, Weight, Thermometer, FlaskConical, Clock, Zap, Activity } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 
 interface ExchangeLog {
@@ -21,22 +22,23 @@ interface ExchangeLog {
   outflowTime: string;
   alarms: string;
   notes: string;
+  isCloudy: boolean;
 }
 
 export default function PatientDailyLogPage() {
   const [exchanges, setExchanges] = useState<ExchangeLog[]>([
-    { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', inflowTime: '', outflowTime: '', alarms: '', notes: '' },
+    { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', inflowTime: '', outflowTime: '', alarms: '', notes: '', isCloudy: false },
   ]);
 
   const addExchange = () => {
-    setExchanges([...exchanges, { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', inflowTime: '', outflowTime: '', alarms: '', notes: '' }]);
+    setExchanges([...exchanges, { id: Date.now(), dialysateType: 'Dextrose 1.5%', fillVolume: '', drainVolume: '', dwellTime: '', inflowTime: '', outflowTime: '', alarms: '', notes: '', isCloudy: false }]);
   };
 
   const removeExchange = (id: number) => {
     setExchanges(exchanges.filter(e => e.id !== id));
   };
   
-  const handleExchangeChange = (id: number, field: keyof Omit<ExchangeLog, 'id'>, value: string) => {
+  const handleExchangeChange = (id: number, field: keyof Omit<ExchangeLog, 'id'>, value: string | boolean) => {
     setExchanges(exchanges.map(ex => ex.id === id ? { ...ex, [field]: value } : ex));
   };
 
@@ -93,7 +95,7 @@ export default function PatientDailyLogPage() {
              <div className="grid grid-cols-1">
                 <div className="space-y-2">
                     <Label htmlFor="symptoms">New or Worsening Symptoms (General)</Label>
-                    <Textarea id="symptoms" placeholder="e.g., feeling tired, exit site pain, swelling in ankles..." />
+                    <Textarea id="symptoms" placeholder="e.g., feeling tired, exit site pain, swelling in ankles, vomiting, fever..." />
                 </div>
             </div>
           </CardContent>
@@ -109,7 +111,7 @@ export default function PatientDailyLogPage() {
               const uf = calculateUF(exchange.fillVolume, exchange.drainVolume);
               return (
                 <div key={exchange.id} className="p-4 border rounded-lg space-y-4 relative bg-white shadow-sm">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-start">
                     <h3 className="font-semibold text-lg">Exchange {index + 1}</h3>
                     {exchanges.length > 1 && (
                       <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 hover:text-red-600" onClick={() => removeExchange(exchange.id)}>
@@ -155,12 +157,18 @@ export default function PatientDailyLogPage() {
                        <Input id={`outflow-${exchange.id}`} value={exchange.outflowTime} placeholder="e.g., 15" type="number" onChange={e => handleExchangeChange(exchange.id, 'outflowTime', e.target.value)} />
                      </div>
                   </div>
-                   {uf !== null && (
-                        <div className="text-sm font-medium p-2 rounded-md bg-gray-100 flex justify-between">
+                  <div className="flex items-center justify-between p-2 rounded-md bg-gray-50">
+                     {uf !== null && (
+                        <div className="text-sm font-medium">
                             <span>Ultrafiltration (UF):</span>
-                            <span className={uf >= 0 ? 'text-green-600' : 'text-red-600'}>{uf} mL</span>
+                            <span className={uf >= 0 ? 'text-green-600' : 'text-red-600'}> {uf} mL</span>
                         </div>
                     )}
+                    <div className="flex items-center space-x-2">
+                        <Switch id={`cloudy-${exchange.id}`} checked={exchange.isCloudy} onCheckedChange={(checked) => handleExchangeChange(exchange.id, 'isCloudy', checked)} />
+                        <Label htmlFor={`cloudy-${exchange.id}`} className="font-semibold text-yellow-600">Is fluid cloudy?</Label>
+                    </div>
+                  </div>
                     <div className="space-y-2">
                        <Label htmlFor={`alarms-${exchange.id}`}><Zap className="inline h-4 w-4 mr-1" />Alarms & Response</Label>
                        <Textarea id={`alarms-${exchange.id}`} value={exchange.alarms} placeholder="Describe any alarms that occurred and what you did." onChange={e => handleExchangeChange(exchange.id, 'alarms', e.target.value)} />

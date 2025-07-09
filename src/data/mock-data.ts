@@ -70,7 +70,6 @@ export const allPatientData: PatientData[] = [
         outflowTimeMinutes: 15,
         isEffluentCloudy: false,
         recordedBy: 'Patient',
-        complications: 'Mild pain on drain',
       },
       {
         exchangeId: 'PD-002',
@@ -102,6 +101,9 @@ export const allPatientData: PatientData[] = [
     patientReportedOutcomes: [
         { surveyId: 'PRO-001', surveyDate: '2024-06-15', surveyTool: 'KDQOL-36', score: 78, summary: 'Patient reports good overall health but some fatigue.' }
     ],
+    uploadedImages: [
+        { imageId: 'IMG-001', type: 'exit-site', uploadDate: '2024-07-28T10:00:00Z', imageUrl: 'https://placehold.co/400x300.png', requiresReview: true }
+    ],
     nutritionLifestyle: { dailyProtein: { current: 45, target: 60 }, fluidRestriction: { current: 1.2, limit: 1.5 }, caloriesToday: { current: 1850, target: 2000 }, handgripStrength: { value: 28, unit: 'kg', status: 'Stable' }, },
     clinicVisits: { nextAppointment: '2024-12-15T10:00:00Z', lastVisitSummary: 'Routine follow-up. Patient doing well on current regimen. Discussed nutrition goals.', },
     patientEducation: [ { id: 'edu1', title: 'PD Technique Videos', description: 'Step-by-step exchange process', icon: 'Video' }, { id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }, { id: 'edu3', title: 'Nutrition Guidelines', description: 'Meal planning for PD patients', icon: 'Apple' }, ]
@@ -120,14 +122,14 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
     currentStatus: 'Active PD',
     physician: 'Dr. Garcia, Chris',
-    vitals: [{ vitalId: 'VIT-003', measurementDateTime: '2024-07-28T09:00:00Z', systolicBP: 140, diastolicBP: 85, heartRateBPM: 68, temperatureCelsius: 37.0, weightKG: 80, respiratoryRateBPM: 18, fluidStatusNotes: 'Mild ankle edema' }],
+    vitals: [{ vitalId: 'VIT-003', measurementDateTime: '2024-07-28T09:00:00Z', systolicBP: 185, diastolicBP: 95, heartRateBPM: 68, temperatureCelsius: 37.0, weightKG: 80, respiratoryRateBPM: 18, fluidStatusNotes: 'Mild ankle edema' }],
     labResults: [
         { labResultId: 'LAB-003', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Creatinine', resultValue: 8.1, units: 'mg/dL', referenceRangeLow: 0.7, referenceRangeHigh: 1.3 },
         { labResultId: 'LAB-007', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Albumin', resultValue: 3.2, units: 'g/dL', referenceRangeLow: 3.4, referenceRangeHigh: 5.4 },
     ],
-    pdEvents: [
-        { exchangeId: 'PD-003', exchangeDateTime: '2024-07-28T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2250, ultrafiltrationML: 50, isEffluentCloudy: false, recordedBy: 'Patient' },
-        { exchangeId: 'PD-004', exchangeDateTime: '2024-07-27T16:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2180, ultrafiltrationML: -20, isEffluentCloudy: false, recordedBy: 'Patient', complications: 'Negative UF' }
+    pdEvents: [ // Old logs to trigger missed entry alert
+        { exchangeId: 'PD-003', exchangeDateTime: '2024-07-20T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2250, ultrafiltrationML: 50, isEffluentCloudy: false, recordedBy: 'Patient' },
+        { exchangeId: 'PD-004', exchangeDateTime: '2024-07-19T16:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2180, ultrafiltrationML: -20, isEffluentCloudy: false, recordedBy: 'Patient', complications: 'Mild abdominal pain during drain.' }
     ],
     peritonitisEpisodes: [],
     medications: [{ medicationId: 'MED-003', medicationName: 'Amlodipine', dosage: '5mg', frequency: 'Once daily', startDate: '2021-06-15', prescribingDoctor: 'Dr. Garcia, Chris', status: 'ok' }],
@@ -152,13 +154,16 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'Polycystic Kidney Disease',
     currentStatus: 'Active PD',
     physician: 'Dr. Pong, Jay',
-    vitals: [{ vitalId: 'VIT-004', measurementDateTime: '2024-07-28T07:30:00Z', systolicBP: 125, diastolicBP: 78, heartRateBPM: 80, temperatureCelsius: 36.7, weightKG: 60, respiratoryRateBPM: 16, fluidStatusNotes: 'No edema' }],
+    vitals: [
+        { vitalId: 'VIT-004', measurementDateTime: '2024-07-28T07:30:00Z', systolicBP: 125, diastolicBP: 78, heartRateBPM: 80, temperatureCelsius: 36.7, weightKG: 68, respiratoryRateBPM: 16, fluidStatusNotes: 'No edema' },
+        { vitalId: 'VIT-005', measurementDateTime: '2024-07-20T07:30:00Z', systolicBP: 122, diastolicBP: 75, heartRateBPM: 78, temperatureCelsius: 36.6, weightKG: 60, respiratoryRateBPM: 16, fluidStatusNotes: 'No edema' }
+    ],
     labResults: [
         { labResultId: 'LAB-004', resultDateTime: '2024-07-24T08:00:00Z', testName: 'Hemoglobin', resultValue: 10.5, units: 'g/dL', referenceRangeLow: 12.0, referenceRangeHigh: 15.5 },
         { labResultId: 'LAB-008', resultDateTime: '2024-07-24T08:00:00Z', testName: 'Albumin', resultValue: 3.9, units: 'g/dL', referenceRangeLow: 3.4, referenceRangeHigh: 5.4 },
     ],
     pdEvents: [
-        { exchangeId: 'PD-005', exchangeDateTime: '2024-07-28T06:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 1800, dwellTimeHours: 4, drainVolumeML: 1900, ultrafiltrationML: 100, isEffluentCloudy: false, recordedBy: 'Patient' }
+        { exchangeId: 'PD-005', exchangeDateTime: '2024-07-28T06:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 1800, dwellTimeHours: 4, drainVolumeML: 1900, ultrafiltrationML: 100, isEffluentCloudy: true, recordedBy: 'Patient' }
     ],
     peritonitisEpisodes: [],
     medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', prescribingDoctor: 'Dr. Pong, Jay', status: 'warning' }],
