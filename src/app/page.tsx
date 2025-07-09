@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lock, User, HeartPulse, Stethoscope } from 'lucide-react';
+import { Lock, User, HeartPulse } from 'lucide-react';
+import { KidneyIcon } from '@/components/kidney-icon';
 
 export default function LoginPage() {
   return (
@@ -13,7 +14,7 @@ export default function LoginPage() {
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
             <div className="flex justify-center items-center gap-3 mb-2">
-                 <Stethoscope className="h-10 w-10 text-primary" />
+                 <KidneyIcon className="h-10 w-10 text-primary" />
                 <h1 className="text-4xl font-bold">
                 DialysisCare
                 </h1>
@@ -37,7 +38,7 @@ export default function LoginPage() {
       <div className="flex items-center justify-center py-12 px-4">
         <div className="mx-auto grid w-[380px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">Clinician Login</h1>
+            <h1 className="text-3xl font-bold">Nephrologist Login</h1>
             <p className="text-balance text-muted-foreground">
               Enter your credentials to access the dashboard
             </p>

@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Stethoscope,
   CircleUser,
   FileText,
   History,
@@ -12,6 +11,7 @@ import {
   LayoutDashboard,
   Users,
 } from 'lucide-react';
+import { KidneyIcon } from '@/components/kidney-icon';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -46,7 +46,7 @@ export default function PatientPortalLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/patient-portal" className="flex items-center gap-2 font-semibold">
-              <Stethoscope className="h-6 w-6 text-primary" />
+              <KidneyIcon className="h-6 w-6 text-primary" />
               <span className="">Patient Portal</span>
             </Link>
           </div>
@@ -96,7 +96,7 @@ export default function PatientPortalLayout({
                   href="/patient-portal"
                   className="flex items-center gap-2 text-lg font-semibold mb-4"
                 >
-                  <Stethoscope className="h-6 w-6 text-primary" />
+                  <KidneyIcon className="h-6 w-6 text-primary" />
                   <span className="">Patient Portal</span>
                 </Link>
                 {patientNavLinks.map(({ href, label, icon: Icon }) => (
