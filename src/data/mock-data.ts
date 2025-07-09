@@ -90,6 +90,7 @@ export const allPatientData: PatientData[] = [
     ],
     medications: [
       { medicationId: 'MED-001', medicationName: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', startDate: '2022-01-20', prescribingDoctor: 'Dr. Abdullah, Majed', status: 'ok' },
+      { medicationId: 'MED-002', medicationName: 'Sevelamer', dosage: '800mg', frequency: 'With meals', startDate: '2022-01-20', prescribingDoctor: 'Dr. Abdullah, Majed', status: 'warning' },
     ],
     urineOutputLogs: [
       { logId: 'UO-001', logDate: '2024-07-28', volumeML: 250 },

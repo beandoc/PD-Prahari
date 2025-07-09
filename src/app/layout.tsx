@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'ShareSource',
+  title: 'DialysisCare',
   description: 'Your Companion in Kidney Care',
 };
 

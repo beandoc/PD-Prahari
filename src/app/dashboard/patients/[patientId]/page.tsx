@@ -19,7 +19,7 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-slate-50">
+    <div className="flex min-h-screen w-full flex-col bg-background">
       <PatientHeader patient={patientData} />
       <main className="flex-1 p-4 sm:p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

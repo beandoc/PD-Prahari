@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lock, User, HeartPulse } from 'lucide-react';
+import { Lock, User, HeartPulse, Stethoscope } from 'lucide-react';
 
 export default function LoginPage() {
   return (
@@ -12,13 +12,10 @@ export default function LoginPage() {
       <div className="hidden bg-muted lg:flex lg:flex-col lg:items-center lg:justify-center p-8">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <div className="flex justify-center items-center gap-2 mb-2">
-                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="#1E40AF" strokeWidth="1.5"/>
-                    <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+            <div className="flex justify-center items-center gap-3 mb-2">
+                 <Stethoscope className="h-10 w-10 text-primary" />
                 <h1 className="text-4xl font-bold">
-                ShareSource
+                DialysisCare
                 </h1>
             </div>
             <p className="text-xl mt-2 text-muted-foreground">Your Companion in Kidney Care</p>

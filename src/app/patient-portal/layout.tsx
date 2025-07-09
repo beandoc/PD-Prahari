@@ -17,7 +17,7 @@ export default function PatientPortalLayout({
             className="flex items-center gap-2 text-lg font-semibold md:text-base"
           >
             <Stethoscope className="h-6 w-6 text-primary" />
-            <span className="">DialysisCare Portal</span>
+            <span className="">DialysisCare Patient Portal</span>
           </Link>
         </nav>
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">

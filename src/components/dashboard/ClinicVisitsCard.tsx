@@ -18,7 +18,7 @@ export default function ClinicVisitsCard({ data, className }: ClinicVisitsCardPr
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base font-semibold">
           <div className="bg-purple-100 rounded-full p-1.5">
-            <Building2 className="h-4 w-4 text-purple-500" />
+            <Building2 className="h-4 w-4 text-purple-600" />
           </div>
           <span>Clinic Visits & Care</span>
         </CardTitle>

@@ -14,6 +14,7 @@ import {
   Menu,
   Video,
   BookOpen,
+  Stethoscope,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -36,7 +37,7 @@ import { cn } from '@/lib/utils';
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/dashboard/pd-logs', label: 'PD Logs', icon: Droplets },
-  { href: '/dashboard/sharesource', label: 'ShareSource', icon: BarChart3 },
+  { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
   { href: '/dashboard/education', label: 'Education', icon: BookOpen },
 ];
@@ -54,11 +55,8 @@ export default function DashboardLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="#1E40AF" strokeWidth="1.5"/>
-                    <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              <span className="">ShareSource</span>
+               <Stethoscope className="h-6 w-6 text-primary" />
+              <span className="">DialysisCare</span>
             </Link>
           </div>
           <div className="flex-1">
@@ -117,11 +115,8 @@ export default function DashboardLayout({
                   href="#"
                   className="flex items-center gap-2 text-lg font-semibold mb-4"
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="#1E40AF" strokeWidth="1.5"/>
-                      <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-                  <span className="">ShareSource</span>
+                  <Stethoscope className="h-6 w-6 text-primary" />
+                  <span className="">DialysisCare</span>
                 </Link>
                 {navLinks.map(({ href, label, icon: Icon }) => (
                   <Link

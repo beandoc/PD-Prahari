@@ -1,6 +1,7 @@
 import type { Patient } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Stethoscope } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface PatientHeaderProps {
   patient: Patient;
@@ -19,27 +20,36 @@ const calculateAge = (birthDate: string) => {
 
 export default function PatientHeader({ patient }: PatientHeaderProps) {
   return (
-    <header className="z-10 border-b bg-card shadow-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Stethoscope className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">ShareSource</h1>
-          </div>
-          <Card className="hidden sm:block">
-            <CardContent className="flex items-center gap-4 p-3">
-              <div className="font-medium">
+    <header className="bg-card border-b p-4">
+      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-end gap-4">
+            <h1 className="text-3xl font-bold text-foreground">
                 {patient.firstName} {patient.lastName}
+            </h1>
+             <p className="text-lg text-muted-foreground">
+                ({patient.nephroId})
+             </p>
+          </div>
+          <Card className="shadow-none border-dashed">
+            <CardContent className="flex items-center gap-x-6 gap-y-2 flex-wrap p-3">
+              <div>
+                 <div className="text-xs text-muted-foreground">Age</div>
+                 <div className="font-semibold">{calculateAge(patient.dateOfBirth)} yrs</div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                {calculateAge(patient.dateOfBirth)} y/o {patient.gender}
+               <div>
+                 <div className="text-xs text-muted-foreground">Gender</div>
+                 <div className="font-semibold">{patient.gender}</div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                Status: <span className="font-semibold text-accent-foreground">{patient.currentStatus}</span>
+              <div>
+                 <div className="text-xs text-muted-foreground">Status</div>
+                 <div className="font-semibold"><Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'} className="text-sm">{patient.currentStatus}</Badge></div>
+              </div>
+               <div>
+                 <div className="text-xs text-muted-foreground">Physician</div>
+                 <div className="font-semibold">{patient.physician}</div>
               </div>
             </CardContent>
           </Card>
-        </div>
       </div>
     </header>
   );

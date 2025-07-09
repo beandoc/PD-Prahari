@@ -28,7 +28,7 @@ export default function MedicationsCard({ medications }: MedicationsCardProps) {
           {medications.map((med) => (
             <li key={med.medicationId} className={cn(
                 "flex items-center justify-between rounded-lg p-3 border",
-                med.status === 'warning' ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-200'
+                med.status === 'warning' ? 'bg-yellow-50/70 border-yellow-200' : 'bg-white'
             )}>
               <div>
                 <p className="font-semibold">{med.medicationName}</p>
