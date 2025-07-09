@@ -7,6 +7,8 @@ import type { PatientData } from '@/lib/types';
 function formatDataForAI(patientData: PatientData) {
   return {
     patientId: patientData.patientId,
+    nephroId: patientData.nephroId,
+    pdExchangeType: patientData.pdExchangeType,
     vitals: patientData.vitals.map(v => ({
       MeasurementDateTime: v.measurementDateTime,
       SystolicBP: v.systolicBP,
@@ -34,6 +36,7 @@ function formatDataForAI(patientData: PatientData) {
       UltrafiltrationML: p.ultrafiltrationML,
       InflowTimeMinutes: p.inflowTimeMinutes,
       OutflowTimeMinutes: p.outflowTimeMinutes,
+      isEffluentCloudy: p.isEffluentCloudy,
       Complications: p.complications,
       Notes: `Recorded by ${p.recordedBy}`,
     })),
@@ -51,6 +54,21 @@ function formatDataForAI(patientData: PatientData) {
         TreatmentRegimen: p.treatmentRegimen,
         Outcome: p.outcome,
         ResolutionDate: p.resolutionDate,
+    })),
+    urineOutputLogs: patientData.urineOutputLogs.map(u => ({
+        logDate: u.logDate,
+        volumeML: u.volumeML,
+    })),
+    pdAdequacy: patientData.pdAdequacy.map(a => ({
+        testDate: a.testDate,
+        totalKtV: a.totalKtV,
+        peritonealKtV: a.peritonealKtV,
+    })),
+    patientReportedOutcomes: patientData.patientReportedOutcomes.map(p => ({
+        surveyDate: p.surveyDate,
+        surveyTool: p.surveyTool,
+        score: p.score,
+        summary: p.summary,
     })),
   };
 }

@@ -1,4 +1,26 @@
 
+export interface UrineOutputLog {
+  logId: string;
+  logDate: string;
+  volumeML: number;
+}
+
+export interface PDAdequacy {
+  testId: string;
+  testDate: string;
+  totalKtV?: number;
+  peritonealKtV?: number;
+  notes?: string;
+}
+
+export interface PROSurvey {
+  surveyId: string;
+  surveyDate: string;
+  surveyTool: string;
+  score: number;
+  summary?: string;
+}
+
 export interface PeritonitisEpisode {
   episodeId: string;
   diagnosisDate: string;
@@ -41,6 +63,7 @@ export interface PDEvent {
   inflowTimeMinutes?: number;
   outflowTimeMinutes?: number;
   solutionBatchNumber?: string;
+  isEffluentCloudy?: boolean;
   complications?: string;
   recordedBy?: 'Patient' | 'Nurse' | 'Automated Machine';
 }
@@ -78,6 +101,7 @@ export interface EducationTopic {
 export interface PatientData {
   // Patient Demographics
   patientId: string;
+  nephroId: string;
   firstName: string;
   lastName:string;
   dateOfBirth: string;
@@ -90,10 +114,13 @@ export interface PatientData {
   stateProvince?: string;
   postalCode?: string;
   country?: string;
+  distanceFromPDCenterKM?: number;
+  educationLevel?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
-  physician: string; // From spec: PrimaryNephrologist
+  physician: string;
   pdStartDate: string;
+  pdExchangeType: 'Assisted' | 'Self';
   underlyingKidneyDisease: string;
   comorbidities?: string[];
   currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased';
@@ -105,6 +132,9 @@ export interface PatientData {
   pdEvents: PDEvent[];
   medications: Medication[];
   peritonitisEpisodes: PeritonitisEpisode[];
+  urineOutputLogs: UrineOutputLog[];
+  pdAdequacy: PDAdequacy[];
+  patientReportedOutcomes: PROSurvey[];
 
   // Data for UI components (keeping for now to avoid breaking UI)
   nutritionLifestyle: NutritionLifestyleData;

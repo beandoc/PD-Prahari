@@ -13,6 +13,8 @@ import {z} from 'genkit';
 
 const MedicationAdjustmentInputSchema = z.object({
   patientId: z.string().describe('The unique identifier for the patient.'),
+  nephroId: z.string().describe('The nephrology-specific patient identifier.'),
+  pdExchangeType: z.enum(['Assisted', 'Self']).describe('Whether the patient performs PD exchanges themselves or with assistance.'),
   vitals: z.array(
     z.object({
       MeasurementDateTime: z.string().describe('Date and Time of vital sign measurement'),
@@ -45,6 +47,7 @@ const MedicationAdjustmentInputSchema = z.object({
       UltrafiltrationML: z.number().describe('Calculated ultrafiltration volume (mL)'),
       InflowTimeMinutes: z.number().optional().describe('Duration of dialysate inflow in minutes'),
       OutflowTimeMinutes: z.number().optional().describe('Duration of dialysate outflow in minutes'),
+      isEffluentCloudy: z.boolean().optional().describe('Whether the drained fluid was cloudy.'),
       Complications: z.string().optional().describe('Complications during the exchange (e.g., Pain, Leakage)'),
       Notes: z.string().optional().describe('Additional notes on the exchange'),
     })
@@ -68,6 +71,27 @@ const MedicationAdjustmentInputSchema = z.object({
         ResolutionDate: z.string().optional().describe('The date the episode was resolved.'),
       })
   ).describe('A list of the patient peritonitis episodes.'),
+  urineOutputLogs: z.array(
+    z.object({
+      logDate: z.string().describe('The date of the urine output measurement.'),
+      volumeML: z.number().describe('The total urine volume in mL for that day.'),
+    })
+  ).describe('A list of the patient daily urine output logs.'),
+  pdAdequacy: z.array(
+    z.object({
+      testDate: z.string().describe('The date of the PD adequacy test.'),
+      totalKtV: z.number().optional().describe('The total Kt/V value.'),
+      peritonealKtV: z.number().optional().describe('The peritoneal Kt/V value.'),
+    })
+  ).describe('A list of the patient PD adequacy test results.'),
+  patientReportedOutcomes: z.array(
+    z.object({
+        surveyDate: z.string().describe('The date the survey was completed.'),
+        surveyTool: z.string().describe('The name of the survey tool used (e.g., KDQOL-36).'),
+        score: z.number().describe('The overall score from the survey.'),
+        summary: z.string().optional().describe('A brief summary of the survey results.'),
+    })
+  ).describe('A list of patient-reported outcome survey results.'),
 }).describe('The data needed to generate medication adjustment suggestions.');
 
 export type MedicationAdjustmentInput = z.infer<typeof MedicationAdjustmentInputSchema>;
@@ -95,6 +119,8 @@ const prompt = ai.definePrompt({
   prompt: `You are an experienced clinician specializing in peritoneal dialysis. Your task is to analyze the provided patient data and suggest potential medication adjustments to optimize their treatment plan. Provide reasoning for each suggestion based on the provided clinical history.
 
 Patient ID: {{{patientId}}}
+Nephro ID: {{{nephroId}}}
+PD Exchange Type: {{{pdExchangeType}}}
 
 Vitals:
 {{#each vitals}}
@@ -108,7 +134,7 @@ Lab Results:
 
 PD Exchange Data:
 {{#each pdEvents}}
-  - ExchangeDateTime: {{{ExchangeDateTime}}}, DialysateType: {{{DialysateType}}}, FillVolumeML: {{{FillVolumeML}}}, DwellTimeHours: {{{DwellTimeHours}}}, DrainVolumeML: {{{DrainVolumeML}}}, UltrafiltrationML: {{{UltrafiltrationML}}}, Complications: {{{Complications}}}, Notes: {{{Notes}}}
+  - ExchangeDateTime: {{{ExchangeDateTime}}}, DialysateType: {{{DialysateType}}}, FillVolumeML: {{{FillVolumeML}}}, DwellTimeHours: {{{DwellTimeHours}}}, DrainVolumeML: {{{DrainVolumeML}}}, UltrafiltrationML: {{{UltrafiltrationML}}}, Cloudy Fluid: {{#if isEffluentCloudy}}Yes{{else}}No{{/if}}, Complications: {{{Complications}}}, Notes: {{{Notes}}}
 {{/each}}
 
 Peritonitis History:
@@ -123,6 +149,21 @@ Peritonitis History:
 Medications:
 {{#each medications}}
   - MedicationName: {{{MedicationName}}}, Dosage: {{{Dosage}}}, Frequency: {{{Frequency}}}, StartDate: {{{StartDate}}}, EndDate: {{{EndDate}}}, Prescribed by: {{{PrescribingDoctor}}}
+{{/each}}
+
+Urine Output (Recent):
+{{#each urineOutputLogs}}
+ - Date: {{{logDate}}}, Volume: {{{volumeML}}} mL
+{{/each}}
+
+PD Adequacy (Kt/V):
+{{#each pdAdequacy}}
+ - Date: {{{testDate}}}, Total Kt/V: {{{totalKtV}}}, Peritoneal Kt/V: {{{peritonealKtV}}}
+{{/each}}
+
+Patient Reported Outcomes:
+{{#each patientReportedOutcomes}}
+ - Date: {{{surveyDate}}}, Tool: {{{surveyTool}}}, Score: {{{score}}}, Summary: {{{summary}}}
 {{/each}}
 
 Based on this information, provide medication adjustment suggestions with reasoning.`,
