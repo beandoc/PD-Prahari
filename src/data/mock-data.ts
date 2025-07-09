@@ -21,6 +21,14 @@ export const allPatientData: PatientData[] = [
     emergencyContactName: 'Fatima Talal',
     emergencyContactPhone: '555-0102',
     pdStartDate: '2022-01-20',
+    pdTrainingEndDate: '2022-04-20',
+    lastHomeVisitDate: '2024-05-10',
+    membraneTransportType: 'High-Average',
+    hospitalizationsCount: 1,
+    psychosocialConcernLevel: 'Low',
+    catheterDysfunction: false,
+    esiCount: 0,
+    additionalNotes: 'Patient is highly motivated and has good family support. Compliant with diet and fluid restrictions.',
     pdExchangeType: 'Self',
     underlyingKidneyDisease: 'Diabetic Nephropathy',
     comorbidities: ['Hypertension', 'Type 2 Diabetes'],
@@ -63,6 +71,7 @@ export const allPatientData: PatientData[] = [
       { labResultId: 'LAB-002', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Potassium', resultValue: 4.5, units: 'mmol/L', referenceRangeLow: 3.5, referenceRangeHigh: 5.1 },
       { labResultId: 'LAB-005', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Albumin', resultValue: 3.5, units: 'g/dL', referenceRangeLow: 3.4, referenceRangeHigh: 5.4 },
       { labResultId: 'LAB-006', resultDateTime: '2024-07-25T09:00:00Z', testName: 'iPTH', resultValue: 350, units: 'pg/mL', referenceRangeLow: 150, referenceRangeHigh: 300 },
+      { labResultId: 'LAB-008', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Hemoglobin', resultValue: 11.2, units: 'g/dL', referenceRangeLow: 13.5, referenceRangeHigh: 17.5 },
     ],
     pdEvents: [
       {
@@ -179,7 +188,7 @@ export const allPatientData: PatientData[] = [
         { vitalId: 'VIT-004', measurementDateTime: '2024-07-28T07:30:00Z', systolicBP: 125, diastolicBP: 78, heartRateBPM: 80, temperatureCelsius: 36.7, weightKG: 68, respiratoryRateBPM: 16, fluidStatusNotes: 'No edema' },
     ],
     labResults: [
-        { labResultId: 'LAB-004', resultDateTime: '2024-07-24T08:00:00Z', testName: 'Hemoglobin', resultValue: 10.5, units: 'g/dL', referenceRangeLow: 12.0, referenceRangeHigh: 15.5 },
+        { labResultId: 'LAB-004', resultDateTime: '2024-07-24T08:00:00Z', testName: 'Hemoglobin', resultValue: 9.8, units: 'g/dL', referenceRangeLow: 12.0, referenceRangeHigh: 15.5 },
     ],
     pdEvents: [
         { exchangeId: 'PD-005', exchangeDateTime: '2024-07-28T06:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 1800, dwellTimeHours: 4, drainVolumeML: 1900, ultrafiltrationML: 100, isEffluentCloudy: true, recordedBy: 'Patient' }

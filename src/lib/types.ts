@@ -160,4 +160,14 @@ export interface PatientData extends Patient {
   nutritionLifestyle: NutritionLifestyleData;
   clinicVisits: ClinicVisitData;
   patientEducation: EducationTopic[];
+  
+  // New fields for Nurse Checklist Reference Sheet
+  pdTrainingEndDate?: string;
+  lastHomeVisitDate?: string;
+  membraneTransportType?: 'High' | 'High-Average' | 'Low-Average' | 'Low';
+  hospitalizationsCount?: number;
+  psychosocialConcernLevel?: 'Low' | 'Medium' | 'High';
+  catheterDysfunction?: boolean;
+  esiCount?: number;
+  additionalNotes?: string;
 }

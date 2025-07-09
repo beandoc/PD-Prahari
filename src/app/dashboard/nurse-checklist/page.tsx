@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { allPatientData } from '@/data/mock-data';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { format, parseISO } from 'date-fns';
 
 const ChecklistItem = ({ id, label }: { id: string, label: string }) => (
     <div className="flex items-center space-x-3 py-2">
@@ -19,17 +23,84 @@ const SubList = ({ items }: { items: string[] }) => (
     </ul>
 );
 
+const MetricItem = ({ label, value }: { label: string, value: React.ReactNode }) => (
+    <div className="space-y-1">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className="font-semibold">{value || 'N/A'}</p>
+    </div>
+);
+
+const FlagItem = ({ label, isFlagged, children }: { label: string, isFlagged: boolean, children: React.ReactNode }) => (
+    <div>
+        <p className="text-xs font-medium text-muted-foreground mb-1">{label}</p>
+        <Badge variant={isFlagged ? 'destructive' : 'secondary'} className={!isFlagged ? 'bg-green-100 text-green-800 border-green-200' : ''}>
+            {children}
+        </Badge>
+    </div>
+);
+
 
 export default function NurseChecklistPage() {
+    const patient = allPatientData[0]; // Using first patient for demonstration
+
+    const latestKtV = patient.pdAdequacy.length > 0 ? patient.pdAdequacy.sort((a,b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime())[0].totalKtV : undefined;
+    const latestAlbumin = patient.labResults.filter(lr => lr.testName === 'Albumin').sort((a,b) => new Date(b.resultDateTime).getTime() - new Date(a.resultDateTime).getTime())[0]?.resultValue;
+    const latestHgb = patient.labResults.filter(lr => lr.testName === 'Hemoglobin').sort((a,b) => new Date(b.resultDateTime).getTime() - new Date(a.resultDateTime).getTime())[0]?.resultValue;
+    const peritonitisCount = patient.peritonitisEpisodes.length;
+
     return (
         <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
             <div className="max-w-5xl mx-auto space-y-8">
                 <header className="text-center space-y-2">
                     <h1 className="text-4xl font-bold text-primary">Nurse Checklist for PD Patient Success</h1>
                     <p className="text-lg text-muted-foreground">
-                        A guide for the first 90 days on PD therapy. Items can be checked off here or in the 7-day views in the calendar.
+                        A guide for the first 90 days on PD therapy, accompanied by a patient reference sheet.
                     </p>
                 </header>
+                
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Patient Reference Sheet</CardTitle>
+                        <CardDescription>Key data and risk factors for {patient.firstName} {patient.lastName}. Last updated: {patient.lastUpdated ? format(parseISO(patient.lastUpdated), 'PPP') : 'N/A'}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                           <MetricItem label="Patient Name" value={`${patient.firstName} ${patient.lastName}`} />
+                           <MetricItem label="Date of Birth" value={format(parseISO(patient.dateOfBirth), 'PPP')} />
+                           <MetricItem label="Patient Number" value={patient.nephroId} />
+                           <MetricItem label="Telephone" value={patient.contactPhone} />
+                           <MetricItem label="Address" value={`${patient.addressLine1}, ${patient.city}, ${patient.postalCode}`} />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                            <MetricItem label="PD Training Start" value={patient.pdStartDate ? format(parseISO(patient.pdStartDate), 'PPP') : 'N/A'} />
+                            <MetricItem label="PD Training End" value={patient.pdTrainingEndDate ? format(parseISO(patient.pdTrainingEndDate), 'PPP') : 'N/A'} />
+                            <MetricItem label="Last Home Visit" value={patient.lastHomeVisitDate ? format(parseISO(patient.lastHomeVisitDate), 'PPP') : 'N/A'} />
+                            <MetricItem label="Last PET Test" value={patient.pdAdequacy.length > 0 ? format(parseISO(patient.pdAdequacy[0].testDate), 'PPP') : 'N/A'} />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm items-start">
+                           <MetricItem label="Transport Type" value={patient.membraneTransportType} />
+                           <FlagItem label="Kt/V < 1.72" isFlagged={!!latestKtV && latestKtV < 1.72}>
+                                {latestKtV ? `Value: ${latestKtV.toFixed(2)}` : 'No Data'}
+                           </FlagItem>
+                           <FlagItem label="Albumin < 4.0 g/dL" isFlagged={!!latestAlbumin && latestAlbumin < 4.0}>
+                                {latestAlbumin ? `Value: ${latestAlbumin.toFixed(1)}` : 'No Data'}
+                           </FlagItem>
+                            <FlagItem label="Hgb < 10 g/dL" isFlagged={!!latestHgb && latestHgb < 10.0}>
+                                {latestHgb ? `Value: ${latestHgb.toFixed(1)}` : 'No Data'}
+                           </FlagItem>
+                        </div>
+                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                            <MetricItem label="Catheter Dysfunction" value={patient.catheterDysfunction ? 'Yes' : 'No'} />
+                            <MetricItem label="Exit Site Infections" value={patient.esiCount} />
+                            <MetricItem label="Peritonitis Episodes" value={peritonitisCount} />
+                            <MetricItem label="Hospitalizations" value={patient.hospitalizationsCount} />
+                        </div>
+                         <div>
+                             <Label className="font-semibold">Additional Notes</Label>
+                             <Textarea readOnly defaultValue={patient.additionalNotes || 'No additional notes.'} className="mt-1 bg-slate-50 font-sans" rows={3}/>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 <Card>
                     <CardHeader>
