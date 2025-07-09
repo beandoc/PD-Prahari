@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MonitorPlay, ShieldCheck, Apple, ArrowRight } from 'lucide-react';
 import type { EducationTopic } from '@/lib/types';
@@ -37,7 +38,7 @@ export default function PatientEducationCard({ topics, className }: PatientEduca
         <ul className="space-y-3">
           {topics.map((topic) => (
             <li key={topic.id}>
-                <Link href="#" className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-gray-50 border bg-white">
+                <Link href="/dashboard/education" className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-gray-50 border bg-white">
                     <div className="flex items-center gap-3">
                         <div className={cn("p-2 rounded-full", iconBg[topic.icon])}>
                             {iconMap[topic.icon]}
