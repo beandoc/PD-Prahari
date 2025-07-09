@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { History } from 'lucide-react';
+import { History, BarChart } from 'lucide-react';
 
 export default function LogHistoryPage() {
   return (
@@ -16,13 +16,15 @@ export default function LogHistoryPage() {
             Coming Soon!
           </CardTitle>
           <CardDescription>
-            This is where a history of your past daily logs will be displayed, allowing you to track your progress over time. This feature is currently under development.
+            This feature is currently under development. Soon, you will be able to review all your past entries here.
            </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            Soon you will be able to see charts and tables of your historical data right here.
-          </p>
+          <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-slate-50 rounded-lg border border-dashed">
+            <BarChart className="h-12 w-12 mb-4" />
+            <p className="font-semibold">Your historical data will be visualized here.</p>
+            <p className="text-sm mt-1">Track your progress over time with charts and tables of your vitals, UF, and more.</p>
+          </div>
         </CardContent>
       </Card>
     </div>

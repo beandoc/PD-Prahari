@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -39,24 +38,6 @@ export default function PatientPortalLayout({
   const pathname = usePathname();
   const patient = allPatientData[0]; // Using first patient for demonstration
 
-  const navContent = (
-    <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-      {patientNavLinks.map(({ href, label, icon: Icon }) => (
-        <Link
-          key={href}
-          href={href}
-          className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-            pathname === href && 'bg-muted text-primary'
-          )}
-        >
-          <Icon className="h-4 w-4" />
-          {label}
-        </Link>
-      ))}
-    </nav>
-  );
-
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -67,12 +48,28 @@ export default function PatientPortalLayout({
               <span className="">Patient Portal</span>
             </Link>
           </div>
-          <div className="flex-1 py-4">{navContent}</div>
-           <div className="mt-auto p-4 border-t">
-              <Button asChild variant="secondary" className="w-full">
+          <div className="flex-1">
+            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              {patientNavLinks.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                    pathname === href && 'bg-muted text-primary'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+          <div className="mt-auto p-4 border-t">
+             <Button asChild variant="secondary" className="w-full">
                 <Link href="/">
                     <LogOut className="mr-2 h-4 w-4" />
-                    Exit Portal
+                    Logout & Exit
                 </Link>
               </Button>
            </div>
@@ -92,21 +89,21 @@ export default function PatientPortalLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
-               <nav className="grid gap-2 text-lg font-medium">
-                  <Link
-                    href="/patient-portal"
-                    className="flex items-center gap-2 text-lg font-semibold mb-4"
-                  >
-                    <Stethoscope className="h-6 w-6 text-primary" />
-                    <span className="">Patient Portal</span>
-                  </Link>
-                  {patientNavLinks.map(({ href, label, icon: Icon }) => (
+              <nav className="grid gap-2 text-lg font-medium">
+                <Link
+                  href="/patient-portal"
+                  className="flex items-center gap-2 text-lg font-semibold mb-4"
+                >
+                  <Stethoscope className="h-6 w-6 text-primary" />
+                  <span className="">Patient Portal</span>
+                </Link>
+                {patientNavLinks.map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
                     href={href}
                     className={cn(
                       'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                      pathname === href && 'bg-muted text-foreground'
+                       pathname === href && 'bg-muted text-foreground'
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -114,13 +111,19 @@ export default function PatientPortalLayout({
                   </Link>
                 ))}
               </nav>
+               <div className="mt-auto">
+                 <Button variant="secondary" className="w-full" asChild>
+                    <Link href="/">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout & Exit
+                    </Link>
+                </Button>
+              </div>
             </SheetContent>
           </Sheet>
-
+          
           <div className="w-full flex-1">
-             <h1 className="font-semibold text-lg hidden md:block">
-                {patientNavLinks.find(link => link.href === pathname)?.label || 'Welcome'}
-             </h1>
+             {/* Can add page title here later if needed */}
           </div>
           
           <DropdownMenu>
@@ -133,7 +136,7 @@ export default function PatientPortalLayout({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{patient.firstName} {patient.lastName}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild><Link href="/patient-portal/profile">Profile</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/patient-portal/profile">My Profile</Link></DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
