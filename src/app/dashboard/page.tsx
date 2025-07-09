@@ -5,11 +5,15 @@ import Link from 'next/link';
 import {
   AlertTriangle,
   Search,
+  Users,
+  Camera,
+  ClipboardX,
 } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
 import type { PatientData } from '@/lib/types';
 import { generatePatientAlerts } from '@/lib/alerts';
 import type { Alert } from '@/lib/alerts';
+import { differenceInDays } from 'date-fns';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -80,9 +84,70 @@ const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
 
 
 export default function DoctorDashboard() {
+  const totalPatients = allPatientData.length;
+
+  const patientsWithCriticalAlerts = allPatientData.filter(patient => {
+    const alerts = generatePatientAlerts(patient);
+    return alerts.some(alert => alert.severity === 'critical');
+  }).length;
+
+  const imagesForReview = allPatientData.reduce((count, patient) => {
+    return count + (patient.uploadedImages?.filter(img => img.requiresReview).length || 0);
+  }, 0);
+  
+  const nonCompliantToday = allPatientData.filter(patient => {
+     if (patient.pdEvents.length === 0) return true;
+     // Sort to find the most recent event
+     const latestEvent = patient.pdEvents.sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
+     const latestEventDate = new Date(latestEvent.exchangeDateTime);
+     const today = new Date();
+     return differenceInDays(today, latestEventDate) >= 1;
+  }).length;
 
   return (
     <>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">{totalPatients}</div>
+                  <p className="text-xs text-muted-foreground">managed in this clinic</p>
+              </CardContent>
+          </Card>
+           <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">{patientsWithCriticalAlerts}</div>
+                  <p className="text-xs text-muted-foreground">patients require immediate attention</p>
+              </CardContent>
+          </Card>
+           <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Images for Review</CardTitle>
+                  <Camera className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">+{imagesForReview}</div>
+                  <p className="text-xs text-muted-foreground">newly uploaded patient photos</p>
+              </CardContent>
+          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Not Logged Today</CardTitle>
+                  <ClipboardX className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">{nonCompliantToday}</div>
+                  <p className="text-xs text-muted-foreground">patients missed today's log entry</p>
+              </CardContent>
+          </Card>
+      </div>
       <Tabs defaultValue="clinical">
         <TabsList className="mb-4">
           <TabsTrigger value="clinical">Clinical</TabsTrigger>
@@ -135,7 +200,7 @@ export default function DoctorDashboard() {
                     {allPatientData.map(patient => {
                       const alerts = generatePatientAlerts(patient);
                       return (
-                      <TableRow key={patient.patientId} className={alerts.length > 0 ? 'bg-yellow-50/50' : ''}>
+                      <TableRow key={patient.patientId} className={alerts.filter(a => a.severity === 'critical').length > 0 ? 'bg-red-50/50' : (alerts.length > 0 ? 'bg-yellow-50/50' : '')}>
                         <TableCell>
                           <Link href={`/dashboard/patients/${patient.patientId}`} className="font-medium hover:underline">
                               {patient.lastName}, {patient.firstName}
