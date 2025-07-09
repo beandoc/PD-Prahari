@@ -34,7 +34,7 @@ export default function NurseChecklistPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Best Demonstrated Practices</CardTitle>
-                        <CardDescription>Use this checklist to avoid the 4 main causes of PD dropout: INFECTION & CATHETER issues.</CardDescription>
+                        <CardDescription>Use this checklist to avoid the main causes of PD dropout: Infection, Catheter Issues, Inadequate Dialysis, and Psychosocial Barriers.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Accordion type="multiple" defaultValue={['item-1']} className="w-full">
@@ -63,7 +63,7 @@ export default function NurseChecklistPage() {
                                      <ChecklistItem id="c10" label="Post-procedure instructions reviewed, and written instructions given to patient." />
                                      <ChecklistItem id="c11" label="Perform post-procedure dressing change at Day 5-10 unless there is obvious signs of bleeding or infection." />
                                      <ChecklistItem id="c12" label="Assess exit site and tunnel for trauma, swelling, or signs of infection." />
-                                     <ChecklistItem id="c13" label="Instruct patient on their daily exit site and catheter care routine." />
+                                     <ChecklistItem id="c13" label="Instruct patient on their daily exit site and catheter care routine, including the use of Mupirocin or Gentamicin Cream." />
                                      <ChecklistItem id="c14" label="Perform low volume PD exchanges to 'break in' the catheter and ensure proper function." />
                                 </AccordionContent>
                             </AccordionItem>
@@ -227,6 +227,26 @@ export default function NurseChecklistPage() {
                                 <AccordionTrigger className="text-lg font-semibold">Month 3: Week 13</AccordionTrigger>
                                 <AccordionContent className="pl-2 space-y-2">
                                     <ChecklistItem id="m3w13-1" label="Proactively contact patient and congratulate them on completing the first 90 days. Assure them that you will continue to provide guidance and support." />
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="item-adequacy">
+                                <AccordionTrigger className="text-lg font-semibold">PD Adequacy Best Practices</AccordionTrigger>
+                                <AccordionContent className="pl-2 space-y-2">
+                                    <ChecklistItem id="adeq-1" label="Work with Nephrologist to utilize non-dextrose, isoosmolar solutions to improve UF in long dwells for high-average transporters." />
+                                    <ChecklistItem id="adeq-2" label="For APD, avoid cycler nighttime dwells less than 120 minutes for average transporters to ensure sodium removal." />
+                                    <ChecklistItem id="adeq-3" label="Initiate or increase diuretics for patients with a Residual Kidney Function (RKF) > 100 ml/day." />
+                                    <ChecklistItem id="adeq-4" label="Ensure no dry day or night without adequate RKF to assure middle molecule clearance." />
+                                    <div>
+                                        <ChecklistItem id="adeq-5" label="Administer or repeat a Peritoneal Equilibration Test (PET) when clinically indicated, such as:" />
+                                        <SubList items={[
+                                            "Presence of unexplained volume overload",
+                                            "Decreasing drain volume (DV) on overnight (CAPD) or daytime (APD) dwells",
+                                            "Increasing clinical need for Hypertonic Dialysate dwells",
+                                            "Worsening hypertension",
+                                            "Change in measured Peritoneal Solute Removal (Kt/V Urea)",
+                                            "Unexplained signs or symptoms of Uremia"
+                                        ]} />
+                                    </div>
                                 </AccordionContent>
                             </AccordionItem>
                              <AccordionItem value="item-4">
