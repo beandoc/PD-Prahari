@@ -1,19 +1,25 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart } from 'recharts';
 import { Droplets, History, TrendingUp } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
+import type { PDEvent } from '@/lib/types';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function LogHistoryPage() {
-    const patientData = allPatientData[0];
+    const [dailyUfData, setDailyUfData] = useState<{ date: string; uf: number; }[]>([]);
+    const [paginatedEvents, setPaginatedEvents] = useState<PDEvent[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const { dailyUfData, paginatedEvents } = useMemo(() => {
+    useEffect(() => {
+        const patientData = allPatientData[0];
+
         const events = [...patientData.pdEvents].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
         
         const dailyUf: Record<string, number> = {};
@@ -23,7 +29,7 @@ export default function LogHistoryPage() {
             dailyUf[day] = (dailyUf[day] || 0) + event.ultrafiltrationML;
         });
         
-        const dailyUfData = Object.entries(dailyUf)
+        const calculatedDailyUfData = Object.entries(dailyUf)
             .map(([date, uf]) => ({
                 date: format(new Date(date), 'MMM d'),
                 uf
@@ -31,11 +37,10 @@ export default function LogHistoryPage() {
             .slice(0, 30) // Show last 30 days
             .reverse();
 
-        return {
-            dailyUfData,
-            paginatedEvents: events.slice(0, 20) // Show last 20 events in table
-        }
-    }, [patientData.pdEvents]);
+        setDailyUfData(calculatedDailyUfData);
+        setPaginatedEvents(events.slice(0, 20)); // Show last 20 events in table
+        setIsLoading(false);
+    }, []);
 
   return (
     <div className="space-y-6">
@@ -55,7 +60,11 @@ export default function LogHistoryPage() {
            </CardDescription>
         </CardHeader>
         <CardContent>
-          {dailyUfData.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[300px]">
+                <Skeleton className="h-[250px] w-full" />
+            </div>
+          ) : dailyUfData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={dailyUfData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -100,7 +109,15 @@ export default function LogHistoryPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {paginatedEvents.length > 0 ? paginatedEvents.map(event => (
+                        {isLoading ? (
+                             Array.from({ length: 5 }).map((_, index) => (
+                                <TableRow key={index}>
+                                    <TableCell colSpan={6}>
+                                        <Skeleton className="h-8 w-full my-1" />
+                                    </TableCell>
+                                </TableRow>
+                             ))
+                        ) : paginatedEvents.length > 0 ? paginatedEvents.map(event => (
                             <TableRow key={event.exchangeId}>
                                 <TableCell className="py-3">{format(new Date(event.exchangeDateTime), 'yyyy-MM-dd HH:mm')}</TableCell>
                                 <TableCell className="py-3">{event.dialysateType}</TableCell>
