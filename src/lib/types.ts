@@ -1,3 +1,4 @@
+
 export interface Patient {
   patientId: string;
   firstName: string;
@@ -5,6 +6,7 @@ export interface Patient {
   dateOfBirth: string;
   gender: 'Male' | 'Female' | 'Other';
   currentStatus: string;
+  physician: string;
 }
 
 export interface Vital {
@@ -88,6 +90,7 @@ export interface PatientData {
   pdStartDate: string;
   underlyingKidneyDisease: string;
   currentStatus: string;
+  physician: string;
   
   vitals: Vital[];
   labResults: LabResult[];

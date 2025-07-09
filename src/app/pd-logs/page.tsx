@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { patientData } from '@/data/mock-data';
+import { allPatientData } from '@/data/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,6 +15,9 @@ import { cn } from '@/lib/utils';
 export default function PdLogsPage() {
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(5);
+    
+    // Use the first patient's data as a default for this page
+    const patientData = allPatientData[0];
 
     const pdEvents = patientData.pdEvents;
     const pageCount = Math.ceil(pdEvents.length / pageSize);
@@ -29,7 +32,7 @@ export default function PdLogsPage() {
                     <div className="bg-[#1fa5b4] p-3 rounded-md">
                         <Droplets className="h-6 w-6 text-white" />
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-bold">Peritoneal Dialysis</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold">Peritoneal Dialysis for {patientData.firstName} {patientData.lastName}</h1>
                 </header>
 
                 <Tabs defaultValue="logs" className="w-full">
