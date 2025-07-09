@@ -55,7 +55,7 @@ export default function LoginPage() {
                <Link href="/dashboard">Login</Link>
             </Button>
              <Button variant="secondary" className="w-full" asChild>
-                <Link href="/patient-portal/daily-log">
+                <Link href="/patient-portal">
                     <HeartPulse className="mr-2 h-4 w-4"/>
                     Patient Portal
                 </Link>
