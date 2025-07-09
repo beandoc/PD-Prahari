@@ -33,7 +33,7 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'Diabetic Nephropathy',
     comorbidities: ['Hypertension', 'Type 2 Diabetes'],
     currentStatus: 'Active PD',
-    physician: 'Dr. Abdullah, Majed',
+    physician: 'Dr. Sachin',
     lastUpdated: '2024-07-28T10:00:00Z',
     prescription: {
       exchange: '4x Daily',
@@ -131,8 +131,8 @@ export const allPatientData: PatientData[] = [
       { episodeId: 'PER-001', diagnosisDate: '2023-11-10', organismIsolated: 'Staphylococcus epidermidis', treatmentRegimen: 'Vancomycin IP', outcome: 'Resolved', resolutionDate: '2023-11-24' },
     ],
     medications: [
-      { medicationId: 'MED-001', medicationName: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', startDate: '2022-01-20', prescribingDoctor: 'Dr. Abdullah, Majed', status: 'ok' },
-      { medicationId: 'MED-002', medicationName: 'Sevelamer', dosage: '800mg', frequency: 'With meals', startDate: '2022-01-20', prescribingDoctor: 'Dr. Abdullah, Majed', status: 'warning' },
+      { medicationId: 'MED-001', medicationName: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', startDate: '2022-01-20', prescribingDoctor: 'Dr. Sachin', status: 'ok' },
+      { medicationId: 'MED-002', medicationName: 'Sevelamer', dosage: '800mg', frequency: 'With meals', startDate: '2022-01-20', prescribingDoctor: 'Dr. Sachin', status: 'warning' },
     ],
     urineOutputLogs: [
       { logId: 'UO-001', logDate: '2024-07-28', volumeML: 250 },
@@ -164,7 +164,7 @@ export const allPatientData: PatientData[] = [
     educationLevel: 'High School',
     underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
     currentStatus: 'Transferred to HD',
-    physician: 'Dr. Garcia, Chris',
+    physician: 'Dr. Atul',
     prescription: {
       exchange: '3x Daily',
       pdStrength: 'Dextrose 2.5%',
@@ -181,7 +181,7 @@ export const allPatientData: PatientData[] = [
         { exchangeId: 'PD-003', exchangeDateTime: '2024-07-20T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2250, ultrafiltrationML: 50, isEffluentCloudy: false, recordedBy: 'Patient' },
     ],
     peritonitisEpisodes: [],
-    medications: [{ medicationId: 'MED-003', medicationName: 'Amlodipine', dosage: '5mg', frequency: 'Once daily', startDate: '2021-06-15', prescribingDoctor: 'Dr. Garcia, Chris', status: 'ok' }],
+    medications: [{ medicationId: 'MED-003', medicationName: 'Amlodipine', dosage: '5mg', frequency: 'Once daily', startDate: '2021-06-15', prescribingDoctor: 'Dr. Atul', status: 'ok' }],
     urineOutputLogs: [{ logId: 'UO-003', logDate: '2024-07-28', volumeML: 150 }],
     pdAdequacy: [{ testId: 'KT-002', testDate: '2024-07-01', totalKtV: 1.6, peritonealKtV: 1.5, notes: 'Borderline adequate.'}],
     patientReportedOutcomes: [{ surveyId: 'PRO-002', surveyDate: '2024-07-01', surveyTool: 'KDQOL-36', score: 65, summary: 'Patient reports feeling well but has concerns about fluid retention.' }],
@@ -202,7 +202,7 @@ export const allPatientData: PatientData[] = [
     educationLevel: 'Masters Degree',
     underlyingKidneyDisease: 'Polycystic Kidney Disease',
     currentStatus: 'Active PD',
-    physician: 'Dr. Pong, Jay',
+    physician: 'Dr. Parikshit',
     prescription: {
       exchange: '4x Daily',
       pdStrength: 'Dextrose 1.5%',
@@ -222,7 +222,7 @@ export const allPatientData: PatientData[] = [
     peritonitisEpisodes: [
       { episodeId: 'PER-002', diagnosisDate: '2024-05-15', organismIsolated: 'Pseudomonas aeruginosa', treatmentRegimen: 'Ceftazidime IP', outcome: 'Resolved', resolutionDate: '2024-06-05' }
     ],
-    medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', prescribingDoctor: 'Dr. Pong, Jay', status: 'warning' }],
+    medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', prescribingDoctor: 'Dr. Parikshit', status: 'warning' }],
     urineOutputLogs: [{ logId: 'UO-004', logDate: '2024-07-28', volumeML: 700 }],
     pdAdequacy: [{ testId: 'KT-003', testDate: '2024-05-15', totalKtV: 1.9, peritonealKtV: 1.3, notes: 'Good total clearance, significant contribution from RKF.'}],
     patientReportedOutcomes: [{ surveyId: 'PRO-003', surveyDate: '2024-05-15', surveyTool: 'KDQOL-36', score: 85, summary: 'Patient reports high quality of life.' }],
@@ -241,7 +241,7 @@ export const allPatientData: PatientData[] = [
     pdExchangeType: 'Self',
     underlyingKidneyDisease: 'IgA Nephropathy',
     currentStatus: 'Active PD',
-    physician: 'Dr. Garcia, Chris',
+    physician: 'Dr. Atul',
     prescription: {
       exchange: '4x Daily',
       pdStrength: 'Dextrose 1.5%',
@@ -265,7 +265,7 @@ export const allPatientData: PatientData[] = [
     pdExchangeType: 'Assisted',
     underlyingKidneyDisease: 'Diabetic Nephropathy',
     currentStatus: 'Deceased', // Dropout
-    physician: 'Dr. Pong, Jay',
+    physician: 'Dr. Parikshit',
     prescription: {
       exchange: '4x Daily',
       pdStrength: 'Mixed Dextrose',
@@ -289,7 +289,7 @@ export const allPatientData: PatientData[] = [
     pdExchangeType: 'Self',
     underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
     currentStatus: 'Awaiting Catheter', // Under counselling
-    physician: 'Dr. Abdullah, Majed',
+    physician: 'Dr. Sachin',
     prescription: {
       exchange: 'Pending',
       pdStrength: 'Pending',

@@ -186,9 +186,9 @@ export default function ClinicianPatientRegistrationPage() {
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select a physician" /></SelectTrigger></FormControl>
                                 <SelectContent>
-                                    <SelectItem value="Dr. Garcia, Chris">Dr. Garcia, Chris</SelectItem>
-                                    <SelectItem value="Dr. Pong, Jay">Dr. Pong, Jay</SelectItem>
-                                    <SelectItem value="Dr. Abdullah, Majed">Dr. Abdullah, Majed</SelectItem>
+                                    <SelectItem value="Dr. Atul">Dr. Atul</SelectItem>
+                                    <SelectItem value="Dr. Parikshit">Dr. Parikshit</SelectItem>
+                                    <SelectItem value="Dr. Sachin">Dr. Sachin</SelectItem>
                                 </SelectContent>
                             </Select><FormMessage />
                         </FormItem>

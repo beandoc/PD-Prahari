@@ -186,9 +186,9 @@ export default function DoctorDashboard() {
                                   </SelectTrigger>
                                   <SelectContent>
                                       <SelectItem value="all">All</SelectItem>
-                                      <SelectItem value="garcia">Dr. Garcia, Chris</SelectItem>
-                                      <SelectItem value="pong">Dr. Pong, Jay</SelectItem>
-                                      <SelectItem value="abdullah">Dr. Abdullah, Majed</SelectItem>
+                                      <SelectItem value="atul">Dr. Atul</SelectItem>
+                                      <SelectItem value="parikshit">Dr. Parikshit</SelectItem>
+                                      <SelectItem value="sachin">Dr. Sachin</SelectItem>
                                   </SelectContent>
                               </Select>
                                <Button asChild>
