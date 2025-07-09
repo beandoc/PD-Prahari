@@ -143,6 +143,20 @@ export interface EducationTopic {
   icon: 'Video' | 'ShieldCheck' | 'Apple';
 }
 
+export interface ContactInfo {
+  clinicName: string;
+  clinicPhone: string;
+  coordinatorName: string;
+  coordinatorPhone: string;
+}
+
+export interface Admission {
+  admissionId: string;
+  admissionDate: string;
+  dischargeDate: string;
+  reason: string;
+}
+
 export interface PatientData extends Patient {
   // Clinical Data Arrays
   prescription: Prescription;
@@ -170,4 +184,8 @@ export interface PatientData extends Patient {
   catheterDysfunction?: boolean;
   esiCount?: number;
   additionalNotes?: string;
+
+  // New fields for profile page
+  contactInfo?: ContactInfo;
+  admissions?: Admission[];
 }

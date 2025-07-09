@@ -42,6 +42,26 @@ export const allPatientData: PatientData[] = [
       dwellVolumeML: 2000,
       exchangeTimeMinutes: 30,
     },
+    contactInfo: {
+      clinicName: 'Riyadh Central Dialysis Center',
+      clinicPhone: '555-0190',
+      coordinatorName: 'Aisha Al-Fahad',
+      coordinatorPhone: '555-0191',
+    },
+    admissions: [
+      {
+        admissionId: 'ADM-001',
+        admissionDate: '2023-08-15',
+        dischargeDate: '2023-08-18',
+        reason: 'Catheter insertion and initial setup.',
+      },
+      {
+        admissionId: 'ADM-002',
+        admissionDate: '2023-11-10',
+        dischargeDate: '2023-11-12',
+        reason: 'Peritonitis treatment.',
+      },
+    ],
     vitals: [
       {
         vitalId: 'VIT-001',

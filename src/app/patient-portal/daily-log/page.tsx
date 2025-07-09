@@ -317,7 +317,7 @@ export default function PatientDailyLogPage() {
             </Card>
           </TabsContent>
           
-          <TabsContent value="uploads" className="mt-6">
+          <TabsContent value="uploads" className="mt-6" id="uploads">
              <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Camera className="text-purple-500" /> Upload Images</CardTitle>
