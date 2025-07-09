@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'DialysisCare',
-  description: 'Peritoneal Dialysis Patient Database',
+  title: 'PD Prahari',
+  description: 'Your Companion in Kidney Care',
 };
 
 export default function RootLayout({

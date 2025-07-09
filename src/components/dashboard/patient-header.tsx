@@ -24,7 +24,7 @@ export default function PatientHeader({ patient }: PatientHeaderProps) {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
             <Stethoscope className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">DialysisCare</h1>
+            <h1 className="text-2xl font-bold text-foreground">PD Prahari</h1>
           </div>
           <Card className="hidden sm:block">
             <CardContent className="flex items-center gap-4 p-3">
