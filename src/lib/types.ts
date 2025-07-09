@@ -1,33 +1,46 @@
 
-export interface UrineOutputLog {
-  logId: string;
-  logDate: string;
-  volumeML: number;
+export interface Patient {
+  patientId: string;
+  nephroId: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: 'Male' | 'Female' | 'Other';
+  contactPhone?: string;
+  contactEmail?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  stateProvince?: string;
+  postalCode?: string;
+  country?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  physician: string;
+  pdStartDate: string;
+  underlyingKidneyDisease: string;
+  comorbidities?: string[];
+  currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased';
+  lastUpdated?: string;
+  distanceFromPDCenterKM?: number;
+  educationLevel?: string;
+  pdExchangeType: 'Assisted' | 'Self';
 }
 
-export interface PDAdequacy {
-  testId: string;
-  testDate: string;
-  totalKtV?: number;
-  peritonealKtV?: number;
-  notes?: string;
-}
-
-export interface PROSurvey {
-  surveyId: string;
-  surveyDate: string;
-  surveyTool: string;
-  score: number;
-  summary?: string;
-}
-
-export interface PeritonitisEpisode {
-  episodeId: string;
-  diagnosisDate: string;
-  organismIsolated: string;
-  treatmentRegimen: string;
-  outcome: 'Resolved' | 'Catheter Removal' | 'Transferred to HD' | 'Deceased';
-  resolutionDate?: string;
+export interface PDEvent {
+  exchangeId: string;
+  exchangeDateTime: string;
+  dialysateType: string;
+  fillVolumeML: number;
+  dwellTimeHours: number;
+  drainVolumeML: number;
+  ultrafiltrationML: number;
+  inflowTimeMinutes?: number;
+  outflowTimeMinutes?: number;
+  solutionBatchNumber?: string;
+  isEffluentCloudy?: boolean;
+  complications?: string;
+  recordedBy?: 'Patient' | 'Nurse' | 'Automated Machine';
 }
 
 export interface Vital {
@@ -52,22 +65,6 @@ export interface LabResult {
   referenceRangeHigh?: number;
 }
 
-export interface PDEvent {
-  exchangeId: string;
-  exchangeDateTime: string;
-  dialysateType: string;
-  fillVolumeML: number;
-  dwellTimeHours: number;
-  drainVolumeML: number;
-  ultrafiltrationML: number;
-  inflowTimeMinutes?: number;
-  outflowTimeMinutes?: number;
-  solutionBatchNumber?: string;
-  isEffluentCloudy?: boolean;
-  complications?: string;
-  recordedBy?: 'Patient' | 'Nurse' | 'Automated Machine';
-}
-
 export interface Medication {
   medicationId: string;
   medicationName: string;
@@ -77,6 +74,45 @@ export interface Medication {
   endDate?: string | null;
   prescribingDoctor?: string;
   status: 'ok' | 'warning';
+}
+
+export interface PeritonitisEpisode {
+  episodeId: string;
+  diagnosisDate: string;
+  organismIsolated: string;
+  treatmentRegimen: string;
+  outcome: 'Resolved' | 'Catheter Removal' | 'Transferred to HD' | 'Deceased';
+  resolutionDate?: string;
+}
+
+export interface UrineOutputLog {
+  logId: string;
+  logDate: string;
+  volumeML: number;
+}
+
+export interface PDAdequacy {
+  testId: string;
+  testDate: string;
+  totalKtV?: number;
+  peritonealKtV?: number;
+  notes?: string;
+}
+
+export interface PROSurvey {
+  surveyId: string;
+  surveyDate: string;
+  surveyTool: string;
+  score: number;
+  summary?: string;
+}
+
+export interface UploadedImage {
+  imageId: string;
+  type: 'exit-site' | 'fluid-bag';
+  uploadDate: string;
+  imageUrl: string;
+  requiresReview: boolean;
 }
 
 export interface NutritionLifestyleData {
@@ -98,42 +134,7 @@ export interface EducationTopic {
   icon: 'Video' | 'ShieldCheck' | 'Apple';
 }
 
-export interface UploadedImage {
-  imageId: string;
-  type: 'exit-site' | 'fluid-bag';
-  uploadDate: string;
-  imageUrl: string;
-  requiresReview: boolean;
-}
-
-export interface PatientData {
-  // Patient Demographics
-  patientId: string;
-  nephroId: string;
-  firstName: string;
-  lastName:string;
-  dateOfBirth: string;
-  gender: 'Male' | 'Female' | 'Other';
-  contactPhone?: string;
-  contactEmail?: string;
-  addressLine1?: string;
-  addressLine2?: string;
-  city?: string;
-  stateProvince?: string;
-  postalCode?: string;
-  country?: string;
-  distanceFromPDCenterKM?: number;
-  educationLevel?: string;
-  emergencyContactName?: string;
-  emergencyContactPhone?: string;
-  physician: string;
-  pdStartDate: string;
-  pdExchangeType: 'Assisted' | 'Self';
-  underlyingKidneyDisease: string;
-  comorbidities?: string[];
-  currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased';
-  lastUpdated?: string;
-
+export interface PatientData extends Patient {
   // Clinical Data Arrays
   vitals: Vital[];
   labResults: LabResult[];
@@ -145,7 +146,7 @@ export interface PatientData {
   patientReportedOutcomes: PROSurvey[];
   uploadedImages?: UploadedImage[];
 
-  // Data for UI components (keeping for now to avoid breaking UI)
+  // Data for UI components
   nutritionLifestyle: NutritionLifestyleData;
   clinicVisits: ClinicVisitData;
   patientEducation: EducationTopic[];

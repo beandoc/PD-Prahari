@@ -13,6 +13,7 @@ import {
   Settings,
   Menu,
   Video,
+  BookOpen,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -35,8 +36,9 @@ import { cn } from '@/lib/utils';
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/dashboard/pd-logs', label: 'PD Logs', icon: Droplets },
-  { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
+  { href: '/dashboard/sharesource', label: 'ShareSource', icon: BarChart3 },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
+  { href: '/dashboard/education', label: 'Education', icon: BookOpen },
 ];
 
 export default function DashboardLayout({

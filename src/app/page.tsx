@@ -1,9 +1,10 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lock, User } from 'lucide-react';
+import { Lock, User, HeartPulse } from 'lucide-react';
 
 export default function LoginPage() {
   return (
@@ -39,9 +40,9 @@ export default function LoginPage() {
       <div className="flex items-center justify-center py-12 px-4">
         <div className="mx-auto grid w-[380px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">Login</h1>
+            <h1 className="text-3xl font-bold">Clinician Login</h1>
             <p className="text-balance text-muted-foreground">
-              Enter your credentials to access your account
+              Enter your credentials to access the dashboard
             </p>
           </div>
           <div className="grid gap-4">
@@ -56,8 +57,11 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" asChild>
                <Link href="/dashboard">Login</Link>
             </Button>
-             <Button variant="outline" className="w-full" asChild>
-                <Link href="/dashboard">Login as Guest</Link>
+             <Button variant="secondary" className="w-full" asChild>
+                <Link href="/patient-portal/daily-log">
+                    <HeartPulse className="mr-2 h-4 w-4"/>
+                    Patient Portal
+                </Link>
             </Button>
           </div>
           <div className="mt-4 text-center text-sm">

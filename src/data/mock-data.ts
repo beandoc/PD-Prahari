@@ -127,7 +127,7 @@ export const allPatientData: PatientData[] = [
         { labResultId: 'LAB-003', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Creatinine', resultValue: 8.1, units: 'mg/dL', referenceRangeLow: 0.7, referenceRangeHigh: 1.3 },
         { labResultId: 'LAB-007', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Albumin', resultValue: 3.2, units: 'g/dL', referenceRangeLow: 3.4, referenceRangeHigh: 5.4 },
     ],
-    pdEvents: [ // Old logs to trigger missed entry alert
+    pdEvents: [ 
         { exchangeId: 'PD-003', exchangeDateTime: '2024-07-20T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2250, ultrafiltrationML: 50, isEffluentCloudy: false, recordedBy: 'Patient' },
         { exchangeId: 'PD-004', exchangeDateTime: '2024-07-19T16:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2180, ultrafiltrationML: -20, isEffluentCloudy: false, recordedBy: 'Patient', complications: 'Mild abdominal pain during drain.' }
     ],
