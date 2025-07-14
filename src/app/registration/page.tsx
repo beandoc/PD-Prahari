@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { format, subYears } from 'date-fns';
 import { CalendarIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { useState, useEffect }from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,8 +82,6 @@ const formSchema = z.object({
   physician: z.string().min(1, { message: 'Attending physician is required.' }),
   underlyingKidneyDisease: z.string().optional(),
   pdStartDate: z.date().optional(),
-  pdExchangeType: z.enum(['Assisted', 'Self']).optional(),
-  distanceFromPDCenterKM: z.coerce.number().optional(),
 }).superRefine((data, ctx) => {
     if (data.dateOfBirth) {
         const age = new Date().getFullYear() - data.dateOfBirth.getFullYear();
@@ -98,6 +97,7 @@ const formSchema = z.object({
 
 export default function ClinicianPatientRegistrationPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [age, setAge] = useState<number | null>(null);
   const [cities, setCities] = useState<string[]>([]);
@@ -174,12 +174,17 @@ export default function ClinicianPatientRegistrationPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    
+    // In a real app, you would get a patient ID from the backend.
+    // For this demo, we'll create a new ID and redirect.
+    const newPatientId = 'PAT-001'; // Redirecting to the first patient for demo purposes.
+
     toast({
       title: "Patient Registered Successfully",
-      description: `Patient ${values.firstName} ${values.lastName} has been added.`,
+      description: `Patient ${values.firstName} ${values.lastName} has been added. Redirecting to their profile...`,
     });
-    // In a real app, you would likely redirect or reset the form.
-    // form.reset();
+    
+    router.push(`/dashboard/patients/${newPatientId}`);
   }
 
   return (
