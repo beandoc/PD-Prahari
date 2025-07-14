@@ -19,6 +19,7 @@ import {
   HeartPulse,
   UserPlus,
   Boxes,
+  Users,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,7 @@ import {
 import { cn } from '@/lib/utils';
 
 
-const navLinks = [
+const doctorNavLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/dashboard/pd-logs', label: 'PD Logs', icon: Droplets },
   { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
@@ -49,12 +50,24 @@ const navLinks = [
   { href: '/patient-portal', label: 'Patient Portal', icon: HeartPulse },
 ];
 
+const nurseNavLinks = [
+  { href: '/dashboard/nurse-dashboard', label: 'Nurse Dashboard', icon: LayoutGrid },
+  { href: '/dashboard/nurse-checklist', label: 'Nurse Checklist', icon: ClipboardCheck },
+  { href: '/dashboard/pd-logs', label: 'Patient PD Logs', icon: Droplets },
+  { href: '/registration', label: 'Register Patient', icon: UserPlus },
+];
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  // Simple logic to determine the role based on URL.
+  // In a real app, this would come from an auth context.
+  const isNurseView = pathname.startsWith('/dashboard/nurse-');
+
+  const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
