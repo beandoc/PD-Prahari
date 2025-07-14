@@ -208,16 +208,16 @@ export default function ClinicianPatientRegistrationPage() {
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Patient Demographics</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <FormField control={form.control} name="firstName" render={({ field }) => (
-                            <FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Enter first name" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>First Name <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="Enter first name" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="lastName" render={({ field }) => (
-                            <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input placeholder="Enter last name" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Last Name <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="Enter last name" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="nephroId" render={({ field }) => (
-                            <FormItem><FormLabel>Nephro ID / UHID</FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Nephro ID / UHID <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="dateOfBirth" render={({ field }) => (
-                            <FormItem className="flex flex-col"><FormLabel>Date of Birth</FormLabel>
+                            <FormItem className="flex flex-col"><FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
                             <Popover><PopoverTrigger asChild>
                                 <FormControl>
                                     <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
@@ -293,7 +293,7 @@ export default function ClinicianPatientRegistrationPage() {
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Emergency Contact / Guardian</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="emergencyContactName" render={({ field }) => (
-                            <FormItem><FormLabel>Contact Name</FormLabel><FormControl><Input placeholder="Enter guardian/contact name" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Contact Name {age !== null && age < 18 && (<span className="text-destructive">*</span>)}</FormLabel><FormControl><Input placeholder="Enter guardian/contact name" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="emergencyContactPhone" render={({ field }) => (
                             <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter guardian/contact phone" {...field} /></FormControl><FormMessage /></FormItem>
@@ -332,7 +332,7 @@ export default function ClinicianPatientRegistrationPage() {
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Clinical Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <FormField control={form.control} name="physician" render={({ field }) => (
-                            <FormItem><FormLabel>Attending Physician</FormLabel>
+                            <FormItem><FormLabel>Attending Physician <span className="text-destructive">*</span></FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a physician" /></SelectTrigger></FormControl>
                                     <SelectContent>
@@ -344,10 +344,10 @@ export default function ClinicianPatientRegistrationPage() {
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="underlyingKidneyDisease" render={({ field }) => (
-                            <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Underlying Kidney Disease <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="pdStartDate" render={({ field }) => (
-                            <FormItem className="flex flex-col"><FormLabel>PD Start Date</FormLabel>
+                            <FormItem className="flex flex-col"><FormLabel>PD Start Date <span className="text-destructive">*</span></FormLabel>
                             <Popover><PopoverTrigger asChild>
                                 <FormControl>
                                     <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
@@ -361,10 +361,10 @@ export default function ClinicianPatientRegistrationPage() {
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="distanceFromPDCenterKM" render={({ field }) => (
-                            <FormItem><FormLabel>Distance from PD Center (KM)</FormLabel><FormControl><Input type="number" placeholder="Enter distance in kilometers" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Distance from PD Center (KM) <span className="text-destructive">*</span></FormLabel><FormControl><Input type="number" placeholder="Enter distance in kilometers" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
-                            <FormItem className="space-y-3"><FormLabel>PD Exchange Type</FormLabel>
+                            <FormItem className="space-y-3"><FormLabel>PD Exchange Type <span className="text-destructive">*</span></FormLabel>
                                 <FormControl>
                                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-row space-x-4">
                                         <FormItem className="flex items-center space-x-2 space-y-0">
