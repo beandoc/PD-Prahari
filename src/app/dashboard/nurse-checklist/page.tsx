@@ -54,7 +54,7 @@ export default function NurseChecklistPage() {
         <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
             <div className="max-w-5xl mx-auto space-y-8">
                 <header className="text-center space-y-2">
-                    <h1 className="text-4xl font-bold text-primary">Nurse Checklist for PD Patient Success</h1>
+                    <h1 className="text-4xl font-bold text-primary">PD Nurse Checklist for Patient Success</h1>
                     <p className="text-lg text-muted-foreground">
                         A guide for the first 90 days on PD therapy, accompanied by a patient reference sheet.
                     </p>

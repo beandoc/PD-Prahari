@@ -51,8 +51,8 @@ const doctorNavLinks = [
 ];
 
 const nurseNavLinks = [
-  { href: '/dashboard/nurse-dashboard', label: 'Nurse Dashboard', icon: LayoutGrid },
-  { href: '/dashboard/nurse-checklist', label: 'Nurse Checklist', icon: ClipboardCheck },
+  { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Dashboard', icon: LayoutGrid },
+  { href: '/dashboard/nurse-checklist', label: 'PD Nurse Checklist', icon: ClipboardCheck },
   { href: '/dashboard/pd-logs', label: 'Patient PD Logs', icon: Droplets },
   { href: '/registration', label: 'Register Patient', icon: UserPlus },
 ];
