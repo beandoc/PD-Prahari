@@ -48,6 +48,8 @@ export default function NurseChecklistPage() {
     const latestHgb = patient.labResults.filter(lr => lr.testName === 'Hemoglobin').sort((a,b) => new Date(b.resultDateTime).getTime() - new Date(a.resultDateTime).getTime())[0]?.resultValue;
     const peritonitisCount = patient.peritonitisEpisodes.length;
 
+    const fullAddress = [patient.addressLine1, patient.city, patient.postalCode].filter(Boolean).join(', ');
+
     return (
         <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
             <div className="max-w-5xl mx-auto space-y-8">
@@ -69,7 +71,7 @@ export default function NurseChecklistPage() {
                            <MetricItem label="Date of Birth" value={format(parseISO(patient.dateOfBirth), 'PPP')} />
                            <MetricItem label="Patient Number" value={patient.nephroId} />
                            <MetricItem label="Telephone" value={patient.contactPhone} />
-                           <MetricItem label="Address" value={`${patient.addressLine1}, ${patient.city}, ${patient.postalCode}`} />
+                           <MetricItem label="Address" value={fullAddress} />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
                             <MetricItem label="PD Training Start" value={patient.pdStartDate ? format(parseISO(patient.pdStartDate), 'PPP') : 'N/A'} />
