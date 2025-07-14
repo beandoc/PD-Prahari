@@ -6,8 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
-import { format, addDays, parseISO } from 'date-fns';
-import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare } from 'lucide-react';
+import { format, addDays, parseISO, isToday } from 'date-fns';
+import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
 
 interface MetricCardProps {
@@ -55,6 +55,10 @@ export default function NurseDashboardPage() {
         p.peritonitisEpisodes.some(ep => ep.outcome !== 'Resolved' && new Date(ep.diagnosisDate) > addDays(new Date(), -30))
     ).length;
 
+    const todaysAppointments = allPatientData.filter(p => 
+        p.clinicVisits?.nextAppointment && isToday(parseISO(p.clinicVisits.nextAppointment))
+    ).length;
+
     const upcomingHomeVisits = allPatientData
         .filter(p => p.lastHomeVisitDate)
         .map(p => ({
@@ -78,10 +82,11 @@ export default function NurseDashboardPage() {
                 <p className="text-muted-foreground">Your daily overview for proactive patient care.</p>
             </header>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <MetricCard title="Awaiting Catheter Insertion" value={patientsAwaitingInsertion} icon={<UserPlus className="h-4 w-4 text-muted-foreground" />} />
                 <MetricCard title="Patients in Training (90d)" value={patientsInTraining} icon={<UserCog className="h-4 w-4 text-muted-foreground" />} />
                 <MetricCard title="Active Peritonitis Tx" value={patientsOnPeritonitisTx} icon={<ShieldAlert className="h-4 w-4 text-muted-foreground" />} />
+                <MetricCard title="Today's Appointments" value={todaysAppointments} icon={<CalendarCheck className="h-4 w-4 text-muted-foreground" />} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -152,4 +157,3 @@ export default function NurseDashboardPage() {
         </div>
     );
 }
-

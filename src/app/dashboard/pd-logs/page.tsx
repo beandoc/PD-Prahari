@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { allPatientData } from '@/data/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,13 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { PatientData } from '@/lib/types';
 
 export default function PdLogsPage() {
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
-    
-    // Use the first patient's data as a default for this page
-    const patientData = allPatientData[0];
+    const [selectedPatientId, setSelectedPatientId] = useState<string>(allPatientData[0].patientId);
+
+    const patientData = useMemo(() => {
+        return allPatientData.find(p => p.patientId === selectedPatientId) || allPatientData[0];
+    }, [selectedPatientId]);
+
     const { prescription, pdEvents } = patientData;
 
     const pageCount = Math.ceil(pdEvents.length / pageSize);
@@ -25,11 +29,30 @@ export default function PdLogsPage() {
     const startItem = pdEvents.length > 0 ? pageIndex * pageSize + 1 : 0;
     const endItem = pdEvents.length > 0 ? Math.min((pageIndex + 1) * pageSize, pdEvents.length) : 0;
 
+    const handlePatientChange = (patientId: string) => {
+        setSelectedPatientId(patientId);
+        setPageIndex(0); // Reset to first page when patient changes
+    };
+
     return (
         <div className="space-y-4">
-            <header className="space-y-1">
-                <h1 className="text-2xl md:text-3xl font-bold">Peritoneal Dialysis Logs</h1>
-                <p className="text-muted-foreground">Viewing logs for {patientData.firstName} {patientData.lastName}</p>
+            <header className="flex flex-wrap items-center justify-between gap-4">
+                <div className="space-y-1">
+                    <h1 className="text-2xl md:text-3xl font-bold">Peritoneal Dialysis Logs</h1>
+                    <p className="text-muted-foreground">Viewing logs for {patientData.firstName} {patientData.lastName}</p>
+                </div>
+                 <div className="w-full sm:w-auto sm:min-w-[250px]">
+                    <Select onValueChange={handlePatientChange} defaultValue={selectedPatientId}>
+                        <SelectTrigger><SelectValue placeholder="Select a patient..." /></SelectTrigger>
+                        <SelectContent>
+                            {allPatientData.map(p => (
+                                <SelectItem key={p.patientId} value={p.patientId}>
+                                    {p.firstName} {p.lastName} ({p.nephroId})
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </header>
 
             <Tabs defaultValue="logs" className="w-full">
@@ -51,7 +74,7 @@ export default function PdLogsPage() {
                                 <div><p className="text-sm text-muted-foreground mb-1">Dwell Vol</p><p className="font-medium">{prescription.dwellVolumeML} mL</p></div>
                                 <div><p className="text-sm text-muted-foreground mb-1">Exchange Time</p><p className="font-medium">{prescription.exchangeTimeMinutes} mins</p></div>
                             </div>
-                            {prescription.regimen && (
+                            {prescription.regimen && prescription.regimen.length > 0 ? (
                                 <>
                                     <h4 className="font-semibold text-lg mt-4 mb-2">Prescribed Regimen Details</h4>
                                     <div className="border rounded-lg">
@@ -77,6 +100,8 @@ export default function PdLogsPage() {
                                         </Table>
                                     </div>
                                 </>
+                            ) : (
+                                <p className="text-center text-muted-foreground py-4">No detailed regimen found for this patient.</p>
                             )}
                         </CardContent>
                     </Card>
@@ -110,7 +135,7 @@ export default function PdLogsPage() {
                                             </TableRow>
                                         )) : (
                                             <TableRow>
-                                                <TableCell colSpan={7} className="text-center py-16 text-muted-foreground">No PD logs found.</TableCell>
+                                                <TableCell colSpan={7} className="text-center py-16 text-muted-foreground">No PD logs found for this patient.</TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
