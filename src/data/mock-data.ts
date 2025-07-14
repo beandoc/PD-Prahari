@@ -95,9 +95,12 @@ export const allPatientData: PatientData[] = [
     labResults: [
       { labResultId: 'LAB-001', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Creatinine', resultValue: 7.2, units: 'mg/dL', referenceRangeLow: 0.6, referenceRangeHigh: 1.2 },
       { labResultId: 'LAB-002', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Potassium', resultValue: 4.5, units: 'mmol/L', referenceRangeLow: 3.5, referenceRangeHigh: 5.1 },
+      { labResultId: 'LAB-003', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Calcium', resultValue: 8.9, units: 'mg/dL', referenceRangeLow: 8.5, referenceRangeHigh: 10.2 },
+      { labResultId: 'LAB-004', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Phosphorus', resultValue: 5.8, units: 'mg/dL', referenceRangeLow: 2.5, referenceRangeHigh: 4.5 },
       { labResultId: 'LAB-005', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Albumin', resultValue: 3.5, units: 'g/dL', referenceRangeLow: 3.4, referenceRangeHigh: 5.4 },
       { labResultId: 'LAB-006', resultDateTime: '2024-07-25T09:00:00Z', testName: 'iPTH', resultValue: 350, units: 'pg/mL', referenceRangeLow: 150, referenceRangeHigh: 300 },
       { labResultId: 'LAB-008', resultDateTime: '2024-07-25T09:00:00Z', testName: 'Hemoglobin', resultValue: 11.2, units: 'g/dL', referenceRangeLow: 13.5, referenceRangeHigh: 17.5 },
+      { labResultId: 'LAB-009', resultDateTime: '2024-06-25T09:00:00Z', testName: 'Creatinine', resultValue: 7.0, units: 'mg/dL', referenceRangeLow: 0.6, referenceRangeHigh: 1.2 },
     ],
     pdEvents: [
       {

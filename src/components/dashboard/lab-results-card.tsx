@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -26,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Beaker } from 'lucide-react';
 import type { LabResult } from '@/lib/types';
 import { format } from 'date-fns';
+import { useMemo } from 'react';
 
 interface LabResultsCardProps {
   labResults: LabResult[];
@@ -49,7 +51,23 @@ const getStatus = (
 };
 
 export default function LabResultsCard({ labResults }: LabResultsCardProps) {
-  const recentResults = labResults.slice(0, 4);
+
+  const keyLabTests = useMemo(() => {
+    const testNames = ['Hemoglobin', 'Creatinine', 'Albumin', 'Calcium', 'Phosphorus', 'iPTH'];
+    
+    return testNames.map(testName => {
+        const latestResult = labResults
+            .filter(lr => lr.testName === testName)
+            .sort((a,b) => new Date(b.resultDateTime).getTime() - new Date(a.resultDateTime).getTime())[0];
+        
+        return {
+            name: testName,
+            result: latestResult
+        };
+    });
+  }, [labResults]);
+
+
   const creatinineData = labResults
     .filter((lr) => lr.testName === 'Creatinine')
     .map((lr) => ({
@@ -65,7 +83,7 @@ export default function LabResultsCard({ labResults }: LabResultsCardProps) {
           <Beaker className="h-6 w-6" />
           Lab Results
         </CardTitle>
-        <CardDescription>Recent laboratory findings.</CardDescription>
+        <CardDescription>Key laboratory findings.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
         <Table>
@@ -78,7 +96,15 @@ export default function LabResultsCard({ labResults }: LabResultsCardProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentResults.map((result) => {
+            {keyLabTests.map(({ name, result }) => {
+              if (!result) {
+                return (
+                    <TableRow key={name}>
+                        <TableCell className="font-medium">{name}</TableCell>
+                        <TableCell colSpan={3} className="text-muted-foreground text-center">No Data</TableCell>
+                    </TableRow>
+                )
+              }
               const status = getStatus(
                 result.resultValue,
                 result.referenceRangeLow,
