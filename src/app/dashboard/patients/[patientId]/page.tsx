@@ -75,9 +75,9 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 }
 
 
-// This default export is now the page component. It is a Server Component by default.
+// This default export is the page component. It is a Server Component by default.
 // Its only job is to handle the server-side params and pass them to the Client Component.
-export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
+export default async function PatientDetailPage({ params }: { params: { patientId: string } }) {
   const { patientId } = params;
   // It then renders the Client Component, passing the ID as a prop.
   return <PatientDetailView patientId={patientId} />;
