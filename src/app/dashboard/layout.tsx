@@ -42,7 +42,6 @@ const navLinks = [
   { href: '/dashboard/pd-logs', label: 'PD Logs', icon: Droplets },
   { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
-  { href: '/dashboard/education', label: 'Education', icon: BookOpen },
   { href: '/dashboard/nurse-checklist', label: 'Nurse Checklist', icon: ClipboardCheck },
   { href: '/registration', label: 'Register Patient', icon: UserPlus },
   { href: '/patient-portal', label: 'Patient Portal', icon: HeartPulse },
