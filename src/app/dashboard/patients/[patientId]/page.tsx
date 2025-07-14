@@ -1,7 +1,4 @@
 
-'use client';
-
-import { useState, useEffect } from 'react';
 import type { PatientData } from '@/lib/types';
 import { getSyncedPatientData } from '@/lib/data-sync';
 import PatientHeader from '@/components/dashboard/patient-header';
@@ -15,7 +12,11 @@ import LabResultsCard from '@/components/dashboard/lab-results-card';
 import PDExchangeCard from '@/components/dashboard/pd-exchange-card';
 import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useState, useEffect } from 'react';
 
+
+// This is now a dedicated Client Component
+'use client';
 function PatientDetailView({ patientId }: { patientId: string }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
 
@@ -72,6 +73,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 }
 
 
+// This is now a Server Component that handles the params
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
   const { patientId } = params;
   return <PatientDetailView patientId={patientId} />;
