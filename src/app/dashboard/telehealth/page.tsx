@@ -52,7 +52,7 @@ export default function TelehealthPage() {
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                     <p><strong>Topic:</strong> Routine Follow-up</p>
-                    <p><strong>With:</strong> Dr. Garcia, Chris</p>
+                    <p><strong>With:</strong> Dr. Sharma, Ajay</p>
                     <p><strong>Time:</strong> In Progress</p>
                 </CardContent>
             </Card>
