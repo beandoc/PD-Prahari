@@ -25,12 +25,15 @@ import {
   Droplets,
 } from 'lucide-react';
 import type { Vital, PDEvent } from '@/lib/types';
-import { format, startOfDay } from 'date-fns';
+import { format, startOfDay, subDays, subMonths } from 'date-fns';
+import { Button } from '@/components/ui/button';
 
 interface VitalsCardProps {
   vitals: Vital[];
   pdEvents: PDEvent[];
 }
+
+type TimeRange = '7d' | '30d' | '90d';
 
 const chartConfig = {
   weight: {
@@ -43,10 +46,28 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
+const filterDataByTimeRange = (data: {date: string}[], range: TimeRange) => {
+    const now = new Date();
+    let startDate: Date;
+    switch(range) {
+        case '7d':
+            startDate = subDays(now, 7);
+            break;
+        case '90d':
+            startDate = subMonths(now, 3);
+            break;
+        case '30d':
+        default:
+            startDate = subMonths(now, 1);
+            break;
+    }
+    return data.filter(item => new Date(item.date) >= startDate);
+}
+
 export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [ufTimeRange, setUfTimeRange] = useState<TimeRange>('30d');
 
-  // Handle case where there are no vitals data
   if (!vitals || vitals.length === 0) {
     return (
       <Card>
@@ -69,7 +90,6 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
   const latestVitals = vitals[0];
 
   useEffect(() => {
-    // This effect runs only on the client, after hydration, to prevent mismatch
     if (latestVitals?.measurementDateTime) {
       setLastUpdated(
         format(
@@ -95,13 +115,16 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
       });
   }
 
-  const ufChartData = Object.entries(dailyUf)
+  const fullUfChartData = Object.entries(dailyUf)
     .map(([date, uf]) => ({
-        date: format(new Date(date), 'MMM d'),
+        date,
+        displayDate: format(new Date(date), 'MMM d'),
         uf
     }))
-    .slice(-30) // Show last 30 days
     .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const ufChartData = filterDataByTimeRange(fullUfChartData.map(d => ({date: d.date, uf: d.uf, displayDate: d.displayDate})), ufTimeRange)
+    .map(d => ({ date: d.displayDate, uf: d.uf }));
 
   return (
     <Card>
@@ -155,10 +178,17 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
 
         <div className="space-y-6">
           <div>
-            <h4 className="mb-2 font-medium flex items-center gap-2">
-                <Droplets className="h-4 w-4 text-blue-500" />
-                Ultrafiltration Trend
-            </h4>
+            <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium flex items-center gap-2">
+                    <Droplets className="h-4 w-4 text-blue-500" />
+                    Ultrafiltration Trend
+                </h4>
+                <div className="flex items-center gap-1">
+                    <Button variant={ufTimeRange === '7d' ? 'secondary' : 'ghost'} size="sm" className="h-7 px-2" onClick={() => setUfTimeRange('7d')}>7D</Button>
+                    <Button variant={ufTimeRange === '30d' ? 'secondary' : 'ghost'} size="sm" className="h-7 px-2" onClick={() => setUfTimeRange('30d')}>1M</Button>
+                    <Button variant={ufTimeRange === '90d' ? 'secondary' : 'ghost'} size="sm" className="h-7 px-2" onClick={() => setUfTimeRange('90d')}>3M</Button>
+                </div>
+            </div>
             <ChartContainer config={chartConfig} className="h-[200px] w-full">
               <LineChart data={ufChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} />
