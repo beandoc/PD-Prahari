@@ -80,13 +80,9 @@ const formSchema = z.object({
   // Clinical
   physician: z.string().min(1, { message: 'Attending physician is required.' }),
   underlyingKidneyDisease: z.string().min(1, { message: 'This field is required.' }),
-  pdStartDate: z.date({
-    required_error: 'PD Start Date is required.',
-  }),
-  pdExchangeType: z.enum(['Assisted', 'Self'], {
-    required_error: "You need to select an exchange type.",
-  }),
-  distanceFromPDCenterKM: z.coerce.number().min(0, { message: 'Distance must be a positive number.' }),
+  pdStartDate: z.date().optional(),
+  pdExchangeType: z.enum(['Assisted', 'Self']).optional(),
+  distanceFromPDCenterKM: z.coerce.number().optional(),
 }).superRefine((data, ctx) => {
     if (data.dateOfBirth) {
         const age = new Date().getFullYear() - data.dateOfBirth.getFullYear();
@@ -125,7 +121,6 @@ export default function ClinicianPatientRegistrationPage() {
       underlyingKidneyDisease: '',
       physician: '',
       educationLevel: '',
-      distanceFromPDCenterKM: 0,
     },
   });
 
@@ -347,7 +342,7 @@ export default function ClinicianPatientRegistrationPage() {
                             <FormItem><FormLabel>Underlying Kidney Disease <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="pdStartDate" render={({ field }) => (
-                            <FormItem className="flex flex-col"><FormLabel>PD Start Date <span className="text-destructive">*</span></FormLabel>
+                            <FormItem className="flex flex-col"><FormLabel>PD Start Date</FormLabel>
                             <Popover><PopoverTrigger asChild>
                                 <FormControl>
                                     <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
@@ -361,10 +356,10 @@ export default function ClinicianPatientRegistrationPage() {
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="distanceFromPDCenterKM" render={({ field }) => (
-                            <FormItem><FormLabel>Distance from PD Center (KM) <span className="text-destructive">*</span></FormLabel><FormControl><Input type="number" placeholder="Enter distance in kilometers" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Distance from PD Center (KM)</FormLabel><FormControl><Input type="number" placeholder="Enter distance" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
-                            <FormItem className="space-y-3"><FormLabel>PD Exchange Type <span className="text-destructive">*</span></FormLabel>
+                            <FormItem className="space-y-3"><FormLabel>PD Exchange Type</FormLabel>
                                 <FormControl>
                                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-row space-x-4">
                                         <FormItem className="flex items-center space-x-2 space-y-0">
