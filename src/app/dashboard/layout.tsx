@@ -47,7 +47,7 @@ const doctorNavLinks = [
   { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/inventory', label: 'Inventory', icon: Boxes },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
-  { href: '/dashboard/nurse-checklist', label: 'Nurse Checklist', icon: ClipboardCheck },
+  { href: '/dashboard/nurse-checklist', label: 'PD Nurse Checklist', icon: ClipboardCheck },
   { href: '/registration', label: 'Register Patient', icon: UserPlus },
   { href: '/patient-portal', label: 'Patient Portal', icon: HeartPulse },
 ];
@@ -68,11 +68,16 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [isNurseView, setIsNurseView] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // This logic determines the user role based on the current or previous page URL.
-    // It makes the navigation persistent for the nurse even on shared pages.
-    if (typeof window !== 'undefined') {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      // This logic determines the user role based on the current or previous page URL.
+      // It makes the navigation persistent for the nurse even on shared pages.
       const currentPathIsNurse = pathname.startsWith('/dashboard/nurse-') || 
                                  pathname.startsWith('/dashboard/update-records');
       
@@ -99,7 +104,7 @@ export default function DashboardLayout({
         }
       }
     }
-  }, [pathname]);
+  }, [pathname, isClient]);
 
   const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
 

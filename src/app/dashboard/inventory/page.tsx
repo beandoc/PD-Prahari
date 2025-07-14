@@ -5,27 +5,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Boxes, Package, Droplets, Replace } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 
 const inventoryData = {
   catheters: [
-    { type: 'Straight', quantity: 42, nextArrival: addDays(new Date(), 15) },
-    { type: 'Coiled', quantity: 28, nextArrival: addDays(new Date(), 15) },
+    { type: 'Straight', quantity: 42, nextArrival: '2024-08-15' },
+    { type: 'Coiled', quantity: 28, nextArrival: '2024-08-15' },
   ],
   pdFluids: [
-    { type: '1.5% Dextrose', quantity: 250, unit: 'bags', nextArrival: addDays(new Date(), 7) },
-    { type: '2.5% Dextrose', quantity: 180, unit: 'bags', nextArrival: addDays(new Date(), 7) },
-    { type: '7.5% Icodextrin', quantity: 95, unit: 'bags', nextArrival: addDays(new Date(), 20) },
+    { type: '1.5% Dextrose', quantity: 250, unit: 'bags', nextArrival: '2024-08-07' },
+    { type: '2.5% Dextrose', quantity: 180, unit: 'bags', nextArrival: '2024-08-07' },
+    { type: '7.5% Icodextrin', quantity: 95, unit: 'bags', nextArrival: '2024-08-20' },
   ],
   apdFluids: [
-    { type: 'Dianeal Low Calcium (1.5%)', quantity: 150, unit: 'bags', nextArrival: addDays(new Date(), 10) },
-    { type: 'Dianeal Low Calcium (2.5%)', quantity: 120, unit: 'bags', nextArrival: addDays(new Date(), 10) },
-    { type: 'Extraneal (7.5% Icodextrin)', quantity: 80, unit: 'bags', nextArrival: addDays(new Date(), 25) },
+    { type: 'Dianeal Low Calcium (1.5%)', quantity: 150, unit: 'bags', nextArrival: '2024-08-10' },
+    { type: 'Dianeal Low Calcium (2.5%)', quantity: 120, unit: 'bags', nextArrival: '2024-08-10' },
+    { type: 'Extraneal (7.5% Icodextrin)', quantity: 80, unit: 'bags', nextArrival: '2024-08-25' },
   ],
   transferSets: {
     quantity: 150,
     unit: 'sets',
-    nextArrival: addDays(new Date(), 5)
+    nextArrival: '2024-08-05'
   }
 };
 
@@ -87,7 +87,7 @@ export default function InventoryPage() {
               </TableBody>
             </Table>
             <p className="text-xs text-muted-foreground mt-4 text-center">
-              Next lot arriving around {format(inventoryData.catheters[0].nextArrival, 'PPP')}.
+              Next lot arriving around {format(new Date(inventoryData.catheters[0].nextArrival), 'PPP')}.
             </p>
           </CardContent>
         </Card>
@@ -124,7 +124,7 @@ export default function InventoryPage() {
               </TableBody>
             </Table>
              <p className="text-xs text-muted-foreground mt-4 text-center">
-              Next lot of Dextrose arriving around {format(inventoryData.pdFluids[0].nextArrival, 'PPP')}.
+              Next lot of Dextrose arriving around {format(new Date(inventoryData.pdFluids[0].nextArrival), 'PPP')}.
             </p>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ export default function InventoryPage() {
               </TableBody>
             </Table>
              <p className="text-xs text-muted-foreground mt-4 text-center">
-              Next APD lot arriving around {format(inventoryData.apdFluids[0].nextArrival, 'PPP')}.
+              Next APD lot arriving around {format(new Date(inventoryData.apdFluids[0].nextArrival), 'PPP')}.
             </p>
           </CardContent>
         </Card>
@@ -181,7 +181,7 @@ export default function InventoryPage() {
                 {inventoryData.transferSets.quantity < 100 ? 'Low Stock' : 'In Stock'}
             </Badge>
             <p className="text-xs text-muted-foreground mt-4 text-center">
-              Next lot arriving around {format(inventoryData.transferSets.nextArrival, 'PPP')}.
+              Next lot arriving around {format(new Date(inventoryData.transferSets.nextArrival), 'PPP')}.
             </p>
           </CardContent>
         </Card>
