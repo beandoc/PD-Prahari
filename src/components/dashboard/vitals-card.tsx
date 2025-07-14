@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,19 +15,21 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import {
   HeartPulse,
   Thermometer,
   Weight,
   Activity,
   Gauge,
+  Droplets,
 } from 'lucide-react';
-import type { Vital } from '@/lib/types';
-import { format } from 'date-fns';
+import type { Vital, PDEvent } from '@/lib/types';
+import { format, startOfDay } from 'date-fns';
 
 interface VitalsCardProps {
   vitals: Vital[];
+  pdEvents: PDEvent[];
 }
 
 const chartConfig = {
@@ -34,9 +37,13 @@ const chartConfig = {
     label: 'Weight (kg)',
     color: 'hsl(var(--chart-1))',
   },
+  uf: {
+    label: 'UF (mL)',
+    color: 'hsl(var(--chart-2))',
+  }
 } satisfies ChartConfig;
 
-export default function VitalsCard({ vitals }: VitalsCardProps) {
+export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   // Handle case where there are no vitals data
@@ -73,12 +80,28 @@ export default function VitalsCard({ vitals }: VitalsCardProps) {
     }
   }, [latestVitals?.measurementDateTime]);
 
-  const chartData = vitals
+  const weightChartData = vitals
     .map((v) => ({
       date: format(new Date(v.measurementDateTime), 'MMM d'),
       weight: v.weightKG,
     }))
     .reverse();
+
+  const dailyUf: Record<string, number> = {};
+  if (pdEvents) {
+      pdEvents.forEach(event => {
+          const day = format(startOfDay(new Date(event.exchangeDateTime)), 'yyyy-MM-dd');
+          dailyUf[day] = (dailyUf[day] || 0) + event.ultrafiltrationML;
+      });
+  }
+
+  const ufChartData = Object.entries(dailyUf)
+    .map(([date, uf]) => ({
+        date: format(new Date(date), 'MMM d'),
+        uf
+    }))
+    .slice(-30) // Show last 30 days
+    .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
     <Card>
@@ -130,48 +153,77 @@ export default function VitalsCard({ vitals }: VitalsCardProps) {
           </div>
         </div>
 
-        <div>
-          <h4 className="mb-2 font-medium">Weight Trend</h4>
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <AreaChart
-              data={chartData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-              />
-              <YAxis domain={['dataMin - 2', 'dataMax + 2']} hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent />}
-              />
-              <defs>
-                <linearGradient id="fillWeight" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="hsl(var(--chart-1))"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="hsl(var(--chart-1))"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-              </defs>
-              <Area
-                dataKey="weight"
-                type="natural"
-                fill="url(#fillWeight)"
-                stroke="hsl(var(--chart-1))"
-                stackId="a"
-              />
-            </AreaChart>
-          </ChartContainer>
+        <div className="space-y-6">
+          <div>
+            <h4 className="mb-2 font-medium flex items-center gap-2">
+                <Droplets className="h-4 w-4 text-blue-500" />
+                Ultrafiltration Trend
+            </h4>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <LineChart data={ufChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
+                <YAxis domain={['dataMin - 100', 'dataMax + 100']} hide/>
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <Line
+                  dataKey="uf"
+                  type="monotone"
+                  stroke="hsl(var(--chart-2))"
+                  strokeWidth={2}
+                  dot={true}
+                  name="UF (mL)"
+                />
+              </LineChart>
+            </ChartContainer>
+          </div>
+
+          <div>
+            <h4 className="mb-2 font-medium flex items-center gap-2">
+                <Weight className="h-4 w-4 text-accent" />
+                Weight Trend
+            </h4>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <AreaChart
+                data={weightChartData}
+                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis domain={['dataMin - 2', 'dataMax + 2']} hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent />}
+                />
+                <defs>
+                  <linearGradient id="fillWeight" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="hsl(var(--chart-1))"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="hsl(var(--chart-1))"
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                </defs>
+                <Area
+                  dataKey="weight"
+                  type="natural"
+                  fill="url(#fillWeight)"
+                  stroke="hsl(var(--chart-1))"
+                  stackId="a"
+                  name="Weight (kg)"
+                />
+              </AreaChart>
+            </ChartContainer>
+          </div>
         </div>
       </CardContent>
     </Card>

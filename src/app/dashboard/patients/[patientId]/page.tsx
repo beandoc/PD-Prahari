@@ -22,7 +22,7 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
       <PatientHeader patient={patientData} />
       <main className="flex-1 p-4 sm:p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-            <VitalsCard vitals={patientData.vitals} />
+            <VitalsCard vitals={patientData.vitals} pdEvents={patientData.pdEvents} />
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <LabResultsCard labResults={patientData.labResults} />
                 <PDExchangeCard pdEvents={patientData.pdEvents.slice(0, 4)} />
