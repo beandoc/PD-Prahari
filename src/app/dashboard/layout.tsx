@@ -22,6 +22,7 @@ import {
   Users,
   UserCog,
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -66,9 +67,39 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  // Simple logic to determine the role based on URL.
-  // In a real app, this would come from an auth context.
-  const isNurseView = pathname.startsWith('/dashboard/nurse-') || pathname.startsWith('/dashboard/update-records') || pathname.startsWith('/nurse-portal');
+  const [isNurseView, setIsNurseView] = useState(false);
+
+  useEffect(() => {
+    // This logic determines the user role based on the current or previous page URL.
+    // It makes the navigation persistent for the nurse even on shared pages.
+    if (typeof window !== 'undefined') {
+      const currentPathIsNurse = pathname.startsWith('/dashboard/nurse-') || 
+                                 pathname.startsWith('/dashboard/update-records');
+      
+      const referrerIsNurse = document.referrer.includes('/nurse-portal') ||
+                              document.referrer.includes('/dashboard/nurse-') ||
+                              document.referrer.includes('/dashboard/update-records');
+
+      // If the current path is definitively a nurse path, or if they came from one,
+      // consider it the nurse view.
+      if (currentPathIsNurse) {
+        setIsNurseView(true);
+        sessionStorage.setItem('userRole', 'nurse');
+      } else if (referrerIsNurse) {
+        setIsNurseView(true);
+        sessionStorage.setItem('userRole', 'nurse');
+      } else {
+        // Fallback to checking session storage or default to doctor
+        const role = sessionStorage.getItem('userRole');
+        if (role === 'nurse' && !pathname.startsWith('/dashboard/inventory') && !pathname.startsWith('/dashboard/sharesource')) {
+           setIsNurseView(true);
+        } else {
+           setIsNurseView(false);
+           sessionStorage.removeItem('userRole');
+        }
+      }
+    }
+  }, [pathname]);
 
   const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
 
