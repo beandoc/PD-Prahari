@@ -16,17 +16,17 @@ import PDExchangeCard from '@/components/dashboard/pd-exchange-card';
 import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
+function PatientDetailView({ patientId }: { patientId: string }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
-  const { patientId } = params;
 
   useEffect(() => {
-    // On component mount, get the latest patient data by merging
-    // mock data with any updates from localStorage.
-    const data = getSyncedPatientData(patientId);
-    setPatientData(data);
+    async function fetchData() {
+      const data = await getSyncedPatientData(patientId);
+      setPatientData(data);
+    }
+    fetchData();
   }, [patientId]);
-
+  
   if (!patientData) {
     return (
       <div className="p-8 space-y-4">
@@ -69,4 +69,10 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
       </main>
     </div>
   );
+}
+
+
+export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
+  const { patientId } = params;
+  return <PatientDetailView patientId={patientId} />;
 }
