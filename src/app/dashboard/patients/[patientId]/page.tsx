@@ -16,9 +16,8 @@ import PDExchangeCard from '@/components/dashboard/pd-exchange-card';
 import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
+export default function PatientDetailPage({ params: { patientId } }: { params: { patientId: string } }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
-  const { patientId } = params;
 
   useEffect(() => {
     // On component mount, get the latest patient data by merging
