@@ -114,6 +114,7 @@ export const allPatientData: PatientData[] = [
     ],
     pdEvents: [
       { exchangeId: 'PD-TODAY-1', exchangeDateTime: '2024-07-29T07:30:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2150, ultrafiltrationML: 150, recordedBy: 'Patient' },
+      { exchangeId: 'PD-TODAY-2', exchangeDateTime: '2024-07-29T12:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2200, ultrafiltrationML: 200, isEffluentCloudy: false, recordedBy: 'Patient' },
       // Recent events (last 14 days) - LOW UF
       { exchangeId: 'PD-R-1', exchangeDateTime: '2024-07-28T07:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2050, ultrafiltrationML: 50, recordedBy: 'Patient' },
       { exchangeId: 'PD-R-2', exchangeDateTime: '2024-07-27T12:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2080, ultrafiltrationML: 80, recordedBy: 'Patient' },
@@ -189,11 +190,16 @@ export const allPatientData: PatientData[] = [
     labResults: [
         { labResultId: 'LAB-003', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Creatinine', resultValue: 8.1, units: 'mg/dL', referenceRangeLow: 0.7, referenceRangeHigh: 1.3 },
         { labResultId: 'LAB-007', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Albumin', resultValue: 3.2, units: 'g/dL', referenceRangeLow: 3.4, referenceRangeHigh: 5.4 },
+        { labResultId: 'LAB-010', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Hemoglobin', resultValue: 10.5, units: 'g/dL', referenceRangeLow: 13.5, referenceRangeHigh: 17.5 },
+        { labResultId: 'LAB-011', resultDateTime: '2024-07-26T10:00:00Z', testName: 'Phosphorus', resultValue: 6.1, units: 'mg/dL', referenceRangeLow: 2.5, referenceRangeHigh: 4.5 },
     ],
     pdEvents: [ 
         { exchangeId: 'PD-003', exchangeDateTime: '2024-07-20T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2250, ultrafiltrationML: 50, isEffluentCloudy: false, recordedBy: 'Patient' },
+        { exchangeId: 'PD-004', exchangeDateTime: '2024-06-20T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2150, ultrafiltrationML: -50, isEffluentCloudy: false, recordedBy: 'Patient' },
     ],
-    peritonitisEpisodes: [],
+    peritonitisEpisodes: [{
+        episodeId: 'PER-003', diagnosisDate: '2024-01-10', organismIsolated: 'E. coli', treatmentRegimen: 'Ciprofloxacin', outcome: 'Resolved', resolutionDate: '2024-01-24'
+    }],
     medications: [{ medicationId: 'MED-003', medicationName: 'Amlodipine', dosage: '5mg', frequency: 'Once daily', startDate: '2021-06-15', prescribingDoctor: 'Dr. Atul', status: 'ok' }],
     urineOutputLogs: [{ logId: 'UO-003', logDate: '2024-07-28', volumeML: 150 }],
     pdAdequacy: [{ testId: 'KT-002', testDate: '2024-07-01', totalKtV: 1.6, peritonealKtV: 1.5, notes: 'Borderline adequate.'}],
@@ -214,7 +220,8 @@ export const allPatientData: PatientData[] = [
     city: 'Nagpur',
     stateProvince: 'Maharashtra',
     postalCode: '440001',
-    pdStartDate: '2023-02-01',
+    pdStartDate: '2024-07-01', // In training
+    pdTrainingEndDate: '2024-09-30', // In training
     pdExchangeType: 'Self',
     distanceFromPDCenterKM: 45,
     educationLevel: 'Masters Degree',

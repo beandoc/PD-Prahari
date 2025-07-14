@@ -29,17 +29,18 @@ const inventoryData = {
   }
 };
 
-const getStatusColor = (quantity: number) => {
+const getStatusVariant = (quantity: number): "destructive" | "outline" | "secondary" => {
   if (quantity < 50) return 'destructive';
   if (quantity < 100) return 'outline';
   return 'secondary';
 };
 
-const getStatusBadgeColor = (quantity: number) => {
-    if (quantity < 50) return 'bg-red-100 text-red-800 border-red-200';
-    if (quantity < 100) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    return 'bg-green-100 text-green-800 border-green-200';
+const getStatusLabel = (quantity: number) => {
+    if (quantity < 50) return 'Critical Low';
+    if (quantity < 100) return 'Low Stock';
+    return 'In Stock';
 }
+
 
 export default function InventoryPage() {
   return (
@@ -78,8 +79,8 @@ export default function InventoryPage() {
                     <TableCell className="font-medium">{item.type}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusColor(item.quantity)} className={getStatusBadgeColor(item.quantity)}>
-                        {item.quantity < 50 ? 'Low Stock' : 'In Stock'}
+                      <Badge variant={getStatusVariant(item.quantity)}>
+                        {getStatusLabel(item.quantity)}
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -115,8 +116,8 @@ export default function InventoryPage() {
                     <TableCell className="font-medium">{item.type}</TableCell>
                     <TableCell>{item.quantity} {item.unit}</TableCell>
                     <TableCell>
-                       <Badge variant={getStatusColor(item.quantity)} className={getStatusBadgeColor(item.quantity)}>
-                        {item.quantity < 100 ? 'Low Stock' : 'In Stock'}
+                       <Badge variant={getStatusVariant(item.quantity)}>
+                        {getStatusLabel(item.quantity)}
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -152,8 +153,8 @@ export default function InventoryPage() {
                     <TableCell className="font-medium">{item.type}</TableCell>
                     <TableCell>{item.quantity} {item.unit}</TableCell>
                     <TableCell>
-                       <Badge variant={getStatusColor(item.quantity)} className={getStatusBadgeColor(item.quantity)}>
-                        {item.quantity < 100 ? 'Low Stock' : 'In Stock'}
+                       <Badge variant={getStatusVariant(item.quantity)}>
+                        {getStatusLabel(item.quantity)}
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -177,8 +178,8 @@ export default function InventoryPage() {
           <CardContent className="text-center pt-6">
             <p className="text-5xl font-bold">{inventoryData.transferSets.quantity}</p>
             <p className="text-muted-foreground mb-4">{inventoryData.transferSets.unit}</p>
-            <Badge variant={getStatusColor(inventoryData.transferSets.quantity)} className={getStatusBadgeColor(inventoryData.transferSets.quantity)}>
-                {inventoryData.transferSets.quantity < 100 ? 'Low Stock' : 'In Stock'}
+            <Badge variant={getStatusVariant(inventoryData.transferSets.quantity)}>
+                {getStatusLabel(inventoryData.transferSets.quantity)}
             </Badge>
             <p className="text-xs text-muted-foreground mt-4 text-center">
               Next lot arriving around {format(new Date(inventoryData.transferSets.nextArrival), 'PPP')}.
