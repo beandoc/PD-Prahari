@@ -1,11 +1,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Phone, BriefcaseMedical, Pill, Inbox, Upload, Video } from 'lucide-react';
+import { User, Phone, BriefcaseMedical, Pill, Inbox, Upload, Video, ShieldAlert, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 export default function PatientProfilePage() {
   const patient = allPatientData[0]; // Using first patient for demonstration
@@ -31,6 +32,61 @@ export default function PatientProfilePage() {
                 <div className="space-y-1"><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
                 <div className="space-y-1"><p className="font-medium">Primary Physician</p><p className="text-muted-foreground">{patient.physician}</p></div>
                 <div className="space-y-1"><p className="font-medium">PD Start Date</p><p className="text-muted-foreground">{patient.pdStartDate ? format(parseISO(patient.pdStartDate), 'PPP'): 'N/A'}</p></div>
+                 <div className="space-y-1"><p className="font-medium">Last Hospital Visit</p><p className="text-muted-foreground">{patient.lastHomeVisitDate ? format(parseISO(patient.lastHomeVisitDate), 'PPP'): 'N/A'}</p></div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><ShieldAlert className="text-yellow-600" /> Peritonitis History</CardTitle>
+              <CardDescription>A summary of past PD-related infections.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {patient.peritonitisEpisodes && patient.peritonitisEpisodes.length > 0 ? (
+                     <div className="space-y-4">
+                        {patient.peritonitisEpisodes.map((episode) => (
+                            <div key={episode.episodeId} className="border p-4 rounded-lg bg-slate-50">
+                                <div className="flex justify-between items-center mb-2">
+                                    <p className="font-semibold">Diagnosis Date: {format(parseISO(episode.diagnosisDate), 'PPP')}</p>
+                                    <Badge variant={episode.outcome === 'Resolved' ? 'secondary' : 'destructive'} className={episode.outcome === 'Resolved' ? 'bg-green-100 text-green-800' : ''}>
+                                        Outcome: {episode.outcome}
+                                    </Badge>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                    <p><span className="font-medium">Organism:</span> {episode.organismIsolated}</p>
+                                    <p><span className="font-medium">Treatment:</span> {episode.treatmentRegimen}</p>
+                                    {episode.resolutionDate && <p><span className="font-medium">Resolution Date:</span> {format(parseISO(episode.resolutionDate), 'PPP')}</p>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-muted-foreground text-sm text-center py-4">No history of peritonitis found.</p>
+                )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><AlertTriangle className="text-orange-500" /> Mechanical Complications</CardTitle>
+              <CardDescription>Issues related to the PD catheter and fluid flow.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="font-semibold text-sm text-red-800">Outflow Problems</p>
+                    <p className="text-2xl font-bold text-red-600">{patient.mechanicalComplications?.outflowProblems ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">episodes</p>
+                </div>
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="font-semibold text-sm text-yellow-800">Inflow Problems</p>
+                    <p className="text-2xl font-bold text-yellow-600">{patient.mechanicalComplications?.inflowProblems ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">episodes</p>
+                </div>
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="font-semibold text-sm text-blue-800">UF Failure</p>
+                    <p className="text-2xl font-bold text-blue-600">{patient.mechanicalComplications?.ufFailure ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">incidents</p>
+                </div>
             </CardContent>
           </Card>
 
@@ -62,7 +118,7 @@ export default function PatientProfilePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><BriefcaseMedical className="text-orange-500" /> Hospital Admissions</CardTitle>
+              <CardTitle className="flex items-center gap-2"><BriefcaseMedical className="text-cyan-600" /> Hospital Admissions</CardTitle>
             </CardHeader>
             <CardContent>
                 {patient.admissions && patient.admissions.length > 0 ? (

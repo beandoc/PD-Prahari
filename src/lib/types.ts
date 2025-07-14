@@ -163,6 +163,13 @@ export interface Admission {
   reason: string;
 }
 
+export interface MechanicalComplications {
+    outflowProblems: number;
+    inflowProblems: number;
+    ufFailure: number;
+}
+
+
 export interface PatientData extends Patient {
   // Clinical Data Arrays
   prescription: Prescription;
@@ -194,4 +201,5 @@ export interface PatientData extends Patient {
   // New fields for profile page
   contactInfo?: ContactInfo;
   admissions?: Admission[];
+  mechanicalComplications?: MechanicalComplications;
 }

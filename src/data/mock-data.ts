@@ -149,7 +149,8 @@ export const allPatientData: PatientData[] = [
     ],
     nutritionLifestyle: { dailyProtein: { current: 45, target: 60 }, fluidRestriction: { current: 1.2, limit: 1.5 }, caloriesToday: { current: 1850, target: 2000 }, handgripStrength: { value: 28, unit: 'kg', status: 'Stable' }, },
     clinicVisits: { nextAppointment: '2024-12-15T10:00:00Z', lastVisitSummary: 'Routine follow-up. Patient doing well on current regimen. Discussed nutrition goals.', },
-    patientEducation: [ { id: 'edu1', title: 'PD Technique Videos', description: 'Step-by-step exchange process', icon: 'Video' }, { id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }, { id: 'edu3', title: 'Nutrition Guidelines', description: 'Meal planning for PD patients', icon: 'Apple' }, ]
+    patientEducation: [ { id: 'edu1', title: 'PD Technique Videos', description: 'Step-by-step exchange process', icon: 'Video' }, { id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }, { id: 'edu3', title: 'Nutrition Guidelines', description: 'Meal planning for PD patients', icon: 'Apple' }, ],
+    mechanicalComplications: { outflowProblems: 2, inflowProblems: 1, ufFailure: 0 }
   },
   {
     patientId: 'PAT-002',
