@@ -1,16 +1,19 @@
 
 'use client';
 
+import { useState, useMemo } from 'react';
 import { allPatientData } from '@/data/mock-data';
-import type { Patient } from '@/lib/types';
+import type { Patient, PatientData } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { generatePatientAlerts } from '@/lib/alerts';
 import Link from 'next/link';
-import { AlertTriangle, Droplets, TrendingUp, Users, CalendarX, CalendarCheck, UserPlus, ShieldAlert, TrendingDown, ListTodo, BarChart3 } from 'lucide-react';
-import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears } from 'date-fns';
+import { AlertTriangle, Droplets, TrendingUp, Users, CalendarX, CalendarCheck, UserPlus, ShieldAlert, TrendingDown, ListTodo, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears, isAfter } from 'date-fns';
+import { Button } from '@/components/ui/button';
+
 
 // --- Data Processing ---
 
@@ -26,36 +29,7 @@ const fluidData = allPatientData[0].vitals.map(vital => {
     };
 }).reverse();
 
-// 2. Peritonitis Indicators (demonstrated for the first patient)
-const peritonitisData = allPatientData[0].pdEvents
-    .filter(event => new Date(event.exchangeDateTime) >= subDays(new Date(), 30))
-    .reduce((acc, event) => {
-        const date = format(new Date(event.exchangeDateTime), 'MMM d');
-        if (!acc[date]) {
-            acc[date] = { date, cloudy: 0, clear: 0 };
-        }
-        if (event.isEffluentCloudy) {
-            acc[date].cloudy += 1;
-        } else {
-            acc[date].clear += 1;
-        }
-        return acc;
-    }, {} as Record<string, { date: string; cloudy: number; clear: number }>);
-
-const peritonitisChartData = Object.values(peritonitisData).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-
-// 3. Compliance Data (demonstrated for the first patient)
-const expectedExchangesPerDay = 4;
-const thirtyDaysAgo = subDays(new Date(), 30);
-const recentEvents = allPatientData[0].pdEvents.filter(e => new Date(e.exchangeDateTime) >= thirtyDaysAgo);
-const daysWithLogs = new Set(recentEvents.map(e => new Date(e.exchangeDateTime).toDateString())).size;
-const complianceRate = (daysWithLogs / 30) * 100;
-const totalExchangesDone = recentEvents.length;
-const totalExchangesExpected = daysWithLogs * expectedExchangesPerDay;
-
-
-// 4. Patient Status Overview
+// 2. Patient Status Overview
 const patientsWithStatus = allPatientData.map(patient => {
     const alerts = generatePatientAlerts(patient);
     let status: 'critical' | 'warning' | 'stable' = 'stable';
@@ -105,7 +79,63 @@ const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiti
 
 const missedVisits = 2; // Placeholder as mock data doesn't contain past appointments
 
+interface FlaggedPatient {
+    patientId: string;
+    firstName: string;
+    lastName: string;
+    type: 'Peritonitis' | 'Exit Site Infection';
+    date: Date;
+}
+
+
 export default function AnalyticsPage() {
+  const [infectionIndex, setInfectionIndex] = useState(0);
+
+  const flaggedPatients = useMemo(() => {
+        const sixMonthsAgo = subMonths(new Date(), 6);
+        const results: FlaggedPatient[] = [];
+
+        allPatientData.forEach(patient => {
+            patient.peritonitisEpisodes.forEach(episode => {
+                const episodeDate = new Date(episode.diagnosisDate);
+                if (isAfter(episodeDate, sixMonthsAgo)) {
+                    results.push({
+                        patientId: patient.patientId,
+                        firstName: patient.firstName,
+                        lastName: patient.lastName,
+                        type: 'Peritonitis',
+                        date: episodeDate
+                    });
+                }
+            });
+
+            if (patient.esiCount && patient.esiCount > 0 && patient.lastHomeVisitDate) {
+                 const esiDate = new Date(patient.lastHomeVisitDate); // Approximate date
+                 if (isAfter(esiDate, sixMonthsAgo)) {
+                     results.push({
+                        patientId: patient.patientId,
+                        firstName: patient.firstName,
+                        lastName: patient.lastName,
+                        type: 'Exit Site Infection',
+                        date: esiDate
+                     });
+                 }
+            }
+        });
+        return results.sort((a, b) => b.date.getTime() - a.date.getTime());
+    }, []);
+
+    const handleNextInfection = () => {
+        setInfectionIndex((prev) => (prev + 1) % flaggedPatients.length);
+    };
+
+    const handlePrevInfection = () => {
+        setInfectionIndex((prev) => (prev - 1 + flaggedPatients.length) % flaggedPatients.length);
+    };
+    
+    const currentInfection = flaggedPatients[infectionIndex];
+
+
   return (
     <div className="space-y-8">
        <header className="space-y-1">
@@ -163,24 +193,51 @@ export default function AnalyticsPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <AlertTriangle className="text-red-500" />
-                        Peritonitis Indicators (Last 30d)
+                        Infective complications (last 6 months)
                     </CardTitle>
-                    <CardDescription>
-                       Frequency of cloudy vs. clear effluent for {allPatientData[0].firstName}.
-                    </CardDescription>
+                    {flaggedPatients.length > 0 ? (
+                        <CardDescription>
+                           Showing {infectionIndex + 1} of {flaggedPatients.length} patients with recent infections.
+                        </CardDescription>
+                    ) : (
+                         <CardDescription>
+                           No patients with recent infections.
+                        </CardDescription>
+                    )}
                 </CardHeader>
                 <CardContent>
-                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={peritonitisChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="clear" stackId="a" fill="#82ca9d" name="Clear Bags" />
-                            <Bar dataKey="cloudy" stackId="a" fill="#ffc658" name="Cloudy Bags" />
-                        </BarChart>
-                    </ResponsiveContainer>
+                     {flaggedPatients.length > 0 ? (
+                        <div className="space-y-4">
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-2">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Patient</p>
+                                    <Link href={`/dashboard/patients/${currentInfection.patientId}`} className="font-bold text-lg hover:underline">
+                                        {currentInfection.firstName} {currentInfection.lastName}
+                                    </Link>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Issue</p>
+                                    <Badge variant="destructive">{currentInfection.type}</Badge>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Date</p>
+                                    <p className="font-semibold">{format(currentInfection.date, 'PPP')}</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <Button variant="outline" size="sm" onClick={handlePrevInfection} disabled={flaggedPatients.length <= 1}>
+                                    <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={handleNextInfection} disabled={flaggedPatients.length <= 1}>
+                                    Next <ChevronRight className="h-4 w-4 ml-1" />
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center text-center text-muted-foreground h-[200px]">
+                            <p>No peritonitis or ESI cases in the last 6 months.</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
@@ -226,3 +283,5 @@ export default function AnalyticsPage() {
     </div>
   );
 }
+
+    
