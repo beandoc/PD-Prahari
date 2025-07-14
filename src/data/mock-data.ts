@@ -131,7 +131,7 @@ export const allPatientData: PatientData[] = [
       },
     ],
     peritonitisEpisodes: [
-      { episodeId: 'PER-001', diagnosisDate: '2023-11-10', organismIsolated: 'Staphylococcus epidermidis', treatmentRegimen: 'Vancomycin IP', outcome: 'Resolved', resolutionDate: '2023-11-24' },
+      { episodeId: 'PER-001', diagnosisDate: '2023-11-10', organismIsolated: 'Staphylococcus epidermidis', treatmentRegimen: 'Vancomycin IP', outcome: 'Resolved', resolutionDate: '2023-11-24', admissionId: 'ADM-002' },
     ],
     medications: [
       { medicationId: 'MED-001', medicationName: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', startDate: '2022-01-20', prescribingDoctor: 'Dr. Sachin', status: 'ok' },

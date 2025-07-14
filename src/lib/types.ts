@@ -98,6 +98,7 @@ export interface PeritonitisEpisode {
   treatmentRegimen: string;
   outcome: 'Resolved' | 'Catheter Removal' | 'Transferred to HD' | 'Deceased';
   resolutionDate?: string;
+  admissionId?: string;
 }
 
 export interface UrineOutputLog {

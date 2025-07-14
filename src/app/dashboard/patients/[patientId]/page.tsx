@@ -57,7 +57,7 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                  <MedicationsCard medications={patientData.medications} />
-                 <PeritonitisHistoryCard episodes={patientData.peritonitisEpisodes} />
+                 <PeritonitisHistoryCard episodes={patientData.peritonitisEpisodes} admissions={patientData.admissions || []} />
             </div>
         </div>
         <div className="lg:col-span-1 space-y-6">
