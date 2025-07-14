@@ -47,7 +47,7 @@ const doctorNavLinks = [
   { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/inventory', label: 'Inventory', icon: Boxes },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
-  { href: '/dashboard/nurse-checklist', label: 'PD Nurse Checklist', icon: ClipboardCheck },
+  { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Portal', icon: Users },
   { href: '/registration', label: 'Register Patient', icon: UserPlus },
   { href: '/patient-portal', label: 'Patient Portal', icon: HeartPulse },
 ];
