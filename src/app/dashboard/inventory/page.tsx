@@ -18,6 +18,7 @@ const inventoryData = {
     { type: '7.5% Icodextrin', quantity: 95, unit: 'bags', nextArrival: addDays(new Date(), 20) },
   ],
   apdFluids: [
+    { type: 'Dianeal Low Calcium (1.5%)', quantity: 150, unit: 'bags', nextArrival: addDays(new Date(), 10) },
     { type: 'Dianeal Low Calcium (2.5%)', quantity: 120, unit: 'bags', nextArrival: addDays(new Date(), 10) },
     { type: 'Extraneal (7.5% Icodextrin)', quantity: 80, unit: 'bags', nextArrival: addDays(new Date(), 25) },
   ],
