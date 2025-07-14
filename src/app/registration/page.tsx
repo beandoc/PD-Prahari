@@ -79,7 +79,7 @@ const formSchema = z.object({
 
   // Clinical
   physician: z.string().min(1, { message: 'Attending physician is required.' }),
-  underlyingKidneyDisease: z.string().min(1, { message: 'This field is required.' }),
+  underlyingKidneyDisease: z.string().optional(),
   pdStartDate: z.date().optional(),
   pdExchangeType: z.enum(['Assisted', 'Self']).optional(),
   distanceFromPDCenterKM: z.coerce.number().optional(),
@@ -339,7 +339,7 @@ export default function ClinicianPatientRegistrationPage() {
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="underlyingKidneyDisease" render={({ field }) => (
-                            <FormItem><FormLabel>Underlying Kidney Disease <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="pdStartDate" render={({ field }) => (
                             <FormItem className="flex flex-col"><FormLabel>PD Start Date</FormLabel>
@@ -353,25 +353,6 @@ export default function ClinicianPatientRegistrationPage() {
                             </PopoverTrigger><PopoverContent className="w-auto p-0" align="start">
                                 <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear()} />
                             </PopoverContent></Popover><FormMessage />
-                            </FormItem>
-                        )} />
-                        <FormField control={form.control} name="distanceFromPDCenterKM" render={({ field }) => (
-                            <FormItem><FormLabel>Distance from PD Center (KM)</FormLabel><FormControl><Input type="number" placeholder="Enter distance" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
-                            <FormItem className="space-y-3"><FormLabel>PD Exchange Type</FormLabel>
-                                <FormControl>
-                                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-row space-x-4">
-                                        <FormItem className="flex items-center space-x-2 space-y-0">
-                                            <FormControl><RadioGroupItem value="Self" /></FormControl>
-                                            <FormLabel className="font-normal">Self</FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-2 space-y-0">
-                                            <FormControl><RadioGroupItem value="Assisted" /></FormControl>
-                                            <FormLabel className="font-normal">Assisted</FormLabel>
-                                        </FormItem>
-                                    </RadioGroup>
-                                </FormControl><FormMessage />
                             </FormItem>
                         )} />
                     </div>
