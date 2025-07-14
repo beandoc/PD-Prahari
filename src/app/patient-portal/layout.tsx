@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -10,6 +11,7 @@ import {
   Menu,
   LayoutDashboard,
   Users,
+  LogOut,
 } from 'lucide-react';
 import { KidneyIcon } from '@/components/kidney-icon';
 import { Button } from '@/components/ui/button';
@@ -68,10 +70,10 @@ export default function PatientPortalLayout({
             </nav>
           </div>
           <div className="mt-auto p-4 border-t">
-             <Button asChild variant="secondary" className="w-full">
-                <Link href="/dashboard">
-                    <Users className="mr-2 h-4 w-4" />
-                    Clinician View
+             <Button asChild variant="outline" className="w-full">
+                <Link href="/">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
                 </Link>
               </Button>
            </div>
@@ -114,10 +116,10 @@ export default function PatientPortalLayout({
                 ))}
               </nav>
                <div className="mt-auto">
-                 <Button variant="secondary" className="w-full" asChild>
-                    <Link href="/dashboard">
-                        <Users className="mr-2 h-4 w-4" />
-                        Clinician View
+                 <Button asChild variant="outline" className="w-full">
+                    <Link href="/">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
                     </Link>
                 </Button>
               </div>
