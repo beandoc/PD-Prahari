@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
-import { format } from 'date-fns';
+import { format, subYears } from 'date-fns';
 import { CalendarIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { useState, useEffect }from 'react';
 
@@ -42,7 +42,24 @@ const formSchema = z.object({
   nephroId: z.string().min(1, { message: 'Nephro ID / UHID is required.' }),
   dateOfBirth: z.date({
     required_error: 'Date of birth is required.',
-  }),
+  }).refine((date) => {
+    const today = new Date();
+    const age = today.getFullYear() - date.getFullYear();
+    const m = today.getMonth() - date.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+      return age - 1 >= 12;
+    }
+    return age >= 12;
+  }, { message: "Patient must be at least 12 years old." })
+  .refine((date) => {
+     const today = new Date();
+    const age = today.getFullYear() - date.getFullYear();
+    const m = today.getMonth() - date.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+      return age - 1 <= 90;
+    }
+    return age <= 90;
+  }, { message: "Patient cannot be more than 90 years old." }),
   gender: z.string().optional(),
   educationLevel: z.string().optional(),
   
@@ -70,6 +87,17 @@ const formSchema = z.object({
     required_error: "You need to select an exchange type.",
   }),
   distanceFromPDCenterKM: z.coerce.number().min(0, { message: 'Distance must be a positive number.' }),
+}).superRefine((data, ctx) => {
+    if (data.dateOfBirth) {
+        const age = new Date().getFullYear() - data.dateOfBirth.getFullYear();
+        if (age < 18 && !data.emergencyContactName) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Guardian details are mandatory for minors.",
+                path: ["emergencyContactName"],
+            });
+        }
+    }
 });
 
 export default function ClinicianPatientRegistrationPage() {
@@ -198,7 +226,7 @@ export default function ClinicianPatientRegistrationPage() {
                                     </Button>
                                 </FormControl>
                             </PopoverTrigger><PopoverContent className="w-auto p-0" align="start">
-                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus captionLayout="dropdown-buttons" fromYear={1930} toYear={new Date().getFullYear()} />
+                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} toDate={subYears(new Date(), 12)} fromDate={subYears(new Date(), 90)} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus captionLayout="dropdown-buttons" fromYear={new Date().getFullYear() - 90} toYear={new Date().getFullYear() - 12} />
                             </PopoverContent></Popover>
                             {age !== null && age < 18 && (
                                 <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor (Age: {age}). Guardian details are mandatory.</FormDescription>
