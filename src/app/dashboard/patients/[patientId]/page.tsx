@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { PatientData } from '@/lib/types';
@@ -17,7 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
 
-// This is now a dedicated Client Component that receives props
+// This is the dedicated Client Component that handles state and data fetching.
+// It receives the patientId as a simple string prop.
 function PatientDetailView({ patientId }: { patientId: string }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
 
@@ -74,8 +74,8 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 }
 
 
-// This default export is the page component that handles params.
-// It remains a Server Component by default, which correctly handles params.
+// This default export is now the page component. It is a Server Component by default.
+// Its only job is to handle the server-side params and pass them to the Client Component.
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
   const { patientId } = params;
   // It then renders the Client Component, passing the ID as a prop.
