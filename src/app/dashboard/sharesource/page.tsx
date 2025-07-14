@@ -69,13 +69,6 @@ export default function AnalyticsPage() {
       flaggedInfectionPatients,
       flaggedUfPatients
   } = useMemo(() => {
-    if (!isClient) {
-        return {
-            patientsWithStatus: [], totalActivePDPatients: 0, thisWeekAppointments: 0, newPDPatientsLastMonth: 0,
-            activePeritonitisEpisodes: 0, dropouts: 0, awaitingInsertion: 0, missedVisits: 0,
-            flaggedInfectionPatients: [], flaggedUfPatients: []
-        };
-    }
     const today = new Date();
 
     const patientsWithStatus = allPatientData.map(patient => {
@@ -160,7 +153,7 @@ export default function AnalyticsPage() {
         flaggedInfectionPatients: flaggedInfections.sort((a, b) => b.date.getTime() - a.date.getTime()),
         flaggedUfPatients: flaggedUf
     };
-  }, [isClient]);
+  }, []);
 
     const handleNextInfection = () => setInfectionIndex((prev) => (prev + 1) % flaggedInfectionPatients.length);
     const handlePrevInfection = () => setInfectionIndex((prev) => (prev - 1 + flaggedInfectionPatients.length) % flaggedInfectionPatients.length);

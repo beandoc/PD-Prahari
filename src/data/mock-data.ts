@@ -141,7 +141,7 @@ export const allPatientData: PatientData[] = [
         { testId: 'KT-001', testDate: '2024-06-01', totalKtV: 1.8, peritonealKtV: 1.6, notes: 'Adequate clearance.'}
     ],
     patientReportedOutcomes: [
-        { surveyId: 'PRO-001', surveyDate: '2024-06-15', surveyTool: 'KDQOL-36', score: 78, summary: 'Patient reports good overall health but some fatigue.' }
+        { surveyId: 'PRO-001', surveyId: 'PRO-001', surveyDate: '2024-06-15', surveyTool: 'KDQOL-36', score: 78, summary: 'Patient reports good overall health but some fatigue.' }
     ],
     uploadedImages: [
         { imageId: 'IMG-001', type: 'exit-site', uploadDate: '2024-07-28T10:00:00Z', imageUrl: 'https://placehold.co/400x300.png', requiresReview: true }
@@ -197,13 +197,14 @@ export const allPatientData: PatientData[] = [
         { exchangeId: 'PD-003', exchangeDateTime: '2024-07-20T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2250, ultrafiltrationML: 50, isEffluentCloudy: false, recordedBy: 'Patient' },
         { exchangeId: 'PD-004', exchangeDateTime: '2024-06-20T08:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2200, dwellTimeHours: 4, drainVolumeML: 2150, ultrafiltrationML: -50, isEffluentCloudy: false, recordedBy: 'Patient' },
     ],
-    peritonitisEpisodes: [{
-        episodeId: 'PER-003', diagnosisDate: '2024-01-10', organismIsolated: 'E. coli', treatmentRegimen: 'Ciprofloxacin', outcome: 'Resolved', resolutionDate: '2024-01-24'
-    }],
+    peritonitisEpisodes: [
+      { episodeId: 'PER-003', diagnosisDate: '2024-01-10', organismIsolated: 'E. coli', treatmentRegimen: 'Ciprofloxacin', outcome: 'Resolved', resolutionDate: '2024-01-24' },
+      { episodeId: 'PER-004', diagnosisDate: '2023-09-05', organismIsolated: 'S. Aureus', treatmentRegimen: 'Cefazolin + Ceftazidime', outcome: 'Catheter Removal', resolutionDate: '2023-09-20' }
+    ],
     medications: [{ medicationId: 'MED-003', medicationName: 'Amlodipine', dosage: '5mg', frequency: 'Once daily', startDate: '2021-06-15', prescribingDoctor: 'Dr. Atul', status: 'ok' }],
     urineOutputLogs: [{ logId: 'UO-003', logDate: '2024-07-28', volumeML: 150 }],
     pdAdequacy: [{ testId: 'KT-002', testDate: '2024-07-01', totalKtV: 1.6, peritonealKtV: 1.5, notes: 'Borderline adequate.'}],
-    patientReportedOutcomes: [{ surveyId: 'PRO-002', surveyDate: '2024-07-01', surveyTool: 'KDQOL-36', score: 65, summary: 'Patient reports feeling well but has concerns about fluid retention.' }],
+    patientReportedOutcomes: [{ surveyId: 'PRO-002', surveyId: 'PRO-002', surveyDate: '2024-07-01', surveyTool: 'KDQOL-36', score: 65, summary: 'Patient reports feeling well but has concerns about fluid retention.' }],
     nutritionLifestyle: { dailyProtein: { current: 55, target: 70 }, fluidRestriction: { current: 1.4, limit: 1.8 }, caloriesToday: { current: 2100, target: 2200 }, dailyActivity: { current: 2000, target: 3000 }},
     clinicVisits: { nextAppointment: '2024-08-01T11:00:00Z', lastVisitSummary: 'Blood pressure slightly elevated. Continue monitoring.' },
     patientEducation: [{ id: 'edu1', title: 'PD Technique Videos', description: 'Step-by-step exchange process', icon: 'Video' }]
@@ -250,7 +251,7 @@ export const allPatientData: PatientData[] = [
     medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', prescribingDoctor: 'Dr. Parikshit', status: 'warning' }],
     urineOutputLogs: [{ logId: 'UO-004', logDate: '2024-07-28', volumeML: 700 }],
     pdAdequacy: [{ testId: 'KT-003', testDate: '2024-05-15', totalKtV: 1.9, peritonealKtV: 1.3, notes: 'Good total clearance, significant contribution from RKF.'}],
-    patientReportedOutcomes: [{ surveyId: 'PRO-003', surveyDate: '2024-05-15', surveyTool: 'KDQOL-36', score: 85, summary: 'Patient reports high quality of life.' }],
+    patientReportedOutcomes: [{ surveyId: 'PRO-003', surveyId: 'PRO-003', surveyDate: '2024-05-15', surveyTool: 'KDQOL-36', score: 85, summary: 'Patient reports high quality of life.' }],
     nutritionLifestyle: { dailyProtein: { current: 50, target: 55 }, fluidRestriction: { current: 1.1, limit: 1.2 }, caloriesToday: { current: 1700, target: 1800 }, dailyActivity: { current: 4500, target: 6000 }},
     clinicVisits: { nextAppointment: '2025-01-10T09:00:00Z', lastVisitSummary: 'Anemia management discussed. Continue EPO.' },
     patientEducation: [{ id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }]

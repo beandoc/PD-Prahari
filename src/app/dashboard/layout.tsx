@@ -90,7 +90,7 @@ export default function DashboardLayout({
       if (currentPathIsNurse) {
         setIsNurseView(true);
         sessionStorage.setItem('userRole', 'nurse');
-      } else if (referrerIsNurse) {
+      } else if (referrerIsNurse && !pathname.startsWith('/dashboard')) {
         setIsNurseView(true);
         sessionStorage.setItem('userRole', 'nurse');
       } else {

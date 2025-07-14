@@ -12,6 +12,7 @@ import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBa
 import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type FilterType = 'awaiting_insertion' | 'in_training' | 'peritonitis_tx' | 'all';
 
@@ -57,8 +58,10 @@ const getAlertIcon = (type: AlertItem['type']) => {
 export default function NurseDashboardPage() {
     const [urgentAlerts, setUrgentAlerts] = useState<AlertItem[]>([]);
     const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+    const [isClient, setIsClient] = useState(false);
     
     useEffect(() => {
+        setIsClient(true);
         // --- Generate dummy alerts for demonstration on the client side ---
         const alerts: AlertItem[] = [
             { patient: allPatientData[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) },
@@ -69,14 +72,35 @@ export default function NurseDashboardPage() {
     }, []);
 
     // --- Data processing for dashboard metrics and filters ---
-    const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter');
-    const patientsInTraining = allPatientData.filter(p => p.pdStartDate && differenceInDays(new Date(), parseISO(p.pdStartDate)) <= 90 && p.currentStatus === 'Active PD');
-    const patientsOnPeritonitisTx = allPatientData.filter(p => 
-        p.peritonitisEpisodes.some(ep => ep.outcome !== 'Resolved' && differenceInDays(new Date(), parseISO(ep.diagnosisDate)) <= 30)
-    );
-    const todaysAppointments = allPatientData.filter(p => 
-        p.clinicVisits?.nextAppointment && isToday(parseISO(p.clinicVisits.nextAppointment))
-    ).length;
+    const {
+        patientsAwaitingInsertion,
+        patientsInTraining,
+        patientsOnPeritonitisTx,
+        todaysAppointments,
+        upcomingHomeVisits
+    } = useMemo(() => {
+        const now = new Date();
+        const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter');
+        const patientsInTraining = allPatientData.filter(p => p.pdStartDate && differenceInDays(now, parseISO(p.pdStartDate)) <= 90 && p.currentStatus === 'Active PD');
+        const patientsOnPeritonitisTx = allPatientData.filter(p => 
+            p.peritonitisEpisodes.some(ep => ep.outcome !== 'Resolved' && differenceInDays(now, parseISO(ep.diagnosisDate)) <= 30)
+        );
+        const todaysAppointments = allPatientData.filter(p => 
+            p.clinicVisits?.nextAppointment && isToday(parseISO(p.clinicVisits.nextAppointment))
+        ).length;
+
+        const upcomingHomeVisits = allPatientData
+            .filter(p => p.lastHomeVisitDate)
+            .map(p => ({
+                ...p,
+                nextVisitDue: addDays(parseISO(p.lastHomeVisitDate!), 90) // Assuming a 90-day cycle
+            }))
+            .filter(p => p.nextVisitDue > now && p.nextVisitDue < addDays(now, 30))
+            .sort((a, b) => a.nextVisitDue.getTime() - b.nextVisitDue.getTime());
+
+        return { patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointments, upcomingHomeVisits };
+
+    }, []);
 
     const filteredPatients = useMemo(() => {
         switch (activeFilter) {
@@ -94,14 +118,20 @@ export default function NurseDashboardPage() {
         peritonitis_tx: 'Patients on Active Peritonitis Treatment'
     };
 
-    const upcomingHomeVisits = allPatientData
-        .filter(p => p.lastHomeVisitDate)
-        .map(p => ({
-            ...p,
-            nextVisitDue: addDays(parseISO(p.lastHomeVisitDate!), 90) // Assuming a 90-day cycle
-        }))
-        .filter(p => p.nextVisitDue > new Date() && p.nextVisitDue < addDays(new Date(), 30))
-        .sort((a, b) => a.nextVisitDue.getTime() - b.nextVisitDue.getTime());
+    if (!isClient) {
+        return (
+             <div className="space-y-6">
+                 <Skeleton className="h-12 w-1/3" />
+                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                     {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
+                 </div>
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Skeleton className="h-64 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                 </div>
+            </div>
+        )
+    }
 
     
     return (
@@ -229,7 +259,7 @@ export default function NurseDashboardPage() {
                                     </div>
                                 </li>
                             )) : (
-                               <li className="text-center h-24 text-muted-foreground">No urgent alerts.</li> 
+                               <li className="text-center h-24 flex items-center justify-center text-muted-foreground">No urgent alerts.</li> 
                             )}
                         </ul>
                     </CardContent>
