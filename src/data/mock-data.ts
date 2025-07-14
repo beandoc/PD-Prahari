@@ -1,4 +1,3 @@
-
 import type { PatientData } from '@/lib/types';
 
 export const allPatientData: PatientData[] = [
@@ -150,7 +149,14 @@ export const allPatientData: PatientData[] = [
     uploadedImages: [
         { imageId: 'IMG-001', type: 'exit-site', uploadDate: '2024-07-28T10:00:00Z', imageUrl: 'https://placehold.co/400x300.png', requiresReview: true }
     ],
-    nutritionLifestyle: { dailyProtein: { current: 45, target: 60 }, fluidRestriction: { current: 1.2, limit: 1.5 }, caloriesToday: { current: 1850, target: 2000 }, handgripStrength: { value: 28, unit: 'kg', status: 'Stable' }, },
+    nutritionLifestyle: { 
+      dailyProtein: { current: 45, target: 60 }, 
+      fluidRestriction: { current: 1.2, limit: 1.5 }, 
+      caloriesToday: { current: 1850, target: 2000 }, 
+      handgripStrength: { value: 28, unit: 'kg', status: 'Stable' },
+      homeBP: { averageSystolic: 145, averageDiastolic: 85, trend: 'Worsening'},
+      bloodSugar: { lastReading: 160, unit: 'mg/dL', trend: 'High' }
+    },
     clinicVisits: { nextAppointment: '2024-12-15T10:00:00Z', lastVisitSummary: 'Routine follow-up. Patient doing well on current regimen. Discussed nutrition goals.', },
     patientEducation: [ { id: 'edu1', title: 'PD Technique Videos', description: 'Step-by-step exchange process', icon: 'Video' }, { id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }, { id: 'edu3', title: 'Nutrition Guidelines', description: 'Meal planning for PD patients', icon: 'Apple' }, ],
     mechanicalComplications: { outflowProblems: 2, inflowProblems: 1, ufFailure: 0 }

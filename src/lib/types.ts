@@ -136,6 +136,16 @@ export interface NutritionLifestyleData {
   fluidRestriction: { current: number; limit: number };
   caloriesToday: { current: number; target: number };
   handgripStrength: { value: number; unit: string; status: string };
+  homeBP?: {
+    averageSystolic: number;
+    averageDiastolic: number;
+    trend: 'Stable' | 'Improving' | 'Worsening';
+  };
+  bloodSugar?: {
+    lastReading: number;
+    unit: 'mg/dL';
+    trend: 'Stable' | 'High' | 'Low';
+  };
 }
 
 export interface ClinicVisitData {
