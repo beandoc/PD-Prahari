@@ -1,16 +1,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info, Sparkles, CheckCircle2, FileText } from 'lucide-react';
-import type { PeritonitisEpisode } from '@/lib/types';
+import type { PeritonitisEpisode, Admission } from '@/lib/types';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 
 interface PeritonitisHistoryCardProps {
   episodes: PeritonitisEpisode[];
+  admissions: Admission[];
 }
 
-export default function PeritonitisHistoryCard({ episodes }: PeritonitisHistoryCardProps) {
+export default function PeritonitisHistoryCard({ episodes, admissions }: PeritonitisHistoryCardProps) {
   return (
     <Card>
       <CardHeader>

@@ -45,6 +45,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CalendarCard from '@/components/dashboard/calendar-card';
 import NotificationsCard from '@/components/dashboard/notifications-card';
+import InfectionHotspotCard from '@/components/dashboard/InfectionHotspotCard';
 import { cn } from '@/lib/utils';
 
 const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
@@ -311,6 +312,7 @@ export default function DoctorDashboard() {
             </Tabs>
           </div>
           <div className="lg:col-span-1 space-y-6">
+            <InfectionHotspotCard patients={allPatientData} />
             <CalendarCard />
             <NotificationsCard />
           </div>
