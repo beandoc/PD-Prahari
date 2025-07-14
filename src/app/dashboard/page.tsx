@@ -99,7 +99,7 @@ export default function DoctorDashboard() {
   const nonCompliantToday = allPatientData.filter(patient => {
      if (patient.currentStatus !== 'Active PD') return false;
      if (patient.pdEvents.length === 0) return true;
-     const latestEvent = patient.pdEvents.sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
+     const latestEvent = [...patient.pdEvents].sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
      const latestEventDate = new Date(latestEvent.exchangeDateTime);
      return differenceInDays(startOfToday(), latestEventDate) >= 1;
   }).length;
@@ -114,7 +114,7 @@ export default function DoctorDashboard() {
         return allPatientData.filter(p => {
             if (p.currentStatus !== 'Active PD') return false;
             if (p.pdEvents.length === 0) return true;
-            const latestEvent = p.pdEvents.sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
+            const latestEvent = [...p.pdEvents].sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
             const latestEventDate = new Date(latestEvent.exchangeDateTime);
             return differenceInDays(startOfToday(), latestEventDate) >= 1;
         });
@@ -128,7 +128,7 @@ export default function DoctorDashboard() {
     all: 'All Patients',
     critical: 'Patients with Critical Alerts',
     review: 'Patients with Images for Review',
-    notLogged: 'Patients Who Haven\'t Logged Today',
+    notLogged: "Patients Who Haven't Logged Today",
   };
 
   return (
@@ -235,7 +235,7 @@ export default function DoctorDashboard() {
                           {filteredPatients.map(patient => {
                             const alerts = generatePatientAlerts(patient);
                             return (
-                            <TableRow key={patient.patientId} className={alerts.filter(a => a.severity === 'critical').length > 0 ? 'bg-red-50/50' : (alerts.length > 0 ? 'bg-yellow-50/50' : '')}>
+                            <TableRow key={patient.patientId} className={alerts.some(a => a.severity === 'critical') ? 'bg-red-50/50' : (alerts.length > 0 ? 'bg-yellow-50/50' : '')}>
                               <TableCell>
                                 <Link href={`/dashboard/patients/${patient.patientId}`} className="font-medium hover:underline">
                                     {patient.lastName}, {patient.firstName}
