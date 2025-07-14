@@ -3,103 +3,101 @@
 
 import { allPatientData } from '@/data/mock-data';
 import type { PatientData, PDEvent, Vital } from '@/lib/types';
+import { db } from './firebase';
+import { doc, getDoc, writeBatch, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 
-const getLocalStorageKey = (patientId: string) => `patient_data_${patientId}`;
 
 /**
- * Retrieves patient data, merging mock data with any updates from localStorage.
+ * Retrieves patient data, first trying Firestore, then falling back to mock data.
  * @param patientId The ID of the patient.
  * @returns The most up-to-date patient data.
  */
-export function getSyncedPatientData(patientId: string): PatientData | null {
-  const basePatientData = allPatientData.find(p => p.patientId === patientId);
-  if (!basePatientData) {
-    return null;
-  }
-
+export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
   try {
-    const key = getLocalStorageKey(patientId);
-    const storedUpdatesJSON = localStorage.getItem(key);
+    const docRef = doc(db, "patients", patientId);
+    const docSnap = await getDoc(docRef);
 
-    if (storedUpdatesJSON) {
-      const updates = JSON.parse(storedUpdatesJSON);
-      // Create a deep copy to avoid mutating the original mock data
-      const mergedData = JSON.parse(JSON.stringify(basePatientData));
-      
-      // Merge top-level fields
-      Object.assign(mergedData, updates.profile);
-
-      // Merge events and vitals
-      mergedData.pdEvents = [...(updates.pdEvents || []), ...mergedData.pdEvents];
-      mergedData.vitals = [...(updates.vitals || []), ...mergedData.vitals];
-
-      return mergedData;
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+      // Here you would merge the Firestore data with any other necessary client-side data.
+      // For now, we'll return it as-is, assuming the structure matches PatientData.
+      return docSnap.data() as PatientData;
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document in Firestore! Falling back to mock data.");
+      return allPatientData.find(p => p.patientId === patientId) || null;
     }
   } catch (error) {
-    console.error("Failed to read or parse from localStorage:", error);
-    // Fallback to base data if localStorage fails
+    console.error("Error getting document:", error);
+    // Fallback to mock data on error
+    return allPatientData.find(p => p.patientId === patientId) || null;
   }
-
-  return basePatientData;
 }
 
 /**
- * Saves new patient log data (PD events and vitals) to localStorage.
+ * Saves new patient log data (PD events and vitals) to Firestore.
  * @param patientId The ID of the patient.
  * @param newEvents An array of new PDEvent objects.
  * @param newVital A new Vital object.
  */
-export function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
+export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
   try {
-    const key = getLocalStorageKey(patientId);
-    const storedUpdatesJSON = localStorage.getItem(key);
-    
-    // Initialize with existing updates or create a new object
-    const updates = storedUpdatesJSON 
-      ? JSON.parse(storedUpdatesJSON) 
-      : { pdEvents: [], vitals: [], profile: {} };
-      
-    // Add the new data to the beginning of the arrays
-    if (!updates.pdEvents) updates.pdEvents = [];
-    if (!updates.vitals) updates.vitals = [];
-    updates.pdEvents.unshift(...newEvents);
-    if (Object.keys(newVital).length > 2) { // Ensure it's not just an empty object with id/date
-        updates.vitals.unshift(newVital);
+    const batch = writeBatch(db);
+    const patientRef = doc(db, "patients", patientId);
+
+    // Add new PD events to the 'pdEvents' subcollection
+    const pdEventsCollectionRef = collection(patientRef, "pdEvents");
+    newEvents.forEach(event => {
+      const eventRef = doc(pdEventsCollectionRef, event.exchangeId);
+       // Convert string dates to Firestore Timestamps
+      const eventData = {
+        ...event,
+        exchangeDateTime: Timestamp.fromDate(new Date(event.exchangeDateTime)),
+        createdAt: serverTimestamp() // Add a server timestamp
+      };
+      batch.set(eventRef, eventData);
+    });
+
+    // Add new vital to the 'vitals' subcollection
+    if (Object.keys(newVital).length > 2) { // Ensure it's not an empty object
+      const vitalsCollectionRef = collection(patientRef, "vitals");
+      const vitalRef = doc(vitalsCollectionRef, newVital.vitalId);
+      const vitalData = {
+        ...newVital,
+        measurementDateTime: Timestamp.fromDate(new Date(newVital.measurementDateTime as string)),
+        createdAt: serverTimestamp()
+      }
+      batch.set(vitalRef, vitalData);
     }
     
-    // Save back to localStorage
-    localStorage.setItem(key, JSON.stringify(updates));
+    // Commit the batch
+    await batch.commit();
+    console.log("Patient log data successfully written to Firestore.");
+
   } catch (error) {
-    console.error("Failed to save to localStorage:", error);
+    console.error("Failed to save to Firestore:", error);
   }
 }
 
 /**
  * Saves updated patient profile data to localStorage.
+ * This function will need to be updated to write to Firestore as well.
  * @param patientId The ID of the patient.
  * @param updatedData An object containing the fields to update.
  */
 export function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
+    // This function will need to be updated to write to Firestore.
+    // For now, it will log the intended action.
+    console.log(`TODO: Update patient ${patientId} in Firestore with:`, updatedData);
+    
+    // Example of how it might work:
+    /*
     try {
-        const key = getLocalStorageKey(patientId);
-        const storedUpdatesJSON = localStorage.getItem(key);
-        
-        const updates = storedUpdatesJSON
-            ? JSON.parse(storedUpdatesJSON)
-            : { pdEvents: [], vitals: [], profile: {} };
-
-        // Ensure profile object exists
-        if (!updates.profile) {
-            updates.profile = {};
-        }
-
-        // Merge the new data into the profile
-        Object.assign(updates.profile, updatedData);
-
-        // Save back to localStorage
-        localStorage.setItem(key, JSON.stringify(updates));
-
+        const patientRef = doc(db, "patients", patientId);
+        await updateDoc(patientRef, updatedData);
+        console.log("Patient profile updated in Firestore.");
     } catch (error) {
-        console.error("Failed to update patient data in localStorage:", error);
+        console.error("Failed to update patient data in Firestore:", error);
     }
+    */
 }

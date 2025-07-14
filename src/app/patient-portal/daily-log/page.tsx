@@ -113,7 +113,7 @@ export default function PatientDailyLogPage() {
     setShowUfModal(true);
   };
 
-  const handleConfirmSubmit = () => {
+  const handleConfirmSubmit = async () => {
     // Create new Vitals and PDEvent objects
     const logDateTime = date.toISOString();
     
@@ -146,8 +146,8 @@ export default function PatientDailyLogPage() {
         };
     });
 
-    // Save the new data to localStorage
-    savePatientLog(patientData.patientId, newEvents, newVital);
+    // Save the new data to Firestore
+    await savePatientLog(patientData.patientId, newEvents, newVital);
 
     toast({
         title: "Log Submitted!",
@@ -155,9 +155,6 @@ export default function PatientDailyLogPage() {
     });
 
     setShowUfModal(false);
-    // Optionally clear the form
-    // setExchanges([]);
-    // setVitals({});
   };
   
   return (
