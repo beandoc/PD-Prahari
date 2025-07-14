@@ -138,7 +138,7 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-3 gap-4">
           <div className="flex flex-col items-center justify-center rounded-lg bg-secondary/50 p-4">
             <HeartPulse className="h-6 w-6 text-destructive" />
             <div className="mt-2 text-2xl font-bold">
@@ -159,20 +159,6 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
               {latestVitals.weightKG}
             </div>
             <div className="text-xs text-muted-foreground">Weight (kg)</div>
-          </div>
-          <div className="flex flex-col items-center justify-center rounded-lg bg-secondary/50 p-4">
-            <Thermometer className="h-6 w-6 text-orange-500" />
-            <div className="mt-2 text-2xl font-bold">
-              {latestVitals.temperatureCelsius}°C
-            </div>
-            <div className="text-xs text-muted-foreground">Temperature</div>
-          </div>
-          <div className="flex flex-col items-center justify-center rounded-lg bg-secondary/50 p-4">
-            <Activity className="h-6 w-6 text-blue-500" />
-            <div className="mt-2 text-2xl font-bold">
-              {latestVitals.respiratoryRateBPM}
-            </div>
-            <div className="text-xs text-muted-foreground">Resp. Rate</div>
           </div>
         </div>
 
