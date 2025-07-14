@@ -44,6 +44,7 @@ const formSchema = z.object({
     required_error: 'Date of birth is required.',
   }),
   gender: z.string().min(1, { message: 'Gender is required.' }),
+  educationLevel: z.string().min(1, { message: 'Education is required.' }),
   
   // Contact
   contactPhone: z.string().min(1, { message: 'Contact phone is required.' }),
@@ -68,6 +69,7 @@ const formSchema = z.object({
   pdExchangeType: z.enum(['Assisted', 'Self'], {
     required_error: "You need to select an exchange type.",
   }),
+  distanceFromPDCenterKM: z.coerce.number().min(0, { message: 'Distance must be a positive number.' }),
 });
 
 export default function ClinicianPatientRegistrationPage() {
@@ -94,6 +96,8 @@ export default function ClinicianPatientRegistrationPage() {
       emergencyContactWhatsapp: '',
       underlyingKidneyDisease: '',
       physician: '',
+      educationLevel: '',
+      distanceFromPDCenterKM: 0,
     },
   });
 
@@ -130,7 +134,7 @@ export default function ClinicianPatientRegistrationPage() {
   const nextStep = async () => {
     let fieldsToValidate: (keyof z.infer<typeof formSchema>)[];
     if (step === 1) {
-        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth', 'gender', 'contactPhone', 'addressLine1', 'state', 'city', 'postalCode', 'emergencyContactName', 'emergencyContactPhone', 'emergencyContactRelation'];
+        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth', 'gender', 'contactPhone', 'addressLine1', 'state', 'city', 'postalCode', 'emergencyContactName', 'emergencyContactPhone', 'emergencyContactRelation', 'educationLevel'];
     } else {
         return;
     }
@@ -207,6 +211,21 @@ export default function ClinicianPatientRegistrationPage() {
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl>
                                     <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                                </Select><FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="educationLevel" render={({ field }) => (
+                            <FormItem><FormLabel>Educational Qualification</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select education level" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="No formal education">No formal education</SelectItem>
+                                        <SelectItem value="Primary School">Primary School</SelectItem>
+                                        <SelectItem value="High School">High School</SelectItem>
+                                        <SelectItem value="Bachelors Degree">Bachelors Degree</SelectItem>
+                                        <SelectItem value="Masters Degree">Masters Degree</SelectItem>
+                                        <SelectItem value="Doctorate">Doctorate</SelectItem>
+                                    </SelectContent>
                                 </Select><FormMessage />
                             </FormItem>
                         )} />
@@ -313,6 +332,9 @@ export default function ClinicianPatientRegistrationPage() {
                             </PopoverContent></Popover><FormMessage />
                             </FormItem>
                         )} />
+                        <FormField control={form.control} name="distanceFromPDCenterKM" render={({ field }) => (
+                            <FormItem><FormLabel>Distance from PD Center (KM)</FormLabel><FormControl><Input type="number" placeholder="Enter distance in kilometers" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
                         <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
                             <FormItem className="space-y-3"><FormLabel>PD Exchange Type</FormLabel>
                                 <FormControl>
@@ -357,5 +379,3 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
-
-    

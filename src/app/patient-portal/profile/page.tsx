@@ -1,12 +1,30 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Phone, BriefcaseMedical, Pill, Inbox, Upload, Video, ShieldAlert, AlertTriangle, CheckCircle, SlidersHorizontal, Activity } from 'lucide-react';
+import { User, Phone, BriefcaseMedical, Pill, Inbox, Upload, Video, ShieldAlert, AlertTriangle, CheckCircle, SlidersHorizontal, Activity, BookOpen, Route, Users2, CalendarClock } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
-import { format, parseISO, addMonths } from 'date-fns';
+import { format, parseISO, addMonths, differenceInMonths, differenceInYears } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+
+const getPDVintage = (startDate: string) => {
+    if (!startDate) return 'N/A';
+    const start = parseISO(startDate);
+    const now = new Date();
+    const years = differenceInYears(now, start);
+    const months = differenceInMonths(now, start) % 12;
+    let vintage = '';
+    if (years > 0) {
+        vintage += `${years} year${years > 1 ? 's' : ''}`;
+    }
+    if (months > 0) {
+        if (vintage) vintage += ', ';
+        vintage += `${months} month${months > 1 ? 's' : ''}`;
+    }
+    return vintage || 'Just started';
+};
+
 
 export default function PatientProfilePage() {
   const patient = allPatientData[0]; // Using first patient for demonstration
@@ -29,16 +47,19 @@ export default function PatientProfilePage() {
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><User className="text-primary" /> Personal Information</CardTitle>
+              <CardTitle className="flex items-center gap-2"><User className="text-primary" /> Personal &amp; Clinical Information</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div className="space-y-1"><p className="font-medium">Name</p><p className="text-muted-foreground">{patient.firstName} {patient.lastName}</p></div>
                 <div className="space-y-1"><p className="font-medium">Nephro ID</p><p className="text-muted-foreground">{patient.nephroId}</p></div>
                 <div className="space-y-1"><p className="font-medium">Date of Birth</p><p className="text-muted-foreground">{patient.dateOfBirth ? format(parseISO(patient.dateOfBirth), 'PPP') : 'N/A'}</p></div>
                 <div className="space-y-1"><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
                 <div className="space-y-1"><p className="font-medium">Primary Physician</p><p className="text-muted-foreground">{patient.physician}</p></div>
-                <div className="space-y-1"><p className="font-medium">PD Start Date</p><p className="text-muted-foreground">{patient.pdStartDate ? format(parseISO(patient.pdStartDate), 'PPP'): 'N/A'}</p></div>
-                 <div className="space-y-1"><p className="font-medium">Last Home Visit</p><p className="text-muted-foreground">{patient.lastHomeVisitDate ? format(parseISO(patient.lastHomeVisitDate), 'PPP'): 'N/A'}</p></div>
+                <div className="space-y-1 flex items-start gap-2"><BookOpen className="h-4 w-4 mt-0.5 text-muted-foreground" /><p className="font-medium text-muted-foreground">{patient.educationLevel || 'N/A'}</p></div>
+                <div className="space-y-1 flex items-start gap-2"><Route className="h-4 w-4 mt-0.5 text-muted-foreground" /><p className="font-medium text-muted-foreground">{patient.distanceFromPDCenterKM ? `${patient.distanceFromPDCenterKM} km from center` : 'N/A'}</p></div>
+                <div className="space-y-1 flex items-start gap-2"><Users2 className="h-4 w-4 mt-0.5 text-muted-foreground" /><p className="font-medium text-muted-foreground">{patient.pdExchangeType}</p></div>
+                <div className="space-y-1 flex items-start gap-2"><CalendarClock className="h-4 w-4 mt-0.5 text-muted-foreground" /><p className="font-medium text-muted-foreground">PD Vintage: {getPDVintage(patient.pdStartDate)}</p></div>
+                <div className="space-y-1 md:col-span-3"><p className="font-medium">Native Kidney Disease</p><p className="text-muted-foreground">{patient.underlyingKidneyDisease}</p></div>
             </CardContent>
           </Card>
 
