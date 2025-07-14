@@ -33,7 +33,7 @@ export const allPatientData: PatientData[] = [
     comorbidities: ['Hypertension', 'Type 2 Diabetes'],
     currentStatus: 'Active PD',
     physician: 'Dr. Sachin',
-    lastUpdated: '2024-07-28T10:00:00Z',
+    lastUpdated: '2024-07-29T10:00:00Z',
     prescription: {
       exchange: '4x Daily',
       pdStrength: 'Mixed Dextrose',
@@ -69,6 +69,17 @@ export const allPatientData: PatientData[] = [
     ],
     vitals: [
       {
+        vitalId: 'VIT-TODAY',
+        measurementDateTime: '2024-07-29T08:00:00Z',
+        systolicBP: 132,
+        diastolicBP: 81,
+        heartRateBPM: 74,
+        temperatureCelsius: 36.7,
+        weightKG: 65.1,
+        respiratoryRateBPM: 16,
+        fluidStatusNotes: 'No edema today.'
+      },
+      {
         vitalId: 'VIT-001',
         measurementDateTime: '2024-07-28T08:00:00Z',
         systolicBP: 130,
@@ -102,6 +113,7 @@ export const allPatientData: PatientData[] = [
       { labResultId: 'LAB-009', resultDateTime: '2024-06-25T09:00:00Z', testName: 'Creatinine', resultValue: 7.0, units: 'mg/dL', referenceRangeLow: 0.6, referenceRangeHigh: 1.2 },
     ],
     pdEvents: [
+      { exchangeId: 'PD-TODAY-1', exchangeDateTime: '2024-07-29T07:30:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2150, ultrafiltrationML: 150, recordedBy: 'Patient' },
       // Recent events (last 14 days) - LOW UF
       { exchangeId: 'PD-R-1', exchangeDateTime: '2024-07-28T07:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2050, ultrafiltrationML: 50, recordedBy: 'Patient' },
       { exchangeId: 'PD-R-2', exchangeDateTime: '2024-07-27T12:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2080, ultrafiltrationML: 80, recordedBy: 'Patient' },
@@ -226,7 +238,7 @@ export const allPatientData: PatientData[] = [
         { exchangeId: 'PD-005', exchangeDateTime: '2024-07-28T06:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 1800, dwellTimeHours: 4, drainVolumeML: 1900, ultrafiltrationML: 100, isEffluentCloudy: true, recordedBy: 'Patient' }
     ],
     peritonitisEpisodes: [
-      { episodeId: 'PER-002', diagnosisDate: '2024-07-15', organismIsolated: 'Pseudomonas aeruginosa', treatmentRegimen: 'Ceftazidime IP', outcome: 'In Treatment' }
+      { episodeId: 'PER-002', diagnosisDate: '2024-07-29', organismIsolated: 'Pseudomonas aeruginosa', treatmentRegimen: 'Ceftazidime IP', outcome: 'In Treatment' }
     ],
     medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', prescribingDoctor: 'Dr. Parikshit', status: 'warning' }],
     urineOutputLogs: [{ logId: 'UO-004', logDate: '2024-07-28', volumeML: 700 }],
