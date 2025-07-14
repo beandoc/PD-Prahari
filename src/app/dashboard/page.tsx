@@ -87,22 +87,28 @@ export default function DoctorDashboard() {
 
   const totalPatients = allPatientData.length;
 
-  const patientsWithCriticalAlerts = allPatientData.filter(patient => {
-    const alerts = generatePatientAlerts(patient);
-    return alerts.some(alert => alert.severity === 'critical');
-  }).length;
+  const patientsWithCriticalAlerts = useMemo(() => {
+    return allPatientData.filter(patient => {
+      const alerts = generatePatientAlerts(patient);
+      return alerts.some(alert => alert.severity === 'critical');
+    }).length;
+  }, []);
 
-  const imagesForReview = allPatientData.reduce((count, patient) => {
-    return count + (patient.uploadedImages?.filter(img => img.requiresReview).length || 0);
-  }, 0);
+  const imagesForReview = useMemo(() => {
+    return allPatientData.reduce((count, patient) => {
+      return count + (patient.uploadedImages?.filter(img => img.requiresReview).length || 0);
+    }, 0);
+  }, []);
   
-  const nonCompliantToday = allPatientData.filter(patient => {
-     if (patient.currentStatus !== 'Active PD') return false;
-     if (patient.pdEvents.length === 0) return true;
-     const latestEvent = [...patient.pdEvents].sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
-     const latestEventDate = new Date(latestEvent.exchangeDateTime);
-     return differenceInDays(startOfToday(), latestEventDate) >= 1;
-  }).length;
+  const nonCompliantToday = useMemo(() => {
+    return allPatientData.filter(patient => {
+       if (patient.currentStatus !== 'Active PD') return false;
+       if (patient.pdEvents.length === 0) return true;
+       const latestEvent = [...patient.pdEvents].sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
+       const latestEventDate = new Date(latestEvent.exchangeDateTime);
+       return differenceInDays(startOfToday(), latestEventDate) >= 1;
+    }).length;
+  }, []);
 
   const filteredPatients = useMemo(() => {
     switch (filter) {
