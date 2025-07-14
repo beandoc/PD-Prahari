@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react';
 import { allPatientData } from '@/data/mock-data';
-import type { Patient, PatientData } from '@/lib/types';
+import type { Patient, PatientData, PDEvent } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Badge } from '@/components/ui/badge';
@@ -11,25 +11,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { generatePatientAlerts } from '@/lib/alerts';
 import Link from 'next/link';
 import { AlertTriangle, Droplets, TrendingUp, Users, CalendarX, CalendarCheck, UserPlus, ShieldAlert, TrendingDown, ListTodo, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears, isAfter } from 'date-fns';
+import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears, isAfter, startOfDay } from 'date-fns';
 import { Button } from '@/components/ui/button';
 
 
 // --- Data Processing ---
 
-// 1. Fluid Management Data (demonstrated for the first patient)
-const fluidData = allPatientData[0].vitals.map(vital => {
-    const date = new Date(vital.measurementDateTime);
-    const dailyEvents = allPatientData[0].pdEvents.filter(event => new Date(event.exchangeDateTime).toDateString() === date.toDateString());
-    const dailyUF = dailyEvents.reduce((acc, curr) => acc + curr.ultrafiltrationML, 0);
-    return {
-        date: format(date, 'MMM d'),
-        weight: vital.weightKG,
-        uf: dailyUF,
-    };
-}).reverse();
-
-// 2. Patient Status Overview
+// 1. Patient Status Overview
 const patientsWithStatus = allPatientData.map(patient => {
     const alerts = generatePatientAlerts(patient);
     let status: 'critical' | 'warning' | 'stable' = 'stable';
@@ -47,11 +35,11 @@ const patientsWithStatus = allPatientData.map(patient => {
     return 0;
 });
 
-// --- NEW KPI Calculations ---
+// 2. KPI Calculations
 const today = new Date();
 const totalActivePDPatients = allPatientData.filter(p => p.currentStatus === 'Active PD').length;
 
-const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 });
 const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
 const thisWeekAppointments = allPatientData.filter(p => {
     if (!p.clinicVisits?.nextAppointment) return false;
@@ -60,7 +48,7 @@ const thisWeekAppointments = allPatientData.filter(p => {
 }).length;
 
 const startOfLastMonth = startOfMonth(subMonths(today, 1));
-const endOfThisMonth = startOfMonth(today); // end of last month is start of this month
+const endOfThisMonth = startOfMonth(today);
 const newPDPatientsLastMonth = allPatientData.filter(p => {
     const startDate = new Date(p.pdStartDate);
     return isWithinInterval(startDate, { start: startOfLastMonth, end: endOfThisMonth });
@@ -77,7 +65,7 @@ const dropouts = allPatientData.filter(p => dropoutStatuses.includes(p.currentSt
 
 const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
 
-const missedVisits = 2; // Placeholder as mock data doesn't contain past appointments
+const missedVisits = 2; // Placeholder
 
 interface FlaggedPatient {
     patientId: string;
@@ -87,11 +75,35 @@ interface FlaggedPatient {
     date: Date;
 }
 
+interface FlaggedUfPatient {
+    patientId: string;
+    firstName: string;
+    lastName: string;
+    baselineUf: number;
+    recentUf: number;
+}
+
+const getDailyUf = (events: PDEvent[]): Record<string, number> => {
+    const dailyUfMap: Record<string, number> = {};
+    events.forEach(event => {
+        const day = startOfDay(new Date(event.exchangeDateTime)).toISOString().split('T')[0];
+        dailyUfMap[day] = (dailyUfMap[day] || 0) + event.ultrafiltrationML;
+    });
+    return dailyUfMap;
+};
+
+const getAverageUf = (dailyUfMap: Record<string, number>): number => {
+    const values = Object.values(dailyUfMap);
+    if (values.length === 0) return 0;
+    return values.reduce((sum, val) => sum + val, 0) / values.length;
+};
+
 
 export default function AnalyticsPage() {
   const [infectionIndex, setInfectionIndex] = useState(0);
+  const [ufIndex, setUfIndex] = useState(0);
 
-  const flaggedPatients = useMemo(() => {
+  const flaggedInfectionPatients = useMemo(() => {
         const sixMonthsAgo = subMonths(new Date(), 6);
         const results: FlaggedPatient[] = [];
 
@@ -125,15 +137,45 @@ export default function AnalyticsPage() {
         return results.sort((a, b) => b.date.getTime() - a.date.getTime());
     }, []);
 
-    const handleNextInfection = () => {
-        setInfectionIndex((prev) => (prev + 1) % flaggedPatients.length);
-    };
+    const flaggedUfPatients = useMemo(() => {
+        const twoWeeksAgo = subDays(new Date(), 14);
+        const flagged: FlaggedUfPatient[] = [];
 
-    const handlePrevInfection = () => {
-        setInfectionIndex((prev) => (prev - 1 + flaggedPatients.length) % flaggedPatients.length);
-    };
-    
-    const currentInfection = flaggedPatients[infectionIndex];
+        allPatientData.forEach(patient => {
+            if (patient.pdEvents.length < 14) return; // Need enough data
+
+            const recentEvents = patient.pdEvents.filter(e => isAfter(new Date(e.exchangeDateTime), twoWeeksAgo));
+            const baselineEvents = patient.pdEvents.filter(e => !isAfter(new Date(e.exchangeDateTime), twoWeeksAgo));
+            
+            if (baselineEvents.length === 0 || recentEvents.length === 0) return;
+
+            const recentDailyUf = getDailyUf(recentEvents);
+            const baselineDailyUf = getDailyUf(baselineEvents);
+            
+            const recentAvg = getAverageUf(recentDailyUf);
+            const baselineAvg = getAverageUf(baselineDailyUf);
+
+            // Flag if recent UF is less than 75% of baseline and baseline is positive
+            if (baselineAvg > 100 && recentAvg < baselineAvg * 0.75) {
+                 flagged.push({
+                    patientId: patient.patientId,
+                    firstName: patient.firstName,
+                    lastName: patient.lastName,
+                    baselineUf: baselineAvg,
+                    recentUf: recentAvg
+                });
+            }
+        });
+        return flagged;
+    }, []);
+
+    const handleNextInfection = () => setInfectionIndex((prev) => (prev + 1) % flaggedInfectionPatients.length);
+    const handlePrevInfection = () => setInfectionIndex((prev) => (prev - 1 + flaggedInfectionPatients.length) % flaggedInfectionPatients.length);
+    const currentInfection = flaggedInfectionPatients[infectionIndex];
+
+    const handleNextUf = () => setUfIndex((prev) => (prev + 1) % flaggedUfPatients.length);
+    const handlePrevUf = () => setUfIndex((prev) => (prev - 1 + flaggedUfPatients.length) % flaggedUfPatients.length);
+    const currentUfPatient = flaggedUfPatients[ufIndex];
 
 
   return (
@@ -168,25 +210,53 @@ export default function AnalyticsPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Droplets className="text-blue-500" />
-                        Fluid Management Trends
+                        Patients with Decreasing Ultrafiltration
                     </CardTitle>
-                    <CardDescription>
-                        Daily weight vs. total ultrafiltration for {allPatientData[0].firstName}.
-                    </CardDescription>
+                    {flaggedUfPatients.length > 0 ? (
+                        <CardDescription>
+                           Showing {ufIndex + 1} of {flaggedUfPatients.length} patients with a significant drop in UF.
+                        </CardDescription>
+                    ) : (
+                         <CardDescription>
+                           No patients with a significant drop in UF detected.
+                        </CardDescription>
+                    )}
                 </CardHeader>
                 <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={fluidData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis yAxisId="left" stroke="#8884d8" label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft' }} />
-                            <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" label={{ value: 'UF (mL)', angle: -90, position: 'insideRight' }}/>
-                            <Tooltip />
-                            <Legend />
-                            <Line yAxisId="left" type="monotone" dataKey="weight" stroke="#8884d8" activeDot={{ r: 8 }} name="Weight (kg)" />
-                            <Line yAxisId="right" type="monotone" dataKey="uf" stroke="#82ca9d" name="UF (mL)" />
-                        </LineChart>
-                    </ResponsiveContainer>
+                     {flaggedUfPatients.length > 0 ? (
+                        <div className="space-y-4">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Patient</p>
+                                    <Link href={`/dashboard/patients/${currentUfPatient.patientId}`} className="font-bold text-lg hover:underline">
+                                        {currentUfPatient.firstName} {currentUfPatient.lastName}
+                                    </Link>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                     <div>
+                                        <p className="text-sm text-muted-foreground">Baseline UF (Avg)</p>
+                                        <p className="font-semibold">{currentUfPatient.baselineUf.toFixed(0)} mL/day</p>
+                                    </div>
+                                    <div className="text-red-600">
+                                        <p className="text-sm font-semibold text-red-800">Recent UF (Avg 14d)</p>
+                                        <p className="font-bold">{currentUfPatient.recentUf.toFixed(0)} mL/day</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <Button variant="outline" size="sm" onClick={handlePrevUf} disabled={flaggedUfPatients.length <= 1}>
+                                    <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={handleNextUf} disabled={flaggedUfPatients.length <= 1}>
+                                    Next <ChevronRight className="h-4 w-4 ml-1" />
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center text-center text-muted-foreground h-[200px]">
+                            <p>UF trends for all patients appear stable.</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
              <Card>
@@ -195,9 +265,9 @@ export default function AnalyticsPage() {
                         <AlertTriangle className="text-red-500" />
                         Infective complications (last 6 months)
                     </CardTitle>
-                    {flaggedPatients.length > 0 ? (
+                    {flaggedInfectionPatients.length > 0 ? (
                         <CardDescription>
-                           Showing {infectionIndex + 1} of {flaggedPatients.length} patients with recent infections.
+                           Showing {infectionIndex + 1} of {flaggedInfectionPatients.length} patients with recent infections.
                         </CardDescription>
                     ) : (
                          <CardDescription>
@@ -206,7 +276,7 @@ export default function AnalyticsPage() {
                     )}
                 </CardHeader>
                 <CardContent>
-                     {flaggedPatients.length > 0 ? (
+                     {flaggedInfectionPatients.length > 0 ? (
                         <div className="space-y-4">
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-2">
                                 <div>
@@ -225,10 +295,10 @@ export default function AnalyticsPage() {
                                 </div>
                             </div>
                             <div className="flex justify-between items-center">
-                                <Button variant="outline" size="sm" onClick={handlePrevInfection} disabled={flaggedPatients.length <= 1}>
+                                <Button variant="outline" size="sm" onClick={handlePrevInfection} disabled={flaggedInfectionPatients.length <= 1}>
                                     <ChevronLeft className="h-4 w-4 mr-1" /> Previous
                                 </Button>
-                                <Button variant="outline" size="sm" onClick={handleNextInfection} disabled={flaggedPatients.length <= 1}>
+                                <Button variant="outline" size="sm" onClick={handleNextInfection} disabled={flaggedInfectionPatients.length <= 1}>
                                     Next <ChevronRight className="h-4 w-4 ml-1" />
                                 </Button>
                             </div>
@@ -283,5 +353,3 @@ export default function AnalyticsPage() {
     </div>
   );
 }
-
-    
