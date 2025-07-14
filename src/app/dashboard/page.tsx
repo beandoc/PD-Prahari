@@ -50,6 +50,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CalendarCard from '@/components/dashboard/calendar-card';
 import NotificationsCard from '@/components/dashboard/notifications-card';
+import { KidneyIcon } from '@/components/kidney-icon';
 
 const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
   if (alerts.length === 0) {
@@ -186,9 +187,9 @@ export default function DoctorDashboard() {
                                   </SelectTrigger>
                                   <SelectContent>
                                       <SelectItem value="all">All</SelectItem>
-                                      <SelectItem value="atul">Dr. Atul</SelectItem>
-                                      <SelectItem value="parikshit">Dr. Parikshit</SelectItem>
-                                      <SelectItem value="sachin">Dr. Sachin</SelectItem>
+                                      <SelectItem value="Dr. Atul">Dr. Atul</SelectItem>
+                                      <SelectItem value="Dr. Parikshit">Dr. Parikshit</SelectItem>
+                                      <SelectItem value="Dr. Sachin">Dr. Sachin</SelectItem>
                                   </SelectContent>
                               </Select>
                                <Button asChild>

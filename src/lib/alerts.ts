@@ -112,7 +112,7 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
               icon: React.createElement(AlertTriangle, { className: "h-4 w-4 text-gray-500" }),
           });
       }
-  } else {
+  } else if (patient.currentStatus === 'Active PD') {
        alerts.push({
             id: 'no-logs',
             severity: 'warning',
@@ -165,10 +165,13 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
   }
 
   // 14. Non-compliance (simplified)
-  const prescriptionExchanges = 4; // Hardcoded assumption
+  const prescriptionExchanges = patient.prescription.regimen?.length || 4; // Use regimen length or default
   const today = new Date();
   const yesterday = subDays(today, 1);
-  const eventsYesterday = patient.pdEvents.filter(e => differenceInDays(yesterday, new Date(e.exchangeDateTime)) === 0).length;
+  const eventsYesterday = patient.pdEvents.filter(e => {
+    const eventDate = new Date(e.exchangeDateTime);
+    return differenceInDays(yesterday, eventDate) === 0;
+  }).length;
   
   if (eventsYesterday > 0 && eventsYesterday < prescriptionExchanges) {
       alerts.push({

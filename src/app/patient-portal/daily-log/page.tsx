@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { allPatientData } from '@/data/mock-data';
-import { format, subDays } from 'date-fns';
+import { format, subDays, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -27,20 +27,16 @@ interface ExchangeLog {
   dialysateType: string;
   fillVolume: string;
   dwellTime: string;
-  drainVolume: string; // User input
-  inflowTime: string; // User input
-  outflowTime: string; // User input
-  alarms: string; // User input
-  notes: string; // User input
-  isCloudy: boolean; // User input
+  drainVolume: string; 
+  notes: string; 
+  isCloudy: boolean;
 }
 
 export default function PatientDailyLogPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [exchanges, setExchanges] = useState<ExchangeLog[]>([]);
-  const [ufAlert, setUfAlert] = useState<string | null>(null);
-  const [totalUf, setTotalUf] = useState(0);
   const [showUfModal, setShowUfModal] = useState(false);
+  const [totalUf, setTotalUf] = useState(0);
 
   // For demonstration, we'll use the first patient's data
   const patientData = allPatientData[0];
@@ -55,9 +51,6 @@ export default function PatientDailyLogPage() {
             fillVolume: String(item.fillVolumeML),
             dwellTime: String(item.dwellTimeHours),
             drainVolume: '',
-            inflowTime: '',
-            outflowTime: '',
-            alarms: '',
             notes: '',
             isCloudy: false,
         }));
@@ -67,7 +60,9 @@ export default function PatientDailyLogPage() {
 
   
   const handleExchangeChange = (id: number, field: keyof Omit<ExchangeLog, 'id' | 'name' | 'dialysateType' | 'fillVolume' | 'dwellTime'>, value: string | boolean) => {
-    setExchanges(exchanges.map(ex => ex.id === id ? { ...ex, [field]: value } : ex));
+    setExchanges(currentExchanges => 
+      currentExchanges.map(ex => ex.id === id ? { ...ex, [field]: value } : ex)
+    );
   };
 
   const calculateUF = (fill: string, drain: string) => {
@@ -78,9 +73,18 @@ export default function PatientDailyLogPage() {
     }
     return null;
   };
+
+  const completedExchanges = useMemo(() => {
+    return exchanges.filter(e => e.drainVolume.trim() !== '');
+  }, [exchanges]);
   
   const handleSubmitClick = () => {
-    const calculatedTotalUf = exchanges.reduce((acc, ex) => {
+    if (completedExchanges.length === 0) {
+        // Or show a toast/alert
+        alert("Please enter drain volume for at least one exchange.");
+        return;
+    }
+    const calculatedTotalUf = completedExchanges.reduce((acc, ex) => {
         const uf = calculateUF(ex.fillVolume, ex.drainVolume);
         return acc + (uf || 0);
     }, 0);
@@ -89,50 +93,15 @@ export default function PatientDailyLogPage() {
   };
 
   const handleConfirmSubmit = () => {
-    console.log("Submitting logs:", { date, exchanges });
+    console.log("Submitting logs:", { 
+      date, 
+      exchanges: completedExchanges,
+      totalUf
+    });
     // In a real app, you would send this data to the server
     setShowUfModal(false);
     // Optionally, show a success toast message and navigate away or clear the form
   };
-
-  useEffect(() => {
-    // UF drop calculation logic
-    const todayTotalUf = exchanges.reduce((acc, ex) => {
-      const uf = calculateUF(ex.fillVolume, ex.drainVolume);
-      return acc + (uf || 0);
-    }, 0);
-
-    if (exchanges.every(e => e.drainVolume === '')) {
-        setUfAlert(null);
-        return;
-    }
-
-    const sevenDaysAgo = subDays(date, 7);
-    const relevantHistoricalEvents = historicalEvents.filter(event => {
-        const eventDate = new Date(event.exchangeDateTime);
-        return eventDate >= sevenDaysAgo && eventDate < date;
-    });
-    
-    const dailyUfHistory: Record<string, number> = {};
-    relevantHistoricalEvents.forEach(event => {
-        const day = format(new Date(event.exchangeDateTime), 'yyyy-MM-dd');
-        dailyUfHistory[day] = (dailyUfHistory[day] || 0) + event.ultrafiltrationML;
-    });
-
-    const historicalUfValues = Object.values(dailyUfHistory);
-    if(historicalUfValues.length < 3) { // Not enough data for a reliable baseline
-        setUfAlert(null);
-        return;
-    }
-
-    const averageHistoricalUf = historicalUfValues.reduce((sum, val) => sum + val, 0) / historicalUfValues.length;
-
-    if (averageHistoricalUf > 0 && todayTotalUf < averageHistoricalUf * 0.7) {
-      setUfAlert(`Today's total ultrafiltration of ${todayTotalUf}mL is more than a 30% drop from your recent average of ${Math.round(averageHistoricalUf)}mL. Please monitor your symptoms and contact your clinic if you feel unwell.`);
-    } else {
-      setUfAlert(null);
-    }
-  }, [exchanges, date, historicalEvents]);
   
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-8">
@@ -199,14 +168,6 @@ export default function PatientDailyLogPage() {
             </Card>
         </div>
         
-        {ufAlert && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Ultrafiltration Alert</AlertTitle>
-            <AlertDescription>{ufAlert}</AlertDescription>
-          </Alert>
-        )}
-
         <Tabs defaultValue="vitals" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="vitals">
@@ -260,16 +221,16 @@ export default function PatientDailyLogPage() {
                 </div>
                 <div className="space-y-4">
                     <Label className="font-semibold">Are you experiencing any of the following?</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                       <div className="flex items-center space-x-2"><Switch id="nausea" /><Label htmlFor="nausea">Nausea</Label></div>
-                       <div className="flex items-center space-x-2"><Switch id="swelling" /><Label htmlFor="swelling">Swelling (legs/face)</Label></div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                       <div className="flex items-center space-x-2"><Switch id="nausea" /><Label htmlFor="nausea">Nausea / Vomiting</Label></div>
+                       <div className="flex items-center space-x-2"><Switch id="swelling" /><Label htmlFor="swelling">Leg Swelling / Edema</Label></div>
                        <div className="flex items-center space-x-2"><Switch id="pain-abdomen" /><Label htmlFor="pain-abdomen">Abdominal Pain</Label></div>
                     </div>
                 </div>
                  <div className="grid grid-cols-1">
                     <div className="space-y-2">
-                        <Label htmlFor="symptoms">Any other symptoms or notes?</Label>
-                        <Textarea id="symptoms" placeholder="e.g., feeling tired, exit site pain, vomiting, fever..." />
+                        <Label htmlFor="symptoms">Any other symptoms or notes? (e.g., exit site issues, outflow problems, etc.)</Label>
+                        <Textarea id="symptoms" placeholder="Please describe any other issues like exit site pain, redness, pus, or problems with fluid draining." />
                     </div>
                 </div>
               </CardContent>
@@ -280,7 +241,7 @@ export default function PatientDailyLogPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Droplets className="text-blue-500" /> PD Exchanges</CardTitle>
-                <CardDescription>Enter the details for your {exchanges.length} prescribed exchange(s) for the day.</CardDescription>
+                <CardDescription>Enter the **drain volume** for each exchange. Other fields are pre-filled from your prescription.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {exchanges.map((exchange) => {
@@ -291,7 +252,7 @@ export default function PatientDailyLogPage() {
                       <div className="flex justify-between items-start">
                         <h3 className="font-semibold text-lg flex items-center gap-2">
                           {exchange.name}
-                          {!isComplete && <Badge variant="destructive">Incomplete</Badge>}
+                          {!isComplete ? <Badge variant="destructive">Missed</Badge> : <Badge variant="secondary" className="bg-green-100 text-green-800">Completed</Badge>}
                         </h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -304,23 +265,9 @@ export default function PatientDailyLogPage() {
                             <Input readOnly value={exchange.fillVolume} className="bg-slate-100" />
                         </div>
                          <div className="space-y-2">
-                          <Label htmlFor={`drain-${exchange.id}`}>Drain Volume (mL)</Label>
+                          <Label htmlFor={`drain-${exchange.id}`} className="font-bold text-blue-700">Drain Volume (mL)</Label>
                           <Input id={`drain-${exchange.id}`} value={exchange.drainVolume} placeholder="Enter drained volume" type="number" onChange={e => handleExchangeChange(exchange.id, 'drainVolume', e.target.value)} />
                         </div>
-                      </div>
-                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                         <div className="space-y-2">
-                           <Label><Clock className="inline h-4 w-4 mr-1" />Prescribed Dwell (hrs)</Label>
-                           <Input readOnly value={exchange.dwellTime} className="bg-slate-100" />
-                         </div>
-                         <div className="space-y-2">
-                           <Label htmlFor={`inflow-${exchange.id}`}>Inflow Time (mins)</Label>
-                           <Input id={`inflow-${exchange.id}`} value={exchange.inflowTime} placeholder="e.g., 10" type="number" onChange={e => handleExchangeChange(exchange.id, 'inflowTime', e.target.value)} />
-                         </div>
-                         <div className="space-y-2">
-                           <Label htmlFor={`outflow-${exchange.id}`}>Outflow Time (mins)</Label>
-                           <Input id={`outflow-${exchange.id}`} value={exchange.outflowTime} placeholder="e.g., 15" type="number" onChange={e => handleExchangeChange(exchange.id, 'outflowTime', e.target.value)} />
-                         </div>
                       </div>
                       <div className="flex items-center justify-between p-2 rounded-md bg-gray-50">
                          {uf !== null ? (
@@ -328,19 +275,15 @@ export default function PatientDailyLogPage() {
                                 <span>Ultrafiltration (UF):</span>
                                 <span className={cn('font-bold', uf >= 0 ? 'text-green-600' : 'text-red-600')}> {uf} mL</span>
                             </div>
-                        ) : <div />}
+                        ) : <div className="text-sm text-muted-foreground">Enter drain volume to calculate UF.</div>}
                         <div className="flex items-center space-x-2">
                             <Switch id={`cloudy-${exchange.id}`} checked={exchange.isCloudy} onCheckedChange={(checked) => handleExchangeChange(exchange.id, 'isCloudy', checked)} />
                             <Label htmlFor={`cloudy-${exchange.id}`} className="font-semibold text-yellow-600">Is fluid cloudy?</Label>
                         </div>
                       </div>
-                        <div className="space-y-2">
-                           <Label htmlFor={`alarms-${exchange.id}`}><Zap className="inline h-4 w-4 mr-1" />Alarms & Response</Label>
-                           <Textarea id={`alarms-${exchange.id}`} value={exchange.alarms} placeholder="Describe any alarms that occurred and what you did." onChange={e => handleExchangeChange(exchange.id, 'alarms', e.target.value)} />
-                        </div>
                          <div className="space-y-2">
-                           <Label htmlFor={`notes-${exchange.id}`}>Symptoms During Exchange</Label>
-                           <Textarea id={`notes-${exchange.id}`} value={exchange.notes} placeholder="e.g., mild pain, feeling of fullness, leakage..." onChange={e => handleExchangeChange(exchange.id, 'notes', e.target.value)} />
+                           <Label htmlFor={`notes-${exchange.id}`}>Symptoms or Alarms During Exchange</Label>
+                           <Textarea id={`notes-${exchange.id}`} value={exchange.notes} placeholder="e.g., mild pain, feeling of fullness, leakage, flow alarm..." onChange={e => handleExchangeChange(exchange.id, 'notes', e.target.value)} />
                         </div>
                     </div>
                   );
@@ -378,13 +321,15 @@ export default function PatientDailyLogPage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Confirm Daily Log Submission</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Your total calculated ultrafiltration for {format(date, "PPP")} is <strong className={cn(totalUf >= 0 ? 'text-green-700' : 'text-red-700')}>{totalUf} mL</strong>.
+                    You completed {completedExchanges.length} out of {exchanges.length} exchanges.
+                    <br/>
+                    Your total calculated ultrafiltration for today is <strong className={cn(totalUf >= 0 ? 'text-green-700' : 'text-red-700')}>{totalUf} mL</strong>.
                     <br />
-                    Does this look correct?
+                    Does this look correct? Missed exchanges cannot be edited after submission.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Go Back</AlertDialogCancel>
+                  <AlertDialogCancel>Go Back & Edit</AlertDialogCancel>
                   <AlertDialogAction onClick={handleConfirmSubmit}>Confirm & Submit</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
