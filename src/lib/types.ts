@@ -135,7 +135,7 @@ export interface NutritionLifestyleData {
   dailyProtein: { current: number; target: number };
   fluidRestriction: { current: number; limit: number };
   caloriesToday: { current: number; target: number };
-  handgripStrength: { value: number; unit: string; status: string };
+  dailyActivity: { current: number; target: number };
   homeBP?: {
     averageSystolic: number;
     averageDiastolic: number;

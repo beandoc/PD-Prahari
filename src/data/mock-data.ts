@@ -152,8 +152,8 @@ export const allPatientData: PatientData[] = [
     nutritionLifestyle: { 
       dailyProtein: { current: 45, target: 60 }, 
       fluidRestriction: { current: 1.2, limit: 1.5 }, 
-      caloriesToday: { current: 1850, target: 2000 }, 
-      handgripStrength: { value: 28, unit: 'kg', status: 'Stable' },
+      caloriesToday: { current: 1850, target: 2000 },
+      dailyActivity: { current: 3200, target: 5000 },
       homeBP: { averageSystolic: 145, averageDiastolic: 85, trend: 'Worsening'},
       bloodSugar: { lastReading: 160, unit: 'mg/dL', trend: 'High' }
     },
@@ -195,7 +195,7 @@ export const allPatientData: PatientData[] = [
     urineOutputLogs: [{ logId: 'UO-003', logDate: '2024-07-28', volumeML: 150 }],
     pdAdequacy: [{ testId: 'KT-002', testDate: '2024-07-01', totalKtV: 1.6, peritonealKtV: 1.5, notes: 'Borderline adequate.'}],
     patientReportedOutcomes: [{ surveyId: 'PRO-002', surveyDate: '2024-07-01', surveyTool: 'KDQOL-36', score: 65, summary: 'Patient reports feeling well but has concerns about fluid retention.' }],
-    nutritionLifestyle: { dailyProtein: { current: 55, target: 70 }, fluidRestriction: { current: 1.4, limit: 1.8 }, caloriesToday: { current: 2100, target: 2200 }, handgripStrength: { value: 35, unit: 'kg', status: 'Improving' }},
+    nutritionLifestyle: { dailyProtein: { current: 55, target: 70 }, fluidRestriction: { current: 1.4, limit: 1.8 }, caloriesToday: { current: 2100, target: 2200 }, dailyActivity: { current: 2000, target: 3000 }},
     clinicVisits: { nextAppointment: '2024-08-01T11:00:00Z', lastVisitSummary: 'Blood pressure slightly elevated. Continue monitoring.' },
     patientEducation: [{ id: 'edu1', title: 'PD Technique Videos', description: 'Step-by-step exchange process', icon: 'Video' }]
   },
@@ -236,7 +236,7 @@ export const allPatientData: PatientData[] = [
     urineOutputLogs: [{ logId: 'UO-004', logDate: '2024-07-28', volumeML: 700 }],
     pdAdequacy: [{ testId: 'KT-003', testDate: '2024-05-15', totalKtV: 1.9, peritonealKtV: 1.3, notes: 'Good total clearance, significant contribution from RKF.'}],
     patientReportedOutcomes: [{ surveyId: 'PRO-003', surveyDate: '2024-05-15', surveyTool: 'KDQOL-36', score: 85, summary: 'Patient reports high quality of life.' }],
-    nutritionLifestyle: { dailyProtein: { current: 50, target: 55 }, fluidRestriction: { current: 1.1, limit: 1.2 }, caloriesToday: { current: 1700, target: 1800 }, handgripStrength: { value: 25, unit: 'kg', status: 'Stable' }},
+    nutritionLifestyle: { dailyProtein: { current: 50, target: 55 }, fluidRestriction: { current: 1.1, limit: 1.2 }, caloriesToday: { current: 1700, target: 1800 }, dailyActivity: { current: 4500, target: 6000 }},
     clinicVisits: { nextAppointment: '2025-01-10T09:00:00Z', lastVisitSummary: 'Anemia management discussed. Continue EPO.' },
     patientEducation: [{ id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }]
   },
@@ -260,7 +260,7 @@ export const allPatientData: PatientData[] = [
       exchangeTimeMinutes: 30,
     },
     vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
-    nutritionLifestyle: { dailyProtein: { current: 0, target: 75 }, fluidRestriction: { current: 0, limit: 2.0 }, caloriesToday: { current: 0, target: 2500 }, handgripStrength: { value: 40, unit: 'kg', status: 'Good' }},
+    nutritionLifestyle: { dailyProtein: { current: 0, target: 75 }, fluidRestriction: { current: 0, limit: 2.0 }, caloriesToday: { current: 0, target: 2500 }, dailyActivity: { current: 0, target: 8000 }},
     clinicVisits: { nextAppointment: '2024-08-15T14:00:00Z', lastVisitSummary: 'Initial PD training completed.' },
     patientEducation: []
   },
@@ -284,7 +284,7 @@ export const allPatientData: PatientData[] = [
       exchangeTimeMinutes: 30,
     },
     vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
-    nutritionLifestyle: { dailyProtein: { current: 0, target: 60 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 1800 }, handgripStrength: { value: 22, unit: 'kg', status: 'Poor' }},
+    nutritionLifestyle: { dailyProtein: { current: 0, target: 60 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 1800 }, dailyActivity: { current: 0, target: 2000 }},
     clinicVisits: { nextAppointment: '', lastVisitSummary: 'Patient expired.' },
     patientEducation: []
   },
@@ -308,7 +308,7 @@ export const allPatientData: PatientData[] = [
       exchangeTimeMinutes: 0,
     },
     vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
-    nutritionLifestyle: { dailyProtein: { current: 0, target: 65 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 2000 }, handgripStrength: { value: 30, unit: 'kg', status: 'Stable' }},
+    nutritionLifestyle: { dailyProtein: { current: 0, target: 65 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 2000 }, dailyActivity: { current: 0, target: 5000 }},
     clinicVisits: { nextAppointment: '2024-08-20T09:30:00Z', lastVisitSummary: 'Pre-PD counselling session.' },
     patientEducation: []
   }

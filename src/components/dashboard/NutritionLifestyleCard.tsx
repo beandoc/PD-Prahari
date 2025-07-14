@@ -1,6 +1,7 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Salad, Info, Heart, Droplet } from 'lucide-react';
+import { Salad, Info, Heart, Droplet, Footprints } from 'lucide-react';
 import type { NutritionLifestyleData } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -92,11 +93,13 @@ export default function NutritionLifestyleCard({ data }: NutritionLifestyleCardP
                 <p className="text-xl font-bold">{data.caloriesToday.current.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">Target: {data.caloriesToday.target.toLocaleString()}</p>
             </div>
-            <div className="rounded-lg bg-gray-100 p-2">
-                <p className="text-xs text-muted-foreground">Handgrip Strength</p>
-                <p className="text-xl font-bold">{data.handgripStrength.value} kg</p>
-                <p className="text-xs text-green-600 font-semibold">{data.handgripStrength.status}</p>
-            </div>
+            {data.dailyActivity && (
+              <div className="rounded-lg bg-gray-100 p-2">
+                  <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5"><Footprints className="h-3 w-3" /> Daily Activity</p>
+                  <p className="text-xl font-bold">{data.dailyActivity.current.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Target: {data.dailyActivity.target.toLocaleString()} steps</p>
+              </div>
+            )}
         </div>
       </CardContent>
     </Card>
