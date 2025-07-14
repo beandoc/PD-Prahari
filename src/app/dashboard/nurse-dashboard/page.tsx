@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,18 @@ const getAlertIcon = (type: AlertItem['type']) => {
 }
 
 export default function NurseDashboardPage() {
+    const [urgentAlerts, setUrgentAlerts] = useState<AlertItem[]>([]);
+
+    useEffect(() => {
+        // --- Generate dummy alerts for demonstration on the client side ---
+        const alerts: AlertItem[] = [
+            { patient: allPatientData[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) },
+            { patient: allPatientData[2], type: 'cloudy', details: 'Reported cloudy effluent bag this morning.', date: new Date() },
+            { patient: allPatientData[1], type: 'symptom', details: 'New symptom: mild ankle edema.', date: addDays(new Date(), -2) },
+        ];
+        setUrgentAlerts(alerts);
+    }, []);
+
     // --- Data processing for dashboard metrics ---
     const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
     
@@ -68,12 +81,6 @@ export default function NurseDashboardPage() {
         .filter(p => p.nextVisitDue > new Date() && p.nextVisitDue < addDays(new Date(), 30))
         .sort((a, b) => a.nextVisitDue.getTime() - b.nextVisitDue.getTime());
 
-    // --- Generate dummy alerts for demonstration ---
-    const urgentAlerts: AlertItem[] = [
-        { patient: allPatientData[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) },
-        { patient: allPatientData[2], type: 'cloudy', details: 'Reported cloudy effluent bag this morning.', date: new Date() },
-        { patient: allPatientData[1], type: 'symptom', details: 'New symptom: mild ankle edema.', date: addDays(new Date(), -2) },
-    ];
     
     return (
         <div className="space-y-6">
@@ -136,7 +143,7 @@ export default function NurseDashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <ul className="space-y-3">
-                            {urgentAlerts.map((alert, index) => (
+                            {urgentAlerts.length > 0 ? urgentAlerts.map((alert, index) => (
                                 <li key={index} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border">
                                     <div className="pt-1">{getAlertIcon(alert.type)}</div>
                                     <div>
@@ -149,7 +156,9 @@ export default function NurseDashboardPage() {
                                         <p className="text-xs text-muted-foreground">{format(alert.date, 'PPP HH:mm')}</p>
                                     </div>
                                 </li>
-                            ))}
+                            )) : (
+                               <li className="text-center h-24 text-muted-foreground">No urgent alerts.</li> 
+                            )}
                         </ul>
                     </CardContent>
                 </Card>
