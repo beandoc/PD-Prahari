@@ -1,15 +1,21 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Phone, BriefcaseMedical, Pill, Inbox, Upload, Video, ShieldAlert, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { User, Phone, BriefcaseMedical, Pill, Inbox, Upload, Video, ShieldAlert, AlertTriangle, CheckCircle, SlidersHorizontal, Activity } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, addMonths } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
 export default function PatientProfilePage() {
   const patient = allPatientData[0]; // Using first patient for demonstration
+  const latestAdequacy = patient.pdAdequacy.length > 0 ? patient.pdAdequacy.sort((a,b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime())[0] : null;
+
+  // Dummy dates for transfer set
+  const lastTransferSetChangeDate = patient.pdStartDate ? new Date(patient.pdStartDate) : new Date();
+  const nextTransferSetChangeDueDate = addMonths(lastTransferSetChangeDate, 6);
+
 
   return (
     <div className="space-y-6">
@@ -32,7 +38,38 @@ export default function PatientProfilePage() {
                 <div className="space-y-1"><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
                 <div className="space-y-1"><p className="font-medium">Primary Physician</p><p className="text-muted-foreground">{patient.physician}</p></div>
                 <div className="space-y-1"><p className="font-medium">PD Start Date</p><p className="text-muted-foreground">{patient.pdStartDate ? format(parseISO(patient.pdStartDate), 'PPP'): 'N/A'}</p></div>
-                 <div className="space-y-1"><p className="font-medium">Last Hospital Visit</p><p className="text-muted-foreground">{patient.lastHomeVisitDate ? format(parseISO(patient.lastHomeVisitDate), 'PPP'): 'N/A'}</p></div>
+                 <div className="space-y-1"><p className="font-medium">Last Home Visit</p><p className="text-muted-foreground">{patient.lastHomeVisitDate ? format(parseISO(patient.lastHomeVisitDate), 'PPP'): 'N/A'}</p></div>
+            </CardContent>
+          </Card>
+
+           <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><SlidersHorizontal className="text-teal-600" /> PD Parameters</CardTitle>
+              <CardDescription>Key details about your peritoneal dialysis setup.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="p-3 bg-slate-50 border rounded-lg"><p className="font-medium">Transporter Status</p><p className="text-muted-foreground">{patient.membraneTransportType || 'N/A'}</p></div>
+                <div className="p-3 bg-slate-50 border rounded-lg"><p className="font-medium">Last Transfer Set Change</p><p className="text-muted-foreground">{format(lastTransferSetChangeDate, 'PPP')}</p></div>
+                <div className="p-3 bg-slate-50 border rounded-lg"><p className="font-medium">Next Change Due</p><p className="text-muted-foreground">{format(nextTransferSetChangeDueDate, 'PPP')}</p></div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Activity className="text-indigo-500" /> PD Adequacy</CardTitle>
+                <CardDescription>Metrics showing how well your dialysis is working.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                    <p className="font-semibold text-sm text-indigo-800">Latest Kt/V</p>
+                    <p className="text-3xl font-bold text-indigo-600">{latestAdequacy?.totalKtV?.toFixed(2) || 'N/A'}</p>
+                    {latestAdequacy && <p className="text-xs text-muted-foreground">from {format(parseISO(latestAdequacy.testDate), 'PPP')}</p>}
+                </div>
+                 <div className="p-4 bg-slate-50 border rounded-lg">
+                    <p className="font-semibold text-sm text-slate-800">Last PET Test</p>
+                    <p className="text-lg font-bold text-slate-600">{latestAdequacy ? format(parseISO(latestAdequacy.testDate), 'PPP') : 'No test on record'}</p>
+                    {latestAdequacy && <Button variant="link" className="p-0 h-auto text-sm">View Report</Button>}
+                </div>
             </CardContent>
           </Card>
           
