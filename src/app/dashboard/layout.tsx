@@ -20,6 +20,7 @@ import {
   UserPlus,
   Boxes,
   Users,
+  UserCog,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -54,6 +55,7 @@ const nurseNavLinks = [
   { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Dashboard', icon: LayoutGrid },
   { href: '/dashboard/nurse-checklist', label: 'PD Nurse Checklist', icon: ClipboardCheck },
   { href: '/dashboard/pd-logs', label: 'Patient PD Logs', icon: Droplets },
+  { href: '/dashboard/update-records', label: 'Update Records', icon: UserCog },
   { href: '/registration', label: 'Register Patient', icon: UserPlus },
 ];
 
@@ -65,7 +67,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   // Simple logic to determine the role based on URL.
   // In a real app, this would come from an auth context.
-  const isNurseView = pathname.startsWith('/dashboard/nurse-');
+  const isNurseView = pathname.startsWith('/dashboard/nurse-') || pathname.startsWith('/dashboard/update-records');
 
   const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
 

@@ -26,9 +26,12 @@ export function getSyncedPatientData(patientId: string): PatientData | null {
       // Create a deep copy to avoid mutating the original mock data
       const mergedData = JSON.parse(JSON.stringify(basePatientData));
       
+      // Merge top-level fields
+      Object.assign(mergedData, updates.profile);
+
       // Merge events and vitals
-      mergedData.pdEvents = [...updates.pdEvents, ...mergedData.pdEvents];
-      mergedData.vitals = [...updates.vitals, ...mergedData.vitals];
+      mergedData.pdEvents = [...(updates.pdEvents || []), ...mergedData.pdEvents];
+      mergedData.vitals = [...(updates.vitals || []), ...mergedData.vitals];
 
       return mergedData;
     }
@@ -54,9 +57,11 @@ export function savePatientLog(patientId: string, newEvents: PDEvent[], newVital
     // Initialize with existing updates or create a new object
     const updates = storedUpdatesJSON 
       ? JSON.parse(storedUpdatesJSON) 
-      : { pdEvents: [], vitals: [] };
+      : { pdEvents: [], vitals: [], profile: {} };
       
     // Add the new data to the beginning of the arrays
+    if (!updates.pdEvents) updates.pdEvents = [];
+    if (!updates.vitals) updates.vitals = [];
     updates.pdEvents.unshift(...newEvents);
     if (Object.keys(newVital).length > 2) { // Ensure it's not just an empty object with id/date
         updates.vitals.unshift(newVital);
@@ -67,4 +72,34 @@ export function savePatientLog(patientId: string, newEvents: PDEvent[], newVital
   } catch (error) {
     console.error("Failed to save to localStorage:", error);
   }
+}
+
+/**
+ * Saves updated patient profile data to localStorage.
+ * @param patientId The ID of the patient.
+ * @param updatedData An object containing the fields to update.
+ */
+export function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
+    try {
+        const key = getLocalStorageKey(patientId);
+        const storedUpdatesJSON = localStorage.getItem(key);
+        
+        const updates = storedUpdatesJSON
+            ? JSON.parse(storedUpdatesJSON)
+            : { pdEvents: [], vitals: [], profile: {} };
+
+        // Ensure profile object exists
+        if (!updates.profile) {
+            updates.profile = {};
+        }
+
+        // Merge the new data into the profile
+        Object.assign(updates.profile, updatedData);
+
+        // Save back to localStorage
+        localStorage.setItem(key, JSON.stringify(updates));
+
+    } catch (error) {
+        console.error("Failed to update patient data in localStorage:", error);
+    }
 }
