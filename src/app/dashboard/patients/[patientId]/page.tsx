@@ -9,7 +9,6 @@ import PatientEducationCard from '@/components/dashboard/PatientEducationCard';
 import VitalsCard from '@/components/dashboard/vitals-card';
 import LabResultsCard from '@/components/dashboard/lab-results-card';
 import PDExchangeCard from '@/components/dashboard/pd-exchange-card';
-import AIMedicationTool from '@/components/dashboard/ai-medication-tool';
 
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
   const patientData = allPatientData.find(p => p.patientId === params.patientId);
@@ -34,7 +33,6 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
             </div>
         </div>
         <div className="lg:col-span-1 space-y-6">
-            <AIMedicationTool patientData={patientData} />
             <ClinicVisitsCard data={patientData.clinicVisits} />
             <NutritionLifestyleCard data={patientData.nutritionLifestyle} />
             <PatientEducationCard topics={patientData.patientEducation} />
