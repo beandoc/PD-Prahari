@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -9,12 +10,13 @@ import {
   Camera,
   ClipboardX,
   PlusCircle,
+  FilterX,
 } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
 import type { PatientData } from '@/lib/types';
 import { generatePatientAlerts } from '@/lib/alerts';
 import type { Alert } from '@/lib/alerts';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, startOfToday } from 'date-fns';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,6 +53,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import CalendarCard from '@/components/dashboard/calendar-card';
 import NotificationsCard from '@/components/dashboard/notifications-card';
 import { KidneyIcon } from '@/components/kidney-icon';
+import { cn } from '@/lib/utils';
+
 
 const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
   if (alerts.length === 0) {
@@ -88,6 +92,8 @@ const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
 
 
 export default function DoctorDashboard() {
+  const [filter, setFilter] = useState<'all' | 'critical' | 'review' | 'notLogged'>('all');
+
   const totalPatients = allPatientData.length;
 
   const patientsWithCriticalAlerts = allPatientData.filter(patient => {
@@ -100,13 +106,39 @@ export default function DoctorDashboard() {
   }, 0);
   
   const nonCompliantToday = allPatientData.filter(patient => {
+     if (patient.currentStatus !== 'Active PD') return false;
      if (patient.pdEvents.length === 0) return true;
-     // Sort to find the most recent event
      const latestEvent = patient.pdEvents.sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
      const latestEventDate = new Date(latestEvent.exchangeDateTime);
-     const today = new Date();
-     return differenceInDays(today, latestEventDate) >= 1;
+     return differenceInDays(startOfToday(), latestEventDate) >= 1;
   }).length;
+
+  const filteredPatients = useMemo(() => {
+    switch (filter) {
+      case 'critical':
+        return allPatientData.filter(p => generatePatientAlerts(p).some(a => a.severity === 'critical'));
+      case 'review':
+        return allPatientData.filter(p => p.uploadedImages?.some(img => img.requiresReview));
+      case 'notLogged':
+        return allPatientData.filter(p => {
+            if (p.currentStatus !== 'Active PD') return false;
+            if (p.pdEvents.length === 0) return true;
+            const latestEvent = p.pdEvents.sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
+            const latestEventDate = new Date(latestEvent.exchangeDateTime);
+            return differenceInDays(startOfToday(), latestEventDate) >= 1;
+        });
+      case 'all':
+      default:
+        return allPatientData;
+    }
+  }, [filter]);
+
+  const filterTitles = {
+    all: 'All Patients',
+    critical: 'Patients with Critical Alerts',
+    review: 'Patients with Images for Review',
+    notLogged: 'Patients Who Haven\'t Logged Today',
+  };
 
   return (
     <div className="space-y-6">
@@ -118,7 +150,7 @@ export default function DoctorDashboard() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
+                <Card className={cn("hover:bg-muted/50 cursor-pointer transition-colors", filter === 'all' && 'ring-2 ring-primary')} onClick={() => setFilter('all')}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -128,7 +160,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">managed in this clinic</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className={cn("hover:bg-muted/50 cursor-pointer transition-colors", filter === 'critical' && 'ring-2 ring-primary')} onClick={() => setFilter('critical')}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
                         <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -138,7 +170,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">require immediate attention</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className={cn("hover:bg-muted/50 cursor-pointer transition-colors", filter === 'review' && 'ring-2 ring-primary')} onClick={() => setFilter('review')}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Images for Review</CardTitle>
                         <Camera className="h-4 w-4 text-muted-foreground" />
@@ -148,7 +180,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">newly uploaded photos</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className={cn("hover:bg-muted/50 cursor-pointer transition-colors", filter === 'notLogged' && 'ring-2 ring-primary')} onClick={() => setFilter('notLogged')}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Not Logged Today</CardTitle>
                         <ClipboardX className="h-4 w-4 text-muted-foreground" />
@@ -171,27 +203,22 @@ export default function DoctorDashboard() {
                   <CardHeader>
                       <div className="flex items-center justify-between">
                           <div>
-                              <CardTitle>Patients</CardTitle>
+                              <CardTitle>{filterTitles[filter]}</CardTitle>
                               <CardDescription>
-                                  A list of patients under your care. Total: {allPatientData.length}
+                                  Showing {filteredPatients.length} of {allPatientData.length} patients.
                               </CardDescription>
                           </div>
                           <div className="flex items-center gap-2">
+                              {filter !== 'all' && (
+                                <Button variant="ghost" onClick={() => setFilter('all')}>
+                                  <FilterX className="mr-2 h-4 w-4" />
+                                  Clear Filter
+                                </Button>
+                              )}
                               <div className="relative">
                                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                   <Input type="search" placeholder="Patient Search..." className="pl-8" />
                               </div>
-                              <Select>
-                                  <SelectTrigger className="w-[180px]">
-                                      <SelectValue placeholder="Attending Physician" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      <SelectItem value="all">All</SelectItem>
-                                      <SelectItem value="Dr. Atul">Dr. Atul</SelectItem>
-                                      <SelectItem value="Dr. Parikshit">Dr. Parikshit</SelectItem>
-                                      <SelectItem value="Dr. Sachin">Dr. Sachin</SelectItem>
-                                  </SelectContent>
-                              </Select>
                                <Button asChild>
                                 <Link href="/registration">
                                   <PlusCircle className="mr-2 h-4 w-4" />
@@ -214,7 +241,7 @@ export default function DoctorDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {allPatientData.map(patient => {
+                          {filteredPatients.map(patient => {
                             const alerts = generatePatientAlerts(patient);
                             return (
                             <TableRow key={patient.patientId} className={alerts.filter(a => a.severity === 'critical').length > 0 ? 'bg-red-50/50' : (alerts.length > 0 ? 'bg-yellow-50/50' : '')}>
@@ -266,7 +293,7 @@ export default function DoctorDashboard() {
                             <CardDescription>
                             Generate and view clinical reports.
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                             <p className="text-muted-foreground">Report generation options will be available here.</p>
                         </CardContent>
@@ -279,7 +306,7 @@ export default function DoctorDashboard() {
                             <CardDescription>
                             Manage clinic-wide settings and configurations.
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                             <p className="text-muted-foreground">Settings for the clinic will be managed from this section.</p>
                         </CardContent>
