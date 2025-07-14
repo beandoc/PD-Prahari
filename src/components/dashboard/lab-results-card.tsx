@@ -130,7 +130,7 @@ export default function LabResultsCard({ labResults }: LabResultsCardProps) {
             {keyLabTests.map(({ name, result }) => {
               if (!result) {
                 return (
-                    <TableRow key={name}>
+                    <TableRow key={`no-data-${name}`}>
                         <TableCell className="font-medium">{name}</TableCell>
                         <TableCell colSpan={3} className="text-muted-foreground text-center">No Data</TableCell>
                     </TableRow>
