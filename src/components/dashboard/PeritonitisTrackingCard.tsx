@@ -1,23 +1,16 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info, Sparkles, CheckCircle2, FileText } from 'lucide-react';
-import type { PeritonitisEpisode, Admission } from '@/lib/types';
+import type { PeritonitisEpisode } from '@/lib/types';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 
 interface PeritonitisHistoryCardProps {
   episodes: PeritonitisEpisode[];
-  admissions: Admission[];
 }
 
-export default function PeritonitisHistoryCard({ episodes, admissions }: PeritonitisHistoryCardProps) {
-
-  const wasAdmittedForEpisode = (episode: PeritonitisEpisode) => {
-    if (!episode.admissionId) return false;
-    return admissions.some(admission => admission.admissionId === episode.admissionId);
-  };
-
+export default function PeritonitisHistoryCard({ episodes }: PeritonitisHistoryCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -48,16 +41,14 @@ export default function PeritonitisHistoryCard({ episodes, admissions }: Periton
                 </div>
                 <p className="text-xs mt-2">Treatment: {episode.treatmentRegimen}</p>
                  {episode.resolutionDate && <p className="text-xs mt-1 text-muted-foreground">Resolved on: {format(new Date(episode.resolutionDate), 'MMMM dd, yyyy')}</p>}
-                 {wasAdmittedForEpisode(episode) && (
-                    <div className="mt-2">
-                       <Button asChild variant="link" size="sm" className="p-0 h-auto text-xs">
-                         <Link href="#">
-                            <FileText className="mr-1 h-3 w-3" />
-                            View Discharge Summary
-                         </Link>
-                       </Button>
-                    </div>
-                 )}
+                <div className="mt-2">
+                   <Button asChild variant="link" size="sm" className="p-0 h-auto text-xs">
+                     <Link href="#">
+                        <FileText className="mr-1 h-3 w-3" />
+                        Download PD Culture Sensitivity Report
+                     </Link>
+                   </Button>
+                </div>
               </li>
             ))}
           </ul>
