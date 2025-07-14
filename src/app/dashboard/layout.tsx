@@ -18,6 +18,7 @@ import {
   ClipboardCheck,
   HeartPulse,
   UserPlus,
+  Boxes,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/dashboard/pd-logs', label: 'PD Logs', icon: Droplets },
   { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
+  { href: '/dashboard/inventory', label: 'Inventory', icon: Boxes },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
   { href: '/dashboard/nurse-checklist', label: 'Nurse Checklist', icon: ClipboardCheck },
   { href: '/registration', label: 'Register Patient', icon: UserPlus },
