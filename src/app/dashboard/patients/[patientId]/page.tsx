@@ -43,3 +43,4 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
     </div>
   );
 }
+
