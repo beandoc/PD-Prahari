@@ -10,8 +10,10 @@ export default function WelcomePage() {
     <div className="w-full min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4">
         <div className="max-w-4xl w-full">
             <header className="text-center mb-12">
-                <div className="flex justify-center items-center gap-3 mb-2">
-                    <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={128} height={128} />
+                <div className="flex justify-center items-center gap-6 mb-4">
+                     <div className="p-2 bg-white rounded-full border-4 border-primary shadow-lg">
+                        <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={160} height={160} className="rounded-full" />
+                    </div>
                     <h1 className="text-5xl font-bold text-gray-800">
                         PD Prahari
                     </h1>
