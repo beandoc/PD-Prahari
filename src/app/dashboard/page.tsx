@@ -29,13 +29,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Table,
   TableBody,
   TableCell,
@@ -52,7 +45,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CalendarCard from '@/components/dashboard/calendar-card';
 import NotificationsCard from '@/components/dashboard/notifications-card';
-import { KidneyIcon } from '@/components/kidney-icon';
 import { cn } from '@/lib/utils';
 
 
@@ -89,7 +81,6 @@ const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
     </TooltipProvider>
   );
 };
-
 
 export default function DoctorDashboard() {
   const [filter, setFilter] = useState<'all' | 'critical' | 'review' | 'notLogged'>('all');
@@ -280,7 +271,7 @@ export default function DoctorDashboard() {
                             <CardDescription>
                             Review patient dialysis adequacy metrics.
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                             <p className="text-muted-foreground">Adequacy data and visualizations will be displayed here.</p>
                         </CardContent>
