@@ -18,13 +18,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
+  const { patientId } = params;
 
   useEffect(() => {
     // On component mount, get the latest patient data by merging
     // mock data with any updates from localStorage.
-    const data = getSyncedPatientData(params.patientId);
+    const data = getSyncedPatientData(patientId);
     setPatientData(data);
-  }, [params.patientId]);
+  }, [patientId]);
 
   if (!patientData) {
     return (
