@@ -102,35 +102,19 @@ export const allPatientData: PatientData[] = [
       { labResultId: 'LAB-009', resultDateTime: '2024-06-25T09:00:00Z', testName: 'Creatinine', resultValue: 7.0, units: 'mg/dL', referenceRangeLow: 0.6, referenceRangeHigh: 1.2 },
     ],
     pdEvents: [
-      {
-        exchangeId: 'PD-001',
-        exchangeDateTime: '2024-07-28T07:00:00Z',
-        dialysateType: 'Dextrose 1.5%',
-        fillVolumeML: 2000,
-        dwellTimeHours: 4,
-        drainVolumeML: 2150,
-        ultrafiltrationML: 150,
-        inflowTimeMinutes: 10,
-        outflowTimeMinutes: 15,
-        isEffluentCloudy: false,
-        recordedBy: 'Patient',
-      },
-      {
-        exchangeId: 'PD-002',
-        exchangeDateTime: '2024-07-27T22:00:00Z',
-        dialysateType: 'Icodextrin 7.5%',
-        fillVolumeML: 2000,
-        dwellTimeHours: 8,
-        drainVolumeML: 2200,
-        ultrafiltrationML: 200,
-        inflowTimeMinutes: 12,
-        outflowTimeMinutes: 20,
-        isEffluentCloudy: false,
-        recordedBy: 'Patient',
-      },
+      // Recent events (last 14 days) - LOW UF
+      { exchangeId: 'PD-R-1', exchangeDateTime: '2024-07-28T07:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2050, ultrafiltrationML: 50, recordedBy: 'Patient' },
+      { exchangeId: 'PD-R-2', exchangeDateTime: '2024-07-27T12:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2080, ultrafiltrationML: 80, recordedBy: 'Patient' },
+      { exchangeId: 'PD-R-3', exchangeDateTime: '2024-07-26T07:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2060, ultrafiltrationML: 60, recordedBy: 'Patient' },
+
+      // Historical events (>14 days ago) - HIGH UF (BASELINE)
+      { exchangeId: 'PD-H-1', exchangeDateTime: '2024-07-01T07:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2300, ultrafiltrationML: 300, recordedBy: 'Patient' },
+      { exchangeId: 'PD-H-2', exchangeDateTime: '2024-07-01T12:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2350, ultrafiltrationML: 350, recordedBy: 'Patient' },
+      { exchangeId: 'PD-H-3', exchangeDateTime: '2024-07-02T07:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2320, ultrafiltrationML: 320, recordedBy: 'Patient' },
+      { exchangeId: 'PD-H-4', exchangeDateTime: '2024-07-02T12:00:00Z', dialysateType: 'Dextrose 2.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2280, ultrafiltrationML: 280, recordedBy: 'Patient' },
     ],
     peritonitisEpisodes: [
-      { episodeId: 'PER-001', diagnosisDate: '2023-11-10', organismIsolated: 'Staphylococcus epidermidis', treatmentRegimen: 'Vancomycin IP', outcome: 'Resolved', resolutionDate: '2023-11-24', admissionId: 'ADM-002' },
+      { episodeId: 'PER-001', diagnosisDate: '2024-05-15', organismIsolated: 'Staphylococcus epidermidis', treatmentRegimen: 'Vancomycin IP', outcome: 'Resolved', resolutionDate: '2024-05-29', admissionId: 'ADM-002' },
     ],
     medications: [
       { medicationId: 'MED-001', medicationName: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', startDate: '2022-01-20', prescribingDoctor: 'Dr. Sachin', status: 'ok' },
@@ -175,6 +159,8 @@ export const allPatientData: PatientData[] = [
     underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
     currentStatus: 'Transferred to HD',
     physician: 'Dr. Atul',
+    lastHomeVisitDate: '2024-06-20', // Recent date for ESI check
+    esiCount: 1, // Add ESI
     prescription: {
       exchange: '3x Daily',
       pdStrength: 'Dextrose 2.5%',
