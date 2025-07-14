@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ import {
   Droplets,
 } from 'lucide-react';
 import type { Vital, PDEvent } from '@/lib/types';
-import { format, startOfDay, subDays, subMonths } from 'date-fns';
+import { format, startOfDay, subDays, subMonths, isAfter } from 'date-fns';
 import { Button } from '@/components/ui/button';
 
 interface VitalsCardProps {
@@ -100,6 +100,29 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
     }
   }, [latestVitals?.measurementDateTime]);
 
+  const { avgUfLast2Weeks, weight2WeeksAgo } = useMemo(() => {
+    const twoWeeksAgoDate = subDays(new Date(), 14);
+
+    // Calculate average UF
+    const recentPdEvents = pdEvents.filter(event => isAfter(new Date(event.exchangeDateTime), twoWeeksAgoDate));
+    const dailyUfMap: Record<string, number> = {};
+    recentPdEvents.forEach(event => {
+      const day = startOfDay(new Date(event.exchangeDateTime)).toISOString().split('T')[0];
+      dailyUfMap[day] = (dailyUfMap[day] || 0) + event.ultrafiltrationML;
+    });
+    const dailyUfValues = Object.values(dailyUfMap);
+    const avgUf = dailyUfValues.length > 0 ? dailyUfValues.reduce((sum, val) => sum + val, 0) / dailyUfValues.length : null;
+
+    // Find weight from ~2 weeks ago
+    const twoWeeksAgoVitals = vitals.filter(v => new Date(v.measurementDateTime) <= twoWeeksAgoDate);
+    const pastWeight = twoWeeksAgoVitals.length > 0 ? twoWeeksAgoVitals[0].weightKG : null;
+
+    return {
+      avgUfLast2Weeks: avgUf,
+      weight2WeeksAgo: pastWeight,
+    };
+  }, [pdEvents, vitals]);
+
   const weightChartData = vitals
     .map((v) => ({
       date: format(new Date(v.measurementDateTime), 'MMM d'),
@@ -160,6 +183,17 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
             </div>
             <div className="text-xs text-muted-foreground">Weight (kg)</div>
           </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-lg bg-blue-50 p-3 border border-blue-200">
+                <p className="text-sm font-medium text-blue-800">Avg UF (14d)</p>
+                <p className="text-xl font-bold text-blue-600">{avgUfLast2Weeks !== null ? `${avgUfLast2Weeks.toFixed(0)} mL/day` : 'N/A'}</p>
+            </div>
+            <div className="rounded-lg bg-indigo-50 p-3 border border-indigo-200">
+                <p className="text-sm font-medium text-indigo-800">Weight (14d ago)</p>
+                <p className="text-xl font-bold text-indigo-600">{weight2WeeksAgo !== null ? `${weight2WeeksAgo} kg` : 'N/A'}</p>
+            </div>
         </div>
 
         <div className="space-y-6">
