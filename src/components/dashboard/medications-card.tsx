@@ -7,12 +7,43 @@ import {
 import { Pill, CheckCircle, AlertTriangle } from 'lucide-react';
 import type { Medication } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 
 interface MedicationsCardProps {
   medications: Medication[];
 }
 
 export default function MedicationsCard({ medications }: MedicationsCardProps) {
+
+  const displayedMedications = useMemo(() => {
+    const esaNames = ["erythropoietin", "mircera", "darbepoetin", "oxemia"];
+    
+    // Check if any ESA is already in the patient's medication list
+    const hasESA = medications.some(med => 
+        esaNames.some(esa => med.medicationName.toLowerCase().includes(esa))
+    );
+
+    // Create a new list to avoid mutating props
+    const newMedicationList = [...medications];
+
+    // If no ESA is found, add a placeholder one.
+    if (!hasESA) {
+        newMedicationList.push({
+            medicationId: 'ESA-placeholder',
+            medicationName: 'Erythropoietin (EPO)',
+            dosage: 'Not Prescribed',
+            frequency: '',
+            startDate: '',
+            status: 'warning',
+            prescribingDoctor: ''
+        });
+    }
+
+    return newMedicationList;
+
+  }, [medications]);
+
+
   return (
     <Card>
       <CardHeader>
@@ -25,7 +56,7 @@ export default function MedicationsCard({ medications }: MedicationsCardProps) {
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">
-          {medications.map((med) => (
+          {displayedMedications.map((med) => (
             <li key={med.medicationId} className={cn(
                 "flex items-center justify-between rounded-lg p-3 border",
                 med.status === 'warning' ? 'bg-yellow-50/70 border-yellow-200' : 'bg-white'

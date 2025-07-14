@@ -16,13 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartConfig,
-} from '@/components/ui/chart';
-import { Line, LineChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Beaker } from 'lucide-react';
 import type { LabResult } from '@/lib/types';
@@ -32,13 +25,6 @@ import { useMemo } from 'react';
 interface LabResultsCardProps {
   labResults: LabResult[];
 }
-
-const chartConfig = {
-  creatinine: {
-    label: 'Creatinine (mg/dL)',
-    color: 'hsl(var(--chart-2))',
-  },
-} satisfies ChartConfig;
 
 const getStatus = (
   value: number,
@@ -66,15 +52,6 @@ export default function LabResultsCard({ labResults }: LabResultsCardProps) {
         };
     });
   }, [labResults]);
-
-
-  const creatinineData = labResults
-    .filter((lr) => lr.testName === 'Creatinine')
-    .map((lr) => ({
-      date: format(new Date(lr.resultDateTime), 'MMM d'),
-      creatinine: lr.resultValue,
-    }))
-    .reverse();
 
   return (
     <Card>
@@ -138,24 +115,6 @@ export default function LabResultsCard({ labResults }: LabResultsCardProps) {
             })}
           </TableBody>
         </Table>
-        <div>
-          <h4 className="mb-2 font-medium">Creatinine Trend</h4>
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <LineChart data={creatinineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis domain={['dataMin - 1', 'dataMax + 1']} hide/>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              <Line
-                dataKey="creatinine"
-                type="monotone"
-                stroke="hsl(var(--chart-2))"
-                strokeWidth={2}
-                dot={true}
-              />
-            </LineChart>
-          </ChartContainer>
-        </div>
       </CardContent>
     </Card>
   );
