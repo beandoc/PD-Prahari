@@ -1,10 +1,11 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'DialysisCare',
-  description: 'Your Companion in Kidney Care',
+  title: 'PD Prahari',
+  description: 'Your Guardian in Peritoneal Dialysis',
 };
 
 export default function RootLayout({

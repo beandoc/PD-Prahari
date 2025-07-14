@@ -14,7 +14,7 @@ export default function WelcomePage() {
                 <div className="flex justify-center items-center gap-3 mb-2">
                     <KidneyIcon className="h-12 w-12 text-primary" />
                     <h1 className="text-5xl font-bold text-gray-800">
-                        DialysisCare
+                        PD Prahari
                     </h1>
                 </div>
                 <p className="text-xl mt-2 text-muted-foreground">Your Companion in Kidney Care</p>

@@ -16,7 +16,7 @@ export default function NephrologistLoginPage() {
             <div className="flex justify-center items-center gap-3 mb-2">
                  <KidneyIcon className="h-10 w-10 text-primary" />
                 <h1 className="text-4xl font-bold">
-                DialysisCare
+                PD Prahari
                 </h1>
             </div>
             <p className="text-xl mt-2 text-muted-foreground">Your Companion in Kidney Care</p>

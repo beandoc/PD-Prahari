@@ -61,7 +61,7 @@ export default function DashboardLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
                <KidneyIcon className="h-6 w-6 text-primary" />
-              <span className="">DialysisCare</span>
+              <span className="">PD Prahari</span>
             </Link>
           </div>
           <div className="flex-1">
@@ -121,7 +121,7 @@ export default function DashboardLayout({
                   className="flex items-center gap-2 text-lg font-semibold mb-4"
                 >
                   <KidneyIcon className="h-6 w-6 text-primary" />
-                  <span className="">DialysisCare</span>
+                  <span className="">PD Prahari</span>
                 </Link>
                 {navLinks.map(({ href, label, icon: Icon }) => (
                   <Link
