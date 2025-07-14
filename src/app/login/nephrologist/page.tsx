@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lock, User } from 'lucide-react';
-import { KidneyIcon } from '@/components/kidney-icon';
 
 export default function NephrologistLoginPage() {
   return (
@@ -14,7 +13,7 @@ export default function NephrologistLoginPage() {
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
             <div className="flex justify-center items-center gap-3 mb-2">
-                 <KidneyIcon className="h-10 w-10 text-primary" />
+                 <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={40} height={40} />
                 <h1 className="text-4xl font-bold">
                 PD Prahari
                 </h1>

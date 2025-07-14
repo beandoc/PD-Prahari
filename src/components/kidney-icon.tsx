@@ -1,8 +1,11 @@
 import type { SVGProps } from 'react';
+import Image from 'next/image';
 
-export function KidneyIcon(props: SVGProps<SVGSVGElement>) {
+export function KidneyIcon(props: SVGProps<SVGSVGElement> & {className?: string}) {
+  // Fallback to SVG if the image fails to load, though this component is being phased out.
+  // The main usage is now Image component directly.
   return (
-    <svg
+   <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"

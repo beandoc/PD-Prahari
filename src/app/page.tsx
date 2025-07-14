@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Stethoscope, HeartPulse, UserRoundCog } from 'lucide-react';
-import { KidneyIcon } from '@/components/kidney-icon';
 
 export default function WelcomePage() {
   return (
@@ -12,7 +11,7 @@ export default function WelcomePage() {
         <div className="max-w-4xl w-full">
             <header className="text-center mb-12">
                 <div className="flex justify-center items-center gap-3 mb-2">
-                    <KidneyIcon className="h-12 w-12 text-primary" />
+                    <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={48} height={48} />
                     <h1 className="text-5xl font-bold text-gray-800">
                         PD Prahari
                     </h1>

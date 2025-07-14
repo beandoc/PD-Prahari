@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   BarChart3,
   CircleUser,
@@ -18,7 +19,6 @@ import {
   HeartPulse,
   UserPlus,
 } from 'lucide-react';
-import { KidneyIcon } from '@/components/kidney-icon';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -60,7 +60,7 @@ export default function DashboardLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-               <KidneyIcon className="h-6 w-6 text-primary" />
+               <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={24} height={24} />
               <span className="">PD Prahari</span>
             </Link>
           </div>
@@ -120,7 +120,7 @@ export default function DashboardLayout({
                   href="#"
                   className="flex items-center gap-2 text-lg font-semibold mb-4"
                 >
-                  <KidneyIcon className="h-6 w-6 text-primary" />
+                  <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={24} height={24} />
                   <span className="">PD Prahari</span>
                 </Link>
                 {navLinks.map(({ href, label, icon: Icon }) => (

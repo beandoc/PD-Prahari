@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   CircleUser,
@@ -13,7 +14,6 @@ import {
   Users,
   LogOut,
 } from 'lucide-react';
-import { KidneyIcon } from '@/components/kidney-icon';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -48,7 +48,7 @@ export default function PatientPortalLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/patient-portal" className="flex items-center gap-2 font-semibold">
-              <KidneyIcon className="h-6 w-6 text-primary" />
+              <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={24} height={24} />
               <span className="">Patient Portal</span>
             </Link>
           </div>
@@ -98,7 +98,7 @@ export default function PatientPortalLayout({
                   href="/patient-portal"
                   className="flex items-center gap-2 text-lg font-semibold mb-4"
                 >
-                  <KidneyIcon className="h-6 w-6 text-primary" />
+                  <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={24} height={24} />
                   <span className="">Patient Portal</span>
                 </Link>
                 {patientNavLinks.map(({ href, label, icon: Icon }) => (
