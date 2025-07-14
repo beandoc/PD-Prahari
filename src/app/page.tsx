@@ -11,7 +11,7 @@ export default function WelcomePage() {
         <div className="max-w-4xl w-full">
             <header className="text-center mb-12">
                 <div className="flex justify-center items-center gap-3 mb-2">
-                    <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={64} height={64} />
+                    <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={128} height={128} />
                     <h1 className="text-5xl font-bold text-gray-800">
                         PD Prahari
                     </h1>
