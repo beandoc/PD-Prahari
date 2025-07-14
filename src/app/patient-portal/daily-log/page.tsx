@@ -11,14 +11,16 @@ import { Camera, Droplets, HeartPulse, Weight, Thermometer, FlaskConical, Clock,
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { allPatientData } from '@/data/mock-data';
-import { format, subDays, parseISO } from 'date-fns';
+import { format, subDays, parseISO, setHours, setMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { savePatientLog } from '@/lib/data-sync';
+import { useToast } from '@/hooks/use-toast';
+import type { Vital, PDEvent } from '@/lib/types';
 
 
 interface ExchangeLog {
@@ -32,15 +34,27 @@ interface ExchangeLog {
   isCloudy: boolean;
 }
 
+interface VitalsLog {
+    systolicBP?: string;
+    diastolicBP?: string;
+    pulse?: string;
+    weight?: string;
+    temp?: string;
+    urineOutput?: string;
+    symptoms?: string;
+}
+
 export default function PatientDailyLogPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [exchanges, setExchanges] = useState<ExchangeLog[]>([]);
+  const [vitals, setVitals] = useState<VitalsLog>({});
   const [showUfModal, setShowUfModal] = useState(false);
   const [totalUf, setTotalUf] = useState(0);
+  const { toast } = useToast();
 
   // For demonstration, we'll use the first patient's data
   const patientData = allPatientData[0];
-  const { prescription, pdEvents: historicalEvents } = patientData;
+  const { prescription } = patientData;
 
   useEffect(() => {
     if (prescription.regimen) {
@@ -65,6 +79,10 @@ export default function PatientDailyLogPage() {
     );
   };
 
+   const handleVitalsChange = (field: keyof VitalsLog, value: string) => {
+    setVitals(currentVitals => ({ ...currentVitals, [field]: value }));
+  };
+
   const calculateUF = (fill: string, drain: string) => {
     const fillNum = parseFloat(fill);
     const drainNum = parseFloat(drain);
@@ -80,8 +98,11 @@ export default function PatientDailyLogPage() {
   
   const handleSubmitClick = () => {
     if (completedExchanges.length === 0) {
-        // Or show a toast/alert
-        alert("Please enter drain volume for at least one exchange.");
+        toast({
+            title: "Incomplete Log",
+            description: "Please enter drain volume for at least one exchange before submitting.",
+            variant: "destructive",
+        });
         return;
     }
     const calculatedTotalUf = completedExchanges.reduce((acc, ex) => {
@@ -93,14 +114,50 @@ export default function PatientDailyLogPage() {
   };
 
   const handleConfirmSubmit = () => {
-    console.log("Submitting logs:", { 
-      date, 
-      exchanges: completedExchanges,
-      totalUf
+    // Create new Vitals and PDEvent objects
+    const logDateTime = date.toISOString();
+    
+    const newVital: Partial<Vital> = {
+        vitalId: `VIT-${Date.now()}`,
+        measurementDateTime: logDateTime,
+        systolicBP: vitals.systolicBP ? parseFloat(vitals.systolicBP) : undefined,
+        diastolicBP: vitals.diastolicBP ? parseFloat(vitals.diastolicBP) : undefined,
+        heartRateBPM: vitals.pulse ? parseInt(vitals.pulse) : undefined,
+        weightKG: vitals.weight ? parseFloat(vitals.weight) : undefined,
+        temperatureCelsius: vitals.temp ? parseFloat(vitals.temp) : undefined,
+        fluidStatusNotes: vitals.symptoms,
+    };
+
+    let exchangeTime = setHours(new Date(date), 7); // Start at 7 AM for the first exchange
+    const newEvents: PDEvent[] = completedExchanges.map((ex, index) => {
+        exchangeTime = new Date(exchangeTime.getTime() + index * 4 * 60 * 60 * 1000); // Increment by 4 hours
+        const uf = calculateUF(ex.fillVolume, ex.drainVolume) || 0;
+        return {
+            exchangeId: `PD-${Date.now()}-${ex.id}`,
+            exchangeDateTime: exchangeTime.toISOString(),
+            dialysateType: ex.dialysateType,
+            fillVolumeML: parseFloat(ex.fillVolume),
+            dwellTimeHours: parseFloat(ex.dwellTime),
+            drainVolumeML: parseFloat(ex.drainVolume),
+            ultrafiltrationML: uf,
+            isEffluentCloudy: ex.isCloudy,
+            complications: ex.notes,
+            recordedBy: 'Patient',
+        };
     });
-    // In a real app, you would send this data to the server
+
+    // Save the new data to localStorage
+    savePatientLog(patientData.patientId, newEvents, newVital);
+
+    toast({
+        title: "Log Submitted!",
+        description: "Your health data has been successfully saved.",
+    });
+
     setShowUfModal(false);
-    // Optionally, show a success toast message and navigate away or clear the form
+    // Optionally clear the form
+    // setExchanges([]);
+    // setVitals({});
   };
   
   return (
@@ -194,29 +251,29 @@ export default function PatientDailyLogPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="systolic-bp">Systolic BP</Label>
-                    <Input id="systolic-bp" placeholder="e.g., 120" type="number" />
+                    <Input id="systolic-bp" placeholder="e.g., 120" type="number" value={vitals.systolicBP || ''} onChange={(e) => handleVitalsChange('systolicBP', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="diastolic-bp">Diastolic BP</Label>
-                    <Input id="diastolic-bp" placeholder="e.g., 80" type="number" />
+                    <Input id="diastolic-bp" placeholder="e.g., 80" type="number" value={vitals.diastolicBP || ''} onChange={(e) => handleVitalsChange('diastolicBP', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="pulse"><HeartPulse className="inline h-4 w-4 mr-1" />Pulse (BPM)</Label>
-                    <Input id="pulse" placeholder="e.g., 72" type="number" />
+                    <Input id="pulse" placeholder="e.g., 72" type="number" value={vitals.pulse || ''} onChange={(e) => handleVitalsChange('pulse', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="weight"><Weight className="inline h-4 w-4 mr-1" />Weight (kg)</Label>
-                    <Input id="weight" placeholder="e.g., 70.5" type="number" step="0.1" />
+                    <Input id="weight" placeholder="e.g., 70.5" type="number" step="0.1" value={vitals.weight || ''} onChange={(e) => handleVitalsChange('weight', e.target.value)} />
                   </div>
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="temp"><Thermometer className="inline h-4 w-4 mr-1" />Temp (°C)</Label>
-                        <Input id="temp" placeholder="e.g., 36.6" type="number" step="0.1" />
+                        <Input id="temp" placeholder="e.g., 36.6" type="number" step="0.1" value={vitals.temp || ''} onChange={(e) => handleVitalsChange('temp', e.target.value)} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="urine-output"><FlaskConical className="inline h-4 w-4 mr-1" />Total Urine Output (24h, mL)</Label>
-                        <Input id="urine-output" placeholder="e.g., 500" type="number" />
+                        <Input id="urine-output" placeholder="e.g., 500" type="number" value={vitals.urineOutput || ''} onChange={(e) => handleVitalsChange('urineOutput', e.target.value)} />
                     </div>
                 </div>
                 <div className="space-y-4">
@@ -230,7 +287,7 @@ export default function PatientDailyLogPage() {
                  <div className="grid grid-cols-1">
                     <div className="space-y-2">
                         <Label htmlFor="symptoms">Any other symptoms or notes? (e.g., exit site issues, outflow problems, etc.)</Label>
-                        <Textarea id="symptoms" placeholder="Please describe any other issues like exit site pain, redness, pus, or problems with fluid draining." />
+                        <Textarea id="symptoms" placeholder="Please describe any other issues like exit site pain, redness, pus, or problems with fluid draining." value={vitals.symptoms || ''} onChange={(e) => handleVitalsChange('symptoms', e.target.value)} />
                     </div>
                 </div>
               </CardContent>
