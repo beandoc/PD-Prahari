@@ -91,13 +91,13 @@ export default function DoctorDashboard() {
       const alerts = generatePatientAlerts(patient);
       return alerts.some(alert => alert.severity === 'critical');
     }).length;
-  }, [allPatientData]);
+  }, []);
 
   const imagesForReview = useMemo(() => {
     return allPatientData.reduce((count, patient) => {
       return count + (patient.uploadedImages?.filter(img => img.requiresReview).length || 0);
     }, 0);
-  }, [allPatientData]);
+  }, []);
   
   const nonCompliantToday = useMemo(() => {
     return allPatientData.filter(patient => {
@@ -107,7 +107,7 @@ export default function DoctorDashboard() {
        const latestEventDate = new Date(latestEvent.exchangeDateTime);
        return differenceInDays(startOfToday(), latestEventDate) >= 1;
     }).length;
-  }, [allPatientData]);
+  }, []);
 
   const filteredPatients = useMemo(() => {
     switch (filter) {
@@ -127,7 +127,7 @@ export default function DoctorDashboard() {
       default:
         return allPatientData;
     }
-  }, [filter, allPatientData]);
+  }, [filter]);
 
   const filterTitles = {
     all: 'All Patients',
