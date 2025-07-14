@@ -43,20 +43,20 @@ const formSchema = z.object({
   dateOfBirth: z.date({
     required_error: 'Date of birth is required.',
   }),
-  gender: z.string().min(1, { message: 'Gender is required.' }),
-  educationLevel: z.string().min(1, { message: 'Education is required.' }),
+  gender: z.string().optional(),
+  educationLevel: z.string().optional(),
   
   // Contact
-  contactPhone: z.string().min(1, { message: 'Contact phone is required.' }),
-  addressLine1: z.string().min(1, { message: 'Address is required.' }),
-  state: z.string().min(1, { message: 'State is required.' }),
-  city: z.string().min(1, { message: 'City is required.' }),
-  postalCode: z.string().min(1, { message: 'Postal code is required.' }),
+  contactPhone: z.string().optional(),
+  addressLine1: z.string().optional(),
+  state: z.string().optional(),
+  city: z.string().optional(),
+  postalCode: z.string().optional(),
   
   // Emergency Contact
-  emergencyContactName: z.string().min(1, { message: 'Emergency contact name is required.' }),
-  emergencyContactPhone: z.string().min(1, { message: 'Emergency contact phone is required.' }),
-  emergencyContactRelation: z.string().min(1, { message: 'Relation is required.' }),
+  emergencyContactName: z.string().optional(),
+  emergencyContactPhone: z.string().optional(),
+  emergencyContactRelation: z.string().optional(),
   emergencyContactEmail: z.string().email({ message: 'Invalid email address.' }).optional().or(z.literal('')),
   emergencyContactWhatsapp: z.string().optional(),
 
@@ -134,7 +134,7 @@ export default function ClinicianPatientRegistrationPage() {
   const nextStep = async () => {
     let fieldsToValidate: (keyof z.infer<typeof formSchema>)[];
     if (step === 1) {
-        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth', 'gender', 'contactPhone', 'addressLine1', 'state', 'city', 'postalCode', 'emergencyContactName', 'emergencyContactPhone', 'emergencyContactRelation', 'educationLevel'];
+        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth'];
     } else {
         return;
     }
