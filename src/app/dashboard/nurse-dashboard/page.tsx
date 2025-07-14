@@ -1,24 +1,33 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
-import { format, addDays, parseISO, isToday } from 'date-fns';
-import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck } from 'lucide-react';
+import { format, addDays, parseISO, isToday, differenceInDays } from 'date-fns';
+import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+type FilterType = 'awaiting_insertion' | 'in_training' | 'peritonitis_tx' | 'all';
 
 interface MetricCardProps {
     title: string;
     value: number;
     icon: React.ReactNode;
+    onClick: () => void;
+    isActive: boolean;
 }
 
-const MetricCard = ({ title, value, icon }: MetricCardProps) => (
-    <Card>
+const MetricCard = ({ title, value, icon, onClick, isActive }: MetricCardProps) => (
+    <Card 
+        className={cn("cursor-pointer hover:bg-muted/50 transition-colors", isActive && "ring-2 ring-primary")}
+        onClick={onClick}
+    >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
             {icon}
@@ -47,7 +56,8 @@ const getAlertIcon = (type: AlertItem['type']) => {
 
 export default function NurseDashboardPage() {
     const [urgentAlerts, setUrgentAlerts] = useState<AlertItem[]>([]);
-
+    const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+    
     useEffect(() => {
         // --- Generate dummy alerts for demonstration on the client side ---
         const alerts: AlertItem[] = [
@@ -58,19 +68,31 @@ export default function NurseDashboardPage() {
         setUrgentAlerts(alerts);
     }, []);
 
-    // --- Data processing for dashboard metrics ---
-    const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
-    
-    // Assuming 'training' status doesn't exist, we'll use new patients as a proxy
-    const patientsInTraining = allPatientData.filter(p => p.pdStartDate && new Date(p.pdStartDate) > addDays(new Date(), -90)).length;
-    
+    // --- Data processing for dashboard metrics and filters ---
+    const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter');
+    const patientsInTraining = allPatientData.filter(p => p.pdStartDate && differenceInDays(new Date(), parseISO(p.pdStartDate)) <= 90 && p.currentStatus === 'Active PD');
     const patientsOnPeritonitisTx = allPatientData.filter(p => 
-        p.peritonitisEpisodes.some(ep => ep.outcome !== 'Resolved' && new Date(ep.diagnosisDate) > addDays(new Date(), -30))
-    ).length;
-
+        p.peritonitisEpisodes.some(ep => ep.outcome !== 'Resolved' && differenceInDays(new Date(), parseISO(ep.diagnosisDate)) <= 30)
+    );
     const todaysAppointments = allPatientData.filter(p => 
         p.clinicVisits?.nextAppointment && isToday(parseISO(p.clinicVisits.nextAppointment))
     ).length;
+
+    const filteredPatients = useMemo(() => {
+        switch (activeFilter) {
+            case 'awaiting_insertion': return patientsAwaitingInsertion;
+            case 'in_training': return patientsInTraining;
+            case 'peritonitis_tx': return patientsOnPeritonitisTx;
+            default: return [];
+        }
+    }, [activeFilter, patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx]);
+
+    const filterTitles: Record<FilterType, string> = {
+        all: 'Patient List',
+        awaiting_insertion: 'Patients Awaiting Catheter Insertion',
+        in_training: 'Patients in Training (Last 90 Days)',
+        peritonitis_tx: 'Patients on Active Peritonitis Treatment'
+    };
 
     const upcomingHomeVisits = allPatientData
         .filter(p => p.lastHomeVisitDate)
@@ -90,11 +112,61 @@ export default function NurseDashboardPage() {
             </header>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <MetricCard title="Awaiting Catheter Insertion" value={patientsAwaitingInsertion} icon={<UserPlus className="h-4 w-4 text-muted-foreground" />} />
-                <MetricCard title="Patients in Training (90d)" value={patientsInTraining} icon={<UserCog className="h-4 w-4 text-muted-foreground" />} />
-                <MetricCard title="Active Peritonitis Tx" value={patientsOnPeritonitisTx} icon={<ShieldAlert className="h-4 w-4 text-muted-foreground" />} />
-                <MetricCard title="Today's Appointments" value={todaysAppointments} icon={<CalendarCheck className="h-4 w-4 text-muted-foreground" />} />
+                <MetricCard title="Awaiting Catheter Insertion" value={patientsAwaitingInsertion.length} icon={<UserPlus className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('awaiting_insertion')} isActive={activeFilter === 'awaiting_insertion'} />
+                <MetricCard title="Patients in Training (90d)" value={patientsInTraining.length} icon={<UserCog className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('in_training')} isActive={activeFilter === 'in_training'} />
+                <MetricCard title="Active Peritonitis Tx" value={patientsOnPeritonitisTx.length} icon={<ShieldAlert className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('peritonitis_tx')} isActive={activeFilter === 'peritonitis_tx'} />
+                <MetricCard title="Today's Appointments" value={todaysAppointments} icon={<CalendarCheck className="h-4 w-4 text-muted-foreground" />} onClick={() => {}} isActive={false} />
             </div>
+
+            {activeFilter !== 'all' && (
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <CardTitle>{filterTitles[activeFilter]}</CardTitle>
+                            <Button variant="ghost" onClick={() => setActiveFilter('all')}>
+                                <FilterX className="mr-2 h-4 w-4" /> Clear Filter
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                             <TableHeader>
+                                <TableRow>
+                                    <TableHead>Patient</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Physician</TableHead>
+                                    <TableHead className="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredPatients.length > 0 ? filteredPatients.map(p => (
+                                    <TableRow key={p.patientId}>
+                                        <TableCell>
+                                            <p className="font-medium">{p.firstName} {p.lastName}</p>
+                                            <p className="text-sm text-muted-foreground">{p.nephroId}</p>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={p.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{p.currentStatus}</Badge>
+                                        </TableCell>
+                                        <TableCell>{p.physician}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button asChild variant="outline" size="sm">
+                                                <Link href={`/dashboard/nurse-checklist?patientId=${p.patientId}`}>
+                                                    View Checklist <ArrowRight className="ml-2 h-4 w-4" />
+                                                </Link>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center">No patients match this filter.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>

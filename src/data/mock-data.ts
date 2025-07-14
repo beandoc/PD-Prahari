@@ -226,7 +226,7 @@ export const allPatientData: PatientData[] = [
         { exchangeId: 'PD-005', exchangeDateTime: '2024-07-28T06:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 1800, dwellTimeHours: 4, drainVolumeML: 1900, ultrafiltrationML: 100, isEffluentCloudy: true, recordedBy: 'Patient' }
     ],
     peritonitisEpisodes: [
-      { episodeId: 'PER-002', diagnosisDate: '2024-05-15', organismIsolated: 'Pseudomonas aeruginosa', treatmentRegimen: 'Ceftazidime IP', outcome: 'Resolved', resolutionDate: '2024-06-05' }
+      { episodeId: 'PER-002', diagnosisDate: '2024-07-15', organismIsolated: 'Pseudomonas aeruginosa', treatmentRegimen: 'Ceftazidime IP', outcome: 'In Treatment' }
     ],
     medications: [{ medicationId: 'MED-004', medicationName: 'Erythropoietin', dosage: '4000 units', frequency: 'Weekly', startDate: '2023-03-01', prescribingDoctor: 'Dr. Parikshit', status: 'warning' }],
     urineOutputLogs: [{ logId: 'UO-004', logDate: '2024-07-28', volumeML: 700 }],
@@ -248,7 +248,7 @@ export const allPatientData: PatientData[] = [
     city: 'Pune',
     stateProvince: 'Maharashtra',
     postalCode: '411014',
-    pdStartDate: '2024-07-05', // New patient last month
+    pdStartDate: '2024-06-25', // In training (last 90 days)
     pdExchangeType: 'Self',
     underlyingKidneyDisease: 'IgA Nephropathy',
     currentStatus: 'Active PD',
