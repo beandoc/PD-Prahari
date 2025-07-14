@@ -47,7 +47,6 @@ import CalendarCard from '@/components/dashboard/calendar-card';
 import NotificationsCard from '@/components/dashboard/notifications-card';
 import { cn } from '@/lib/utils';
 
-
 const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
   if (alerts.length === 0) {
     return <span className="text-muted-foreground">-</span>;
@@ -92,13 +91,13 @@ export default function DoctorDashboard() {
       const alerts = generatePatientAlerts(patient);
       return alerts.some(alert => alert.severity === 'critical');
     }).length;
-  }, []);
+  }, [allPatientData]);
 
   const imagesForReview = useMemo(() => {
     return allPatientData.reduce((count, patient) => {
       return count + (patient.uploadedImages?.filter(img => img.requiresReview).length || 0);
     }, 0);
-  }, []);
+  }, [allPatientData]);
   
   const nonCompliantToday = useMemo(() => {
     return allPatientData.filter(patient => {
@@ -108,7 +107,7 @@ export default function DoctorDashboard() {
        const latestEventDate = new Date(latestEvent.exchangeDateTime);
        return differenceInDays(startOfToday(), latestEventDate) >= 1;
     }).length;
-  }, []);
+  }, [allPatientData]);
 
   const filteredPatients = useMemo(() => {
     switch (filter) {
@@ -128,7 +127,7 @@ export default function DoctorDashboard() {
       default:
         return allPatientData;
     }
-  }, [filter]);
+  }, [filter, allPatientData]);
 
   const filterTitles = {
     all: 'All Patients',
@@ -277,7 +276,7 @@ export default function DoctorDashboard() {
                             <CardDescription>
                             Review patient dialysis adequacy metrics.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                             <p className="text-muted-foreground">Adequacy data and visualizations will be displayed here.</p>
                         </CardContent>
@@ -290,7 +289,7 @@ export default function DoctorDashboard() {
                             <CardDescription>
                             Generate and view clinical reports.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                             <p className="text-muted-foreground">Report generation options will be available here.</p>
                         </CardContent>
@@ -303,7 +302,7 @@ export default function DoctorDashboard() {
                             <CardDescription>
                             Manage clinic-wide settings and configurations.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                             <p className="text-muted-foreground">Settings for the clinic will be managed from this section.</p>
                         </CardContent>
