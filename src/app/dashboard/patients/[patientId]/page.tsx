@@ -1,6 +1,4 @@
 
-'use client';
-
 import type { PatientData } from '@/lib/types';
 import { getSyncedPatientData } from '@/lib/data-sync';
 import PatientHeader from '@/components/dashboard/patient-header';
@@ -16,6 +14,7 @@ import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
+'use client';
 
 // This is the dedicated Client Component that handles state and data fetching.
 // It receives the patientId as a simple string prop.
