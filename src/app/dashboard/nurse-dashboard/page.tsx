@@ -62,14 +62,26 @@ export default function NurseDashboardPage() {
     
     useEffect(() => {
         setIsClient(true);
-        // --- Generate dummy alerts for demonstration on the client side ---
-        const alerts: AlertItem[] = [
-            { patient: allPatientData[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) },
-            { patient: allPatientData[2], type: 'cloudy', details: 'Reported cloudy effluent bag this morning.', date: new Date() },
-            { patient: allPatientData[1], type: 'symptom', details: 'New symptom: mild ankle edema.', date: addDays(new Date(), -2) },
-        ];
-        setUrgentAlerts(alerts);
-    }, []);
+        // This effect will run on initial load and whenever allPatientData changes.
+        // In a real app, this would be handled by a real-time subscription.
+        const alerts: AlertItem[] = [];
+        
+        allPatientData.forEach(p => {
+             // @ts-ignore - Check for our simulated new alert
+            if (p.newCloudyAlert) {
+                alerts.push({
+                    // @ts-ignore
+                    patient: p, type: 'cloudy', details: p.newCloudyAlert.details, date: p.newCloudyAlert.date
+                });
+            }
+        });
+        
+        // Example static alerts for demonstration
+        alerts.push({ patient: allPatientData[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) });
+
+        setUrgentAlerts(alerts.sort((a, b) => b.date.getTime() - a.date.getTime()));
+
+    }, [isClient, allPatientData]);
 
     // --- Data processing for dashboard metrics and filters ---
     const {

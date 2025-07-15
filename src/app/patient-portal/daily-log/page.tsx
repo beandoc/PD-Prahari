@@ -139,7 +139,7 @@ export default function PatientDailyLogPage() {
 
     // Filter out undefined values to prevent Firestore errors
     const newVital = Object.fromEntries(
-        Object.entries(vitalData).filter(([, value]) => value !== undefined)
+        Object.entries(vitalData).filter(([, value]) => value !== undefined && value !== null && value !== '')
     ) as Partial<Vital>;
 
 
@@ -169,7 +169,17 @@ export default function PatientDailyLogPage() {
                 description: "Your care team has been notified immediately.",
                 variant: "destructive",
             });
+            // This is the external alert
             await triggerCloudyFluidAlert(patientData, event);
+            
+            // This is the internal alert for demonstration
+            // In a real app, this would be a real-time event (e.g., WebSocket)
+            const patientForAlert = allPatientData.find(p => p.patientId === patientData.patientId);
+            if (patientForAlert) {
+                 // Add a temporary flag to the mock data to simulate a new alert.
+                 // @ts-ignore
+                patientForAlert.newCloudyAlert = { details: 'Reported cloudy effluent bag.', date: new Date() };
+            }
         }
     }
 
