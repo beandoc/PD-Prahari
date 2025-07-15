@@ -92,6 +92,7 @@ export async function triggerCloudyFluidAlert(patientData: PatientData, event: P
             patientId: patientData.nephroId,
             reportedAt: new Date(event.exchangeDateTime).toLocaleString(),
             physician: patientData.physician,
+            clinicPhoneNumber: patientData.contactInfo?.clinicPhone,
         });
         return { success: true };
     } catch (error) {

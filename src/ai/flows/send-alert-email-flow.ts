@@ -17,6 +17,7 @@ const CloudyFluidAlertInputSchema = z.object({
   patientId: z.string().describe('The unique identifier for the patient.'),
   reportedAt: z.string().describe('The date and time the cloudy fluid was reported.'),
   physician: z.string().describe('The name of the attending physician.'),
+  clinicPhoneNumber: z.string().optional().describe("The clinic's WhatsApp enabled phone number."),
 });
 export type CloudyFluidAlertInput = z.infer<typeof CloudyFluidAlertInputSchema>;
 
@@ -52,11 +53,40 @@ const sendEmailTool = ai.defineTool(
   }
 );
 
+// Placeholder tool for sending a WhatsApp message
+const sendWhatsAppMessageTool = ai.defineTool(
+  {
+    name: 'sendWhatsAppMessage',
+    description: 'Sends a WhatsApp message to the clinic phone number.',
+    inputSchema: z.object({
+      to: z.string().describe('The destination WhatsApp number.'),
+      body: z.string().describe('The content of the message.'),
+    }),
+    outputSchema: z.void(),
+  },
+  async (input) => {
+    // This is a placeholder. In a real application, you would integrate
+    // with a WhatsApp API provider like Twilio here.
+    console.log(`--- SIMULATING WHATSAPP MESSAGE ---`);
+    console.log(`To: ${input.to}`);
+    console.log(`Body: ${input.body}`);
+    console.log(`---------------------------------`);
+    // Example with Twilio (requires 'twilio' package and credentials):
+    // const twilio = require('twilio');
+    // const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    // await client.messages.create({
+    //   from: 'whatsapp:+14155238886', // Twilio's sandbox number
+    //   body: input.body,
+    //   to: `whatsapp:${input.to}`
+    // });
+  }
+);
+
 
 const prompt = ai.definePrompt({
     name: 'cloudyFluidAlertPrompt',
     input: { schema: CloudyFluidAlertInputSchema },
-    tools: [sendEmailTool],
+    tools: [sendEmailTool, sendWhatsAppMessageTool],
     prompt: `
         A critical alert has been reported for a patient.
         Patient Name: {{{patientName}}}
@@ -65,7 +95,9 @@ const prompt = ai.definePrompt({
         Reported At: {{{reportedAt}}}
         Issue: Patient reported cloudy peritoneal dialysis fluid.
         This is a potential sign of peritonitis and requires immediate attention.
-        Use the sendEmail tool to notify the clinic at ${clinicEmail}.
+        
+        1. Use the sendEmail tool to notify the clinic at ${clinicEmail}.
+        2. Use the sendWhatsAppMessage tool to send an alert to the clinic's number: {{{clinicPhoneNumber}}}. The message body should be a concise alert summarizing the critical issue.
     `,
 });
 
@@ -84,7 +116,7 @@ const sendCloudyFluidAlertFlow = ai.defineFlow(
     // You can optionally check the LLM response or tool output here
     console.log("LLM response after tool call:", llmResponse.text);
 
-    return { status: 'Alert email process initiated.' };
+    return { status: 'Alert email and WhatsApp process initiated.' };
   }
 );
 
