@@ -148,11 +148,12 @@ export default function PetTestPage() {
                     <CardHeader>
                         <CardTitle>Patient Information</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                         <div><p className="font-medium">Patient Name</p><p className="text-muted-foreground">{patient.firstName} {patient.lastName}</p></div>
                         <div><p className="font-medium">ID Number</p><p className="text-muted-foreground">{patient.nephroId}</p></div>
                         <div><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
                         <div><p className="font-medium">Age</p><p className="text-muted-foreground">{calculateAge(patient.dateOfBirth)} years</p></div>
+                        <div><p className="font-medium">Catheter Date</p><p className="text-muted-foreground">{patient.pdStartDate ? format(parseISO(patient.pdStartDate), 'PPP') : 'N/A'}</p></div>
                     </CardContent>
                 </Card>
             )}
@@ -283,4 +284,3 @@ export default function PetTestPage() {
         </div>
     );
 }
-
