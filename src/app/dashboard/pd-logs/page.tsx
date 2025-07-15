@@ -4,12 +4,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { allPatientData } from '@/data/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PatientData, PDEvent, Prescription } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -108,9 +108,14 @@ export default function PdLogsPage() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Current Prescription</CardTitle>
+                                {patientData.currentStatus !== 'Active PD' && (
+                                     <CardDescription>
+                                        This patient does not have an active PD prescription. Current Status: {patientData.currentStatus}
+                                     </CardDescription>
+                                )}
                             </CardHeader>
                             <CardContent>
-                                {prescription ? (
+                                {prescription && patientData.currentStatus === 'Active PD' ? (
                                     <>
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                                             <div><p className="text-sm text-muted-foreground mb-1">Exchange</p><p className="font-medium">{prescription.exchange}</p></div>
@@ -150,7 +155,11 @@ export default function PdLogsPage() {
                                         )}
                                     </>
                                 ) : (
-                                     <p className="text-center text-muted-foreground py-4">No prescription found for this patient.</p>
+                                    <div className="text-center text-muted-foreground py-8 flex flex-col items-center justify-center bg-slate-50 rounded-md">
+                                        <Info className="h-8 w-8 mb-2" />
+                                        <p className="font-semibold">No Active Prescription</p>
+                                        <p className="text-sm">A prescription will be available once the patient begins PD therapy.</p>
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>
