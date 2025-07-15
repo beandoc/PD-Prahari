@@ -338,9 +338,11 @@ const ChecklistContent = () => {
     );
 }
 
+// This is now a Server Component
 export default function NurseChecklistPage() {
     return (
         <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
+            {/* Suspense is a Client Component, so we wrap the part that uses client hooks */}
             <Suspense fallback={<Skeleton className="w-full h-[80vh]" />}>
                 <ChecklistContent />
             </Suspense>
