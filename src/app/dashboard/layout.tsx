@@ -21,6 +21,7 @@ import {
   Boxes,
   Users,
   UserCog,
+  FlaskConical,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -55,6 +56,7 @@ const doctorNavLinks = [
 const nurseNavLinks = [
   { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Dashboard', icon: LayoutGrid },
   { href: '/dashboard/nurse-checklist', label: 'PD Nurse Checklist', icon: ClipboardCheck },
+  { href: '/dashboard/pet-test', label: 'PET Test', icon: FlaskConical },
   { href: '/dashboard/pd-logs', label: 'Patient PD Logs', icon: Droplets },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
   { href: '/dashboard/update-records', label: 'Update Records', icon: UserCog },
@@ -79,11 +81,13 @@ export default function DashboardLayout({
       // This logic determines the user role based on the current or previous page URL.
       // It makes the navigation persistent for the nurse even on shared pages.
       const currentPathIsNurse = pathname.startsWith('/dashboard/nurse-') || 
-                                 pathname.startsWith('/dashboard/update-records');
+                                 pathname.startsWith('/dashboard/update-records') ||
+                                 pathname.startsWith('/dashboard/pet-test');
       
       const referrerIsNurse = document.referrer.includes('/nurse-portal') ||
                               document.referrer.includes('/dashboard/nurse-') ||
-                              document.referrer.includes('/dashboard/update-records');
+                              document.referrer.includes('/dashboard/update-records') ||
+                              document.referrer.includes('/dashboard/pet-test');
 
       // If the current path is definitively a nurse path, or if they came from one,
       // consider it the nurse view.
