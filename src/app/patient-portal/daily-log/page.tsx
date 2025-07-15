@@ -126,16 +126,22 @@ export default function PatientDailyLogPage() {
     // Create new Vitals and PDEvent objects
     const logDateTime = date.toISOString();
     
-    const newVital: Partial<Vital> = {
+    const vitalData: Partial<Vital> = {
         vitalId: `VIT-${Date.now()}`,
         measurementDateTime: logDateTime,
         systolicBP: vitals.systolicBP ? parseFloat(vitals.systolicBP) : undefined,
         diastolicBP: vitals.diastolicBP ? parseFloat(vitals.diastolicBP) : undefined,
-        heartRateBPM: vitals.pulse ? parseInt(vitals.pulse) : undefined,
+        heartRateBPM: vitals.pulse ? parseInt(vitals.pulse, 10) : undefined,
         weightKG: vitals.weight ? parseFloat(vitals.weight) : undefined,
         temperatureCelsius: vitals.temp ? parseFloat(vitals.temp) : undefined,
-        fluidStatusNotes: vitals.symptoms,
+        fluidStatusNotes: vitals.symptoms || undefined,
     };
+
+    // Filter out undefined values to prevent Firestore errors
+    const newVital = Object.fromEntries(
+        Object.entries(vitalData).filter(([, value]) => value !== undefined)
+    ) as Partial<Vital>;
+
 
     let exchangeTime = setHours(new Date(date), 7); // Start at 7 AM for the first exchange
     const newEvents: PDEvent[] = completedExchanges.map((ex, index) => {
