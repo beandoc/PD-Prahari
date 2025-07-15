@@ -94,7 +94,7 @@ export default function UpdateRecordsPage() {
         pdExchangeType: selected.pdExchangeType || undefined,
         membraneTransportType: selected.membraneTransportType || undefined,
         distanceFromPDCenterKM: selected.distanceFromPDCenterKM || undefined,
-        dateOfBirth: parseISO(selected.dateOfBirth),
+        dateOfBirth: selected.dateOfBirth ? parseISO(selected.dateOfBirth) : new Date(),
         pdStartDate: selected.pdStartDate ? parseISO(selected.pdStartDate) : undefined,
         pdTrainingEndDate: selected.pdTrainingEndDate ? parseISO(selected.pdTrainingEndDate) : undefined,
         lastHomeVisitDate: selected.lastHomeVisitDate ? parseISO(selected.lastHomeVisitDate) : undefined,
@@ -199,10 +199,10 @@ export default function UpdateRecordsPage() {
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Contact Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <FormField control={form.control} name="contactPhone" render={({ field }) => (
-                        <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="addressLine1" render={({ field }) => (
-                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="state" render={({ field }) => (
                         <FormItem><FormLabel>State</FormLabel>
@@ -221,7 +221,7 @@ export default function UpdateRecordsPage() {
                         </FormItem>
                     )} />
                     <FormField control={form.control} name="postalCode" render={({ field }) => (
-                        <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
               </section>
@@ -232,13 +232,13 @@ export default function UpdateRecordsPage() {
                         <FormItem><FormLabel>Attending Physician</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="underlyingKidneyDisease" render={({ field }) => (
-                        <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} value={field.value ?? ''} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="pdStartDate" render={({ field }) => (
                         <FormItem className="flex flex-col"><FormLabel>PD Start Date</FormLabel>
                         <Popover><PopoverTrigger asChild>
                             <FormControl>
-                                <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                <Button disabled variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
                                     {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -249,11 +249,11 @@ export default function UpdateRecordsPage() {
                         </FormItem>
                     )} />
                      <FormField control={form.control} name="distanceFromPDCenterKM" render={({ field }) => (
-                        <FormItem><FormLabel>Distance from PD Center (KM)</FormLabel><FormControl><Input type="number" placeholder="Enter distance" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Distance from PD Center (KM)</FormLabel><FormControl><Input type="number" placeholder="Enter distance" {...field} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
                         <FormItem><FormLabel>PD Exchange Type</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value} disabled>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl>
                                 <SelectContent><SelectItem value="Self">Self</SelectItem><SelectItem value="Assisted">Assisted</SelectItem></SelectContent>
                             </Select><FormMessage />
@@ -261,7 +261,7 @@ export default function UpdateRecordsPage() {
                     )} />
                     <FormField control={form.control} name="membraneTransportType" render={({ field }) => (
                         <FormItem><FormLabel>Membrane Transport Type</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value} disabled>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl>
                                 <SelectContent>
                                     <SelectItem value="High">High</SelectItem>
@@ -312,5 +312,3 @@ export default function UpdateRecordsPage() {
     </div>
   );
 }
-
-    
