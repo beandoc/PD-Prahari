@@ -22,8 +22,6 @@ const CloudyFluidAlertInputSchema = z.object({
 });
 export type CloudyFluidAlertInput = z.infer<typeof CloudyFluidAlertInputSchema>;
 
-// Initialize Resend with the API key from environment variables
-const resend = new Resend(process.env.RESEND_API_KEY);
 const clinicEmail = "nirogyam93@gmail.com";
 const hospitalWhatsAppNumber = "9665183839";
 
@@ -41,6 +39,13 @@ const sendEmailTool = ai.defineTool(
     outputSchema: z.void(),
   },
   async (input) => {
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+        console.warn('Resend API key is not set. Skipping email send.');
+        return;
+    }
+
+    const resend = new Resend(resendApiKey);
     try {
       await resend.emails.send({
         from: 'PD Prahari Alert <onboarding@resend.dev>',
