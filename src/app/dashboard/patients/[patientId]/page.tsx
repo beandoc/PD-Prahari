@@ -16,7 +16,6 @@ import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
-
 // This is the dedicated Client Component that handles state and data fetching.
 // It receives the patientId as a simple string prop.
 function PatientDetailView({ patientId }: { patientId: string }) {
