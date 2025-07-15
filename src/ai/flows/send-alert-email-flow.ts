@@ -15,6 +15,7 @@ import { Resend } from 'resend';
 const CloudyFluidAlertInputSchema = z.object({
   patientName: z.string().describe('The full name of the patient.'),
   patientId: z.string().describe('The unique identifier for the patient.'),
+  patientMobile: z.string().optional().describe('The mobile number of the patient.'),
   reportedAt: z.string().describe('The date and time the cloudy fluid was reported.'),
   physician: z.string().describe('The name of the attending physician.'),
   clinicPhoneNumber: z.string().optional().describe("The clinic's WhatsApp enabled phone number."),
@@ -24,6 +25,8 @@ export type CloudyFluidAlertInput = z.infer<typeof CloudyFluidAlertInputSchema>;
 // Initialize Resend with the API key from environment variables
 const resend = new Resend(process.env.RESEND_API_KEY);
 const clinicEmail = "nirogyam93@gmail.com";
+const hospitalWhatsAppNumber = "9665183839";
+
 
 // Tool for sending the email
 const sendEmailTool = ai.defineTool(
@@ -91,13 +94,12 @@ const prompt = ai.definePrompt({
         A critical alert has been reported for a patient.
         Patient Name: {{{patientName}}}
         Patient ID: {{{patientId}}}
-        Attending Physician: {{{physician}}}
         Reported At: {{{reportedAt}}}
         Issue: Patient reported cloudy peritoneal dialysis fluid.
         This is a potential sign of peritonitis and requires immediate attention.
         
-        1. Use the sendEmail tool to notify the clinic at ${clinicEmail}.
-        2. Use the sendWhatsAppMessage tool to send an alert to the clinic's number: {{{clinicPhoneNumber}}}. The message body should be a concise alert summarizing the critical issue.
+        1. Use the sendEmail tool to notify the clinic at ${clinicEmail}. The subject should be "Critical Alert: Cloudy PD Fluid for patient {{{patientName}}}". The body should contain all the details.
+        2. Use the sendWhatsAppMessage tool to send an alert to the hospital number ${hospitalWhatsAppNumber}. The message body MUST be exactly: "Suspicion of PD Peritonitis. Patient Name: {{{patientName}}}, Mobile: {{{patientMobile}}}".
     `,
 });
 

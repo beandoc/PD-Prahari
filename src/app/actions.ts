@@ -90,6 +90,7 @@ export async function triggerCloudyFluidAlert(patientData: PatientData, event: P
         await sendCloudyFluidAlert({
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             patientId: patientData.nephroId,
+            patientMobile: patientData.contactPhone,
             reportedAt: new Date(event.exchangeDateTime).toLocaleString(),
             physician: patientData.physician,
             clinicPhoneNumber: patientData.contactInfo?.clinicPhone,
