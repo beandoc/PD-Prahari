@@ -11,10 +11,11 @@ import type { PDEvent } from '@/lib/types';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function LogHistoryPage() {
     const [dailyUfData, setDailyUfData] = useState<{ date: string; uf: number; }[]>([]);
-    const [paginatedEvents, setPaginatedEvents] = useState<PDEvent[]>([]);
+    const [allEvents, setAllEvents] = useState<PDEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -38,7 +39,7 @@ export default function LogHistoryPage() {
             .reverse();
 
         setDailyUfData(calculatedDailyUfData);
-        setPaginatedEvents(events.slice(0, 20)); // Show last 20 events in table
+        setAllEvents(events);
         setIsLoading(false);
     }, []);
 
@@ -92,11 +93,11 @@ export default function LogHistoryPage() {
             Recent Exchange Logs
           </CardTitle>
           <CardDescription>
-            A detailed view of your most recent PD exchange logs.
+            A detailed and scrollable view of your historical PD exchange logs.
            </CardDescription>
         </CardHeader>
         <CardContent>
-             <div className="overflow-x-auto">
+             <ScrollArea className="h-[400px]">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -110,14 +111,14 @@ export default function LogHistoryPage() {
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
-                             Array.from({ length: 5 }).map((_, index) => (
+                             Array.from({ length: 10 }).map((_, index) => (
                                 <TableRow key={index}>
                                     <TableCell colSpan={6}>
                                         <Skeleton className="h-8 w-full my-1" />
                                     </TableCell>
                                 </TableRow>
                              ))
-                        ) : paginatedEvents.length > 0 ? paginatedEvents.map(event => (
+                        ) : allEvents.length > 0 ? allEvents.map(event => (
                             <TableRow key={event.exchangeId}>
                                 <TableCell className="py-3">{format(new Date(event.exchangeDateTime), 'yyyy-MM-dd HH:mm')}</TableCell>
                                 <TableCell className="py-3">{event.dialysateType}</TableCell>
@@ -133,7 +134,7 @@ export default function LogHistoryPage() {
                         )}
                     </TableBody>
                 </Table>
-            </div>
+            </ScrollArea>
         </CardContent>
       </Card>
     </div>
