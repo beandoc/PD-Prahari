@@ -18,34 +18,33 @@ export default function TelehealthPage() {
           <p className="text-muted-foreground mt-1">Connect with your care team remotely.</p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Card className="overflow-hidden">
-                <div className="relative aspect-video bg-black rounded-t-lg flex items-center justify-center">
-                    <p className="text-2xl text-gray-500">Doctor's Video Feed</p>
+        <div className="space-y-8">
+          <Card className="overflow-hidden w-full">
+              <div className="relative aspect-video bg-black rounded-t-lg flex items-center justify-center">
+                  <p className="text-2xl text-gray-500">Doctor's Video Feed</p>
 
-                    {/* Self view */}
-                    <div className="absolute bottom-4 right-4 h-1/4 w-1/4 bg-gray-800 border-2 border-gray-600 rounded-md flex items-center justify-center">
-                         { isVideoOff ? <VideoOff className="h-8 w-8 text-gray-400" /> : <p className="text-sm text-gray-400">You</p> }
-                    </div>
-                </div>
-                <CardContent className="bg-gray-100 p-4 flex justify-center items-center gap-4">
-                    <Button variant={isMuted ? 'destructive' : 'secondary'} size="icon" className="rounded-full w-14 h-14" onClick={() => setIsMuted(!isMuted)}>
-                       { isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" /> }
-                    </Button>
-                    <Button variant={isVideoOff ? 'destructive' : 'secondary'} size="icon" className="rounded-full w-14 h-14" onClick={() => setIsVideoOff(!isVideoOff)}>
-                       { isVideoOff ? <VideoOff className="h-6 w-6" /> : <Video className="h-6 w-6" /> }
-                    </Button>
-                     <Button variant="secondary" size="icon" className="rounded-full w-14 h-14">
-                       <ScreenShare className="h-6 w-6" />
-                    </Button>
-                     <Button variant="destructive" size="icon" className="rounded-full w-14 h-14">
-                       <PhoneOff className="h-6 w-6" />
-                    </Button>
-                </CardContent>
-            </Card>
-          </div>
-          <div className="space-y-6">
+                  {/* Self view */}
+                  <div className="absolute bottom-4 right-4 h-1/4 w-1/4 bg-gray-800 border-2 border-gray-600 rounded-md flex items-center justify-center">
+                       { isVideoOff ? <VideoOff className="h-8 w-8 text-gray-400" /> : <p className="text-sm text-gray-400">You</p> }
+                  </div>
+              </div>
+              <CardContent className="bg-gray-100 p-4 flex justify-center items-center gap-4">
+                  <Button variant={isMuted ? 'destructive' : 'secondary'} size="icon" className="rounded-full w-14 h-14" onClick={() => setIsMuted(!isMuted)}>
+                     { isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" /> }
+                  </Button>
+                  <Button variant={isVideoOff ? 'destructive' : 'secondary'} size="icon" className="rounded-full w-14 h-14" onClick={() => setIsVideoOff(!isVideoOff)}>
+                     { isVideoOff ? <VideoOff className="h-6 w-6" /> : <Video className="h-6 w-6" /> }
+                  </Button>
+                   <Button variant="secondary" size="icon" className="rounded-full w-14 h-14">
+                     <ScreenShare className="h-6 w-6" />
+                  </Button>
+                   <Button variant="destructive" size="icon" className="rounded-full w-14 h-14">
+                     <PhoneOff className="h-6 w-6" />
+                  </Button>
+              </CardContent>
+          </Card>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
                 <CardHeader>
                     <CardTitle>Session Details</CardTitle>
