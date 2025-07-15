@@ -35,19 +35,27 @@ interface ExchangeLog {
 }
 
 interface VitalsLog {
-    systolicBP?: string;
-    diastolicBP?: string;
-    pulse?: string;
-    weight?: string;
-    temp?: string;
-    urineOutput?: string;
-    symptoms?: string;
+    systolicBP: string;
+    diastolicBP: string;
+    pulse: string;
+    weight: string;
+    temp: string;
+    urineOutput: string;
+    symptoms: string;
 }
 
 export default function PatientDailyLogPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [exchanges, setExchanges] = useState<ExchangeLog[]>([]);
-  const [vitals, setVitals] = useState<VitalsLog>({});
+  const [vitals, setVitals] = useState<VitalsLog>({
+    systolicBP: '',
+    diastolicBP: '',
+    pulse: '',
+    weight: '',
+    temp: '',
+    urineOutput: '',
+    symptoms: '',
+  });
   const [showUfModal, setShowUfModal] = useState(false);
   const [totalUf, setTotalUf] = useState(0);
   const { toast } = useToast();
@@ -248,29 +256,29 @@ export default function PatientDailyLogPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="systolic-bp">Systolic BP</Label>
-                    <Input id="systolic-bp" placeholder="e.g., 120" type="number" value={vitals.systolicBP || ''} onChange={(e) => handleVitalsChange('systolicBP', e.target.value)} />
+                    <Input id="systolic-bp" placeholder="e.g., 120" type="number" value={vitals.systolicBP} onChange={(e) => handleVitalsChange('systolicBP', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="diastolic-bp">Diastolic BP</Label>
-                    <Input id="diastolic-bp" placeholder="e.g., 80" type="number" value={vitals.diastolicBP || ''} onChange={(e) => handleVitalsChange('diastolicBP', e.target.value)} />
+                    <Input id="diastolic-bp" placeholder="e.g., 80" type="number" value={vitals.diastolicBP} onChange={(e) => handleVitalsChange('diastolicBP', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="pulse"><HeartPulse className="inline h-4 w-4 mr-1" />Pulse (BPM)</Label>
-                    <Input id="pulse" placeholder="e.g., 72" type="number" value={vitals.pulse || ''} onChange={(e) => handleVitalsChange('pulse', e.target.value)} />
+                    <Input id="pulse" placeholder="e.g., 72" type="number" value={vitals.pulse} onChange={(e) => handleVitalsChange('pulse', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="weight"><Weight className="inline h-4 w-4 mr-1" />Weight (kg)</Label>
-                    <Input id="weight" placeholder="e.g., 70.5" type="number" step="0.1" value={vitals.weight || ''} onChange={(e) => handleVitalsChange('weight', e.target.value)} />
+                    <Input id="weight" placeholder="e.g., 70.5" type="number" step="0.1" value={vitals.weight} onChange={(e) => handleVitalsChange('weight', e.target.value)} />
                   </div>
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="temp"><Thermometer className="inline h-4 w-4 mr-1" />Temp (°C)</Label>
-                        <Input id="temp" placeholder="e.g., 36.6" type="number" step="0.1" value={vitals.temp || ''} onChange={(e) => handleVitalsChange('temp', e.target.value)} />
+                        <Input id="temp" placeholder="e.g., 36.6" type="number" step="0.1" value={vitals.temp} onChange={(e) => handleVitalsChange('temp', e.target.value)} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="urine-output"><FlaskConical className="inline h-4 w-4 mr-1" />Total Urine Output (24h, mL)</Label>
-                        <Input id="urine-output" placeholder="e.g., 500" type="number" value={vitals.urineOutput || ''} onChange={(e) => handleVitalsChange('urineOutput', e.target.value)} />
+                        <Input id="urine-output" placeholder="e.g., 500" type="number" value={vitals.urineOutput} onChange={(e) => handleVitalsChange('urineOutput', e.target.value)} />
                     </div>
                 </div>
                 <div className="space-y-4">
@@ -284,7 +292,7 @@ export default function PatientDailyLogPage() {
                  <div className="grid grid-cols-1">
                     <div className="space-y-2">
                         <Label htmlFor="symptoms">Any other symptoms or notes? (e.g., exit site issues, outflow problems, etc.)</Label>
-                        <Textarea id="symptoms" placeholder="Please describe any other issues like exit site pain, redness, pus, or problems with fluid draining." value={vitals.symptoms || ''} onChange={(e) => handleVitalsChange('symptoms', e.target.value)} />
+                        <Textarea id="symptoms" placeholder="Please describe any other issues like exit site pain, redness, pus, or problems with fluid draining." value={vitals.symptoms} onChange={(e) => handleVitalsChange('symptoms', e.target.value)} />
                     </div>
                 </div>
               </CardContent>
