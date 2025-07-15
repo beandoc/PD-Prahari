@@ -84,6 +84,16 @@ export default function UpdateRecordsPage() {
       setPatient(selected);
       form.reset({
         ...selected,
+        gender: selected.gender || '',
+        educationLevel: selected.educationLevel || '',
+        contactPhone: selected.contactPhone || '',
+        addressLine1: selected.addressLine1 || '',
+        city: selected.city || '',
+        postalCode: selected.postalCode || '',
+        underlyingKidneyDisease: selected.underlyingKidneyDisease || '',
+        pdExchangeType: selected.pdExchangeType || undefined,
+        membraneTransportType: selected.membraneTransportType || undefined,
+        distanceFromPDCenterKM: selected.distanceFromPDCenterKM || undefined,
         dateOfBirth: parseISO(selected.dateOfBirth),
         pdStartDate: selected.pdStartDate ? parseISO(selected.pdStartDate) : undefined,
         pdTrainingEndDate: selected.pdTrainingEndDate ? parseISO(selected.pdTrainingEndDate) : undefined,
@@ -302,3 +312,5 @@ export default function UpdateRecordsPage() {
     </div>
   );
 }
+
+    
