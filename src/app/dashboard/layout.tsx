@@ -22,6 +22,7 @@ import {
   Users,
   UserCog,
   FlaskConical,
+  MessageSquare,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -39,7 +40,6 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
-  SheetDescription,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
@@ -48,6 +48,7 @@ const doctorNavLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/registration', label: 'Register Patient', icon: UserPlus },
   { href: '/dashboard/pd-logs', label: 'PD Logs', icon: Droplets },
+  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare },
   { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/inventory', label: 'Inventory', icon: Boxes },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
@@ -60,6 +61,7 @@ const nurseNavLinks = [
   { href: '/dashboard/nurse-checklist', label: 'PD Nurse Checklist', icon: ClipboardCheck },
   { href: '/dashboard/pet-test', label: 'PET Test', icon: FlaskConical },
   { href: '/dashboard/pd-logs', label: 'Patient PD Logs', icon: Droplets },
+  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
   { href: '/dashboard/update-records', label: 'Update Records', icon: UserCog },
   { href: '/registration', label: 'Register Patient', icon: UserPlus },

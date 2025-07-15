@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Users,
   LogOut,
+  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +32,7 @@ const patientNavLinks = [
   { href: '/patient-portal', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/patient-portal/daily-log', label: 'Daily Log', icon: FileText },
   { href: '/patient-portal/history', label: 'Log History', icon: History },
+  { href: '/patient-portal/messages', label: 'My Inbox', icon: MessageSquare },
   { href: '/patient-portal/profile', label: 'My Profile', icon: User },
 ];
 

@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { savePatientLog } from '@/lib/data-sync';
 import { useToast } from '@/hooks/use-toast';
 import type { Vital, PDEvent } from '@/lib/types';
+import { triggerCloudyFluidAlert } from '@/app/actions';
 
 
 interface ExchangeLog {
@@ -153,6 +154,18 @@ export default function PatientDailyLogPage() {
             recordedBy: 'Patient',
         };
     });
+
+    // Check for cloudy fluid and trigger email alert
+    for (const event of newEvents) {
+        if (event.isEffluentCloudy) {
+            toast({
+                title: "Cloudy Fluid Alert!",
+                description: "Your care team has been notified immediately.",
+                variant: "destructive",
+            });
+            await triggerCloudyFluidAlert(patientData, event);
+        }
+    }
 
     // Save the new data to Firestore
     await savePatientLog(patientData.patientId, newEvents, newVital);

@@ -1,0 +1,95 @@
+
+'use server';
+/**
+ * @fileOverview A flow to send an email alert for critical patient events.
+ *
+ * - sendCloudyFluidAlert - Sends an email notification about a patient reporting cloudy PD fluid.
+ * - CloudyFluidAlertInput - The input type for the sendCloudyFluidAlert function.
+ */
+
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+import { Resend } from 'resend';
+
+// Input schema for the alert flow
+const CloudyFluidAlertInputSchema = z.object({
+  patientName: z.string().describe('The full name of the patient.'),
+  patientId: z.string().describe('The unique identifier for the patient.'),
+  reportedAt: z.string().describe('The date and time the cloudy fluid was reported.'),
+  physician: z.string().describe('The name of the attending physician.'),
+});
+export type CloudyFluidAlertInput = z.infer<typeof CloudyFluidAlertInputSchema>;
+
+// Initialize Resend with the API key from environment variables
+const resend = new Resend(process.env.RESEND_API_KEY);
+const clinicEmail = "nirogyam93@gmail.com";
+
+// Tool for sending the email
+const sendEmailTool = ai.defineTool(
+  {
+    name: 'sendEmail',
+    description: 'Sends an email to the clinic staff.',
+    inputSchema: z.object({
+      to: z.string(),
+      subject: z.string(),
+      html: z.string(),
+    }),
+    outputSchema: z.void(),
+  },
+  async (input) => {
+    try {
+      await resend.emails.send({
+        from: 'PD Prahari Alert <onboarding@resend.dev>',
+        to: input.to,
+        subject: input.subject,
+        html: input.html,
+      });
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      // It's important to handle errors, but for the flow, we might not want to stop everything.
+      // Depending on requirements, you might throw an error here.
+    }
+  }
+);
+
+
+const prompt = ai.definePrompt({
+    name: 'cloudyFluidAlertPrompt',
+    input: { schema: CloudyFluidAlertInputSchema },
+    tools: [sendEmailTool],
+    prompt: `
+        A critical alert has been reported for a patient.
+        Patient Name: {{{patientName}}}
+        Patient ID: {{{patientId}}}
+        Attending Physician: {{{physician}}}
+        Reported At: {{{reportedAt}}}
+        Issue: Patient reported cloudy peritoneal dialysis fluid.
+        This is a potential sign of peritonitis and requires immediate attention.
+        Use the sendEmail tool to notify the clinic at ${clinicEmail}.
+    `,
+});
+
+// The main flow function
+const sendCloudyFluidAlertFlow = ai.defineFlow(
+  {
+    name: 'sendCloudyFluidAlertFlow',
+    inputSchema: CloudyFluidAlertInputSchema,
+    outputSchema: z.object({ status: z.string() }),
+  },
+  async (input) => {
+    
+    // Generate the email content using the prompt and instruct the model to use the tool
+    const llmResponse = await prompt(input);
+    
+    // You can optionally check the LLM response or tool output here
+    console.log("LLM response after tool call:", llmResponse.text);
+
+    return { status: 'Alert email process initiated.' };
+  }
+);
+
+
+// Exported wrapper function
+export async function sendCloudyFluidAlert(input: CloudyFluidAlertInput): Promise<{ status: string }> {
+  return sendCloudyFluidAlertFlow(input);
+}

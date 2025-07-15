@@ -2,7 +2,8 @@
 'use server';
 
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
-import type { PatientData } from '@/lib/types';
+import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
+import type { PatientData, PDEvent } from '@/lib/types';
 
 function formatDataForAI(patientData: PatientData) {
   return {
@@ -82,4 +83,19 @@ export async function getSuggestionsAction(patientData: PatientData) {
     console.error('Error getting AI suggestions:', error);
     return { success: false, error: 'Failed to get AI suggestions.' };
   }
+}
+
+export async function triggerCloudyFluidAlert(patientData: PatientData, event: PDEvent) {
+    try {
+        await sendCloudyFluidAlert({
+            patientName: `${patientData.firstName} ${patientData.lastName}`,
+            patientId: patientData.nephroId,
+            reportedAt: new Date(event.exchangeDateTime).toLocaleString(),
+            physician: patientData.physician,
+        });
+        return { success: true };
+    } catch (error) {
+        console.error('Error triggering cloudy fluid alert:', error);
+        return { success: false, error: 'Failed to trigger alert.' };
+    }
 }
