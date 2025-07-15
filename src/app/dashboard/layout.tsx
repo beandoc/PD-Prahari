@@ -50,7 +50,7 @@ const doctorNavLinks = [
   { href: '/dashboard/inventory', label: 'Inventory', icon: Boxes },
   { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
   { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Portal', icon: Users },
-  { href: '/patient-portal', label: 'Patient Portal', icon: HeartPulse },
+  { href: '/patient-portal', label: 'Patient Portal (Test)', icon: HeartPulse },
 ];
 
 const nurseNavLinks = [
