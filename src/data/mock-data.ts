@@ -1,3 +1,4 @@
+
 import type { PatientData } from '@/lib/types';
 
 export const allPatientData: PatientData[] = [
@@ -50,7 +51,7 @@ export const allPatientData: PatientData[] = [
     contactInfo: {
       clinicName: 'Pune Central Dialysis Center',
       clinicPhone: '020-25678901',
-      coordinatorName: 'Aisha Al-Fahad',
+      coordinatorName: 'Kamlesh',
       coordinatorPhone: '9988776655',
     },
     admissions: [
