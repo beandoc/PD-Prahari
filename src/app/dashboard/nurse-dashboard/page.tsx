@@ -7,8 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
-import { format, addDays, parseISO, isToday, differenceInDays } from 'date-fns';
-import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight } from 'lucide-react';
+import { format, addDays, parseISO, isToday, differenceInDays, addWeeks, isAfter } from 'date-fns';
+import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight, FlaskConical } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -77,7 +77,8 @@ export default function NurseDashboardPage() {
         patientsInTraining,
         patientsOnPeritonitisTx,
         todaysAppointments,
-        upcomingHomeVisits
+        upcomingHomeVisits,
+        upcomingPetTests,
     } = useMemo(() => {
         const now = new Date();
         const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter');
@@ -98,7 +99,16 @@ export default function NurseDashboardPage() {
             .filter(p => p.nextVisitDue > now && p.nextVisitDue < addDays(now, 30))
             .sort((a, b) => a.nextVisitDue.getTime() - b.nextVisitDue.getTime());
 
-        return { patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointments, upcomingHomeVisits };
+        const upcomingPetTests = allPatientData
+            .filter(p => p.pdStartDate && p.pdAdequacy.length === 0) // Only for patients who started PD and have no test yet
+            .map(p => ({
+                ...p,
+                petTestDueDate: addWeeks(parseISO(p.pdStartDate), 8)
+            }))
+            .filter(p => isAfter(p.petTestDueDate, now) && p.petTestDueDate < addDays(now, 60))
+            .sort((a, b) => a.petTestDueDate.getTime() - b.petTestDueDate.getTime());
+
+        return { patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointments, upcomingHomeVisits, upcomingPetTests };
 
     }, []);
 
@@ -125,7 +135,8 @@ export default function NurseDashboardPage() {
                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                      {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
                  </div>
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <Skeleton className="h-64 w-full" />
                     <Skeleton className="h-64 w-full" />
                     <Skeleton className="h-64 w-full" />
                  </div>
@@ -198,7 +209,36 @@ export default function NurseDashboardPage() {
                 </Card>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-red-500" />
+                            Urgent Patient Alerts
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className="space-y-3">
+                            {urgentAlerts.length > 0 ? urgentAlerts.map((alert, index) => (
+                                <li key={index} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border">
+                                    <div className="pt-1">{getAlertIcon(alert.type)}</div>
+                                    <div>
+                                        <p className="text-sm">
+                                            <Link href={`/dashboard/patients/${alert.patient.patientId}`} className="font-semibold hover:underline">
+                                                {alert.patient.firstName} {alert.patient.lastName}
+                                            </Link>
+                                            : {alert.details}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">{format(alert.date, 'PPP HH:mm')}</p>
+                                    </div>
+                                </li>
+                            )) : (
+                               <li className="text-center h-24 flex items-center justify-center text-muted-foreground">No urgent alerts.</li> 
+                            )}
+                        </ul>
+                    </CardContent>
+                </Card>
+
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -239,29 +279,43 @@ export default function NurseDashboardPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <AlertCircle className="h-5 w-5 text-red-500" />
-                            Urgent Patient Alerts
+                            <FlaskConical className="h-5 w-5 text-purple-600" />
+                            Upcoming PET Tests (Due within 60 Days)
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ul className="space-y-3">
-                            {urgentAlerts.length > 0 ? urgentAlerts.map((alert, index) => (
-                                <li key={index} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border">
-                                    <div className="pt-1">{getAlertIcon(alert.type)}</div>
-                                    <div>
-                                        <p className="text-sm">
-                                            <Link href={`/dashboard/patients/${alert.patient.patientId}`} className="font-semibold hover:underline">
-                                                {alert.patient.firstName} {alert.patient.lastName}
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Patient</TableHead>
+                                    <TableHead>Due Date</TableHead>
+                                    <TableHead>Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {upcomingPetTests.length > 0 ? upcomingPetTests.map(p => (
+                                    <TableRow key={p.patientId}>
+                                        <TableCell>
+                                            <Link href={`/dashboard/patients/${p.patientId}`} className="font-medium hover:underline">
+                                                {p.firstName} {p.lastName}
                                             </Link>
-                                            : {alert.details}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">{format(alert.date, 'PPP HH:mm')}</p>
-                                    </div>
-                                </li>
-                            )) : (
-                               <li className="text-center h-24 flex items-center justify-center text-muted-foreground">No urgent alerts.</li> 
-                            )}
-                        </ul>
+                                        </TableCell>
+                                        <TableCell>{format(p.petTestDueDate, 'PPP')}</TableCell>
+                                        <TableCell>
+                                            <Button asChild variant="outline" size="sm">
+                                                <Link href={`/dashboard/pet-test?patientId=${p.patientId}`}>
+                                                    Enter Data
+                                                </Link>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="text-center h-24">No PET tests due soon.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
             </div>
