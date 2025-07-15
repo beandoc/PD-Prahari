@@ -139,7 +139,7 @@ export default function PatientDailyLogPage() {
 
     // Filter out undefined values to prevent Firestore errors
     const newVital = Object.fromEntries(
-        Object.entries(vitalData).filter(([, value]) => value !== undefined && value !== null && value !== '')
+        Object.entries(vitalData).filter(([, value]) => value !== undefined && value !== null && !isNaN(value as number))
     ) as Partial<Vital>;
 
 
@@ -234,24 +234,26 @@ export default function PatientDailyLogPage() {
                 </CardHeader>
                 <CardContent>
                     {prescription.regimen ? (
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Exchange</TableHead>
-                            <TableHead>Solution</TableHead>
-                            <TableHead>Volume</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {prescription.regimen.map(item => (
-                            <TableRow key={item.name}>
-                              <TableCell className="font-medium">{item.name}</TableCell>
-                              <TableCell>{item.dialysateType}</TableCell>
-                              <TableCell>{item.fillVolumeML} mL</TableCell>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Exchange</TableHead>
+                              <TableHead>Solution</TableHead>
+                              <TableHead>Volume</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {prescription.regimen.map(item => (
+                              <TableRow key={item.name}>
+                                <TableCell className="font-medium whitespace-nowrap">{item.name}</TableCell>
+                                <TableCell>{item.dialysateType}</TableCell>
+                                <TableCell>{item.fillVolumeML} mL</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">No detailed regimen found.</p>
                     )}
@@ -346,7 +348,7 @@ export default function PatientDailyLogPage() {
                           {!isComplete ? <Badge variant="destructive">Missed</Badge> : <Badge variant="secondary" className="bg-green-100 text-green-800">Completed</Badge>}
                         </h3>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <Label>Dialysate Type</Label>
                             <Input readOnly value={exchange.dialysateType} className="bg-slate-100" />
@@ -360,7 +362,7 @@ export default function PatientDailyLogPage() {
                           <Input id={`drain-${exchange.id}`} value={exchange.drainVolume} placeholder="Enter drained volume" type="number" onChange={e => handleExchangeChange(exchange.id, 'drainVolume', e.target.value)} />
                         </div>
                       </div>
-                      <div className="flex items-center justify-between p-2 rounded-md bg-gray-50">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 rounded-md bg-gray-50 gap-4">
                          {uf !== null ? (
                             <div className="text-sm font-medium">
                                 <span>Ultrafiltration (UF):</span>

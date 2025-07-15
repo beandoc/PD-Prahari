@@ -198,25 +198,25 @@ export default function DoctorDashboard() {
               <TabsContent value="clinical">
                 <Card>
                   <CardHeader>
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                           <div>
                               <CardTitle>{filterTitles[filter]}</CardTitle>
                               <CardDescription>
                                   Showing {filteredPatients.length} of {allPatientData.length} patients.
                               </CardDescription>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                               {filter !== 'all' && (
-                                <Button variant="ghost" onClick={() => setFilter('all')}>
+                                <Button variant="ghost" onClick={() => setFilter('all')} className="w-full sm:w-auto">
                                   <FilterX className="mr-2 h-4 w-4" />
                                   Clear Filter
                                 </Button>
                               )}
-                              <div className="relative">
+                              <div className="relative flex-1 sm:flex-initial">
                                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                  <Input type="search" placeholder="Patient Search..." className="pl-8" />
+                                  <Input type="search" placeholder="Patient Search..." className="pl-8 w-full" />
                               </div>
-                               <Button asChild>
+                               <Button asChild className="w-full sm:w-auto">
                                 <Link href="/registration">
                                   <PlusCircle className="mr-2 h-4 w-4" />
                                   Add Patient
@@ -226,7 +226,7 @@ export default function DoctorDashboard() {
                       </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="border rounded-lg">
+                    <div className="border rounded-lg overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow>

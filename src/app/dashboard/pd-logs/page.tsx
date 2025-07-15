@@ -127,7 +127,7 @@ export default function PdLogsPage() {
                                         {prescription.regimen && prescription.regimen.length > 0 ? (
                                             <>
                                                 <h4 className="font-semibold text-lg mt-4 mb-2">Prescribed Regimen Details</h4>
-                                                <div className="border rounded-lg">
+                                                <div className="border rounded-lg overflow-x-auto">
                                                     <Table>
                                                         <TableHeader>
                                                             <TableRow>
@@ -167,7 +167,7 @@ export default function PdLogsPage() {
                     <TabsContent value="logs" className="mt-4">
                         <Card>
                             <CardContent className="p-4 sm:p-6">
-                                <div className="overflow-x-auto">
+                                <div className="border rounded-lg overflow-x-auto">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
@@ -183,7 +183,7 @@ export default function PdLogsPage() {
                                         <TableBody>
                                             {paginatedEvents.length > 0 ? paginatedEvents.map(event => (
                                                 <TableRow key={event.exchangeId}>
-                                                    <TableCell className="py-3">{format(new Date(event.exchangeDateTime), 'yyyy-MM-dd HH:mm')}</TableCell>
+                                                    <TableCell className="py-3 whitespace-nowrap">{format(new Date(event.exchangeDateTime), 'yyyy-MM-dd HH:mm')}</TableCell>
                                                     <TableCell className="py-3">Manual</TableCell>
                                                     <TableCell className="py-3">{event.dialysateType}</TableCell>
                                                     <TableCell className="py-3">{event.dwellTimeHours} hr</TableCell>
@@ -201,7 +201,7 @@ export default function PdLogsPage() {
                                 </div>
                                 <div className="flex flex-wrap items-center justify-end gap-y-4 gap-x-2 sm:gap-x-6 pt-4 text-sm">
                                     <div className="flex items-center space-x-2">
-                                        <p className="font-medium">Items per page:</p>
+                                        <p className="font-medium whitespace-nowrap">Items per page:</p>
                                         <Select
                                             value={`${pageSize}`}
                                             onValueChange={(value) => {
@@ -219,7 +219,7 @@ export default function PdLogsPage() {
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div className="font-medium text-muted-foreground">
+                                    <div className="font-medium text-muted-foreground whitespace-nowrap">
                                        {startItem}-{endItem} of {pdEvents.length}
                                     </div>
                                     <div className="flex items-center space-x-1">

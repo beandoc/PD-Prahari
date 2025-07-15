@@ -148,7 +148,7 @@ export default function PetTestPage() {
                     <CardHeader>
                         <CardTitle>Patient Information</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                    <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-sm">
                         <div><p className="font-medium">Patient Name</p><p className="text-muted-foreground">{patient.firstName} {patient.lastName}</p></div>
                         <div><p className="font-medium">ID Number</p><p className="text-muted-foreground">{patient.nephroId}</p></div>
                         <div><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
@@ -167,7 +167,7 @@ export default function PetTestPage() {
                     <CardContent className="space-y-6">
                         <div>
                             <h3 className="font-semibold mb-2">Serum (at 120 mins)</h3>
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div className="space-y-1"><Label>BUN (mg/dl)</Label><Input value={labValues.serumBun} onChange={e => handleValueChange('serumBun', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Creatinine (mg/dl)</Label><Input value={labValues.serumCreatinine} onChange={e => handleValueChange('serumCreatinine', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Glucose (mg/dl)</Label><Input value={labValues.serumGlucose} onChange={e => handleValueChange('serumGlucose', e.target.value)} /></div>
@@ -175,7 +175,7 @@ export default function PetTestPage() {
                         </div>
                          <div>
                             <h3 className="font-semibold mb-2">Dialysate (at 0 mins)</h3>
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div className="space-y-1"><Label>BUN (mg/dl)</Label><Input value={labValues.dialysateBun0} onChange={e => handleValueChange('dialysateBun0', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Creatinine (mg/dl)</Label><Input value={labValues.dialysateCreatinine0} onChange={e => handleValueChange('dialysateCreatinine0', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Glucose (mg/dl)</Label><Input value={labValues.dialysateGlucose0} onChange={e => handleValueChange('dialysateGlucose0', e.target.value)} /></div>
@@ -183,7 +183,7 @@ export default function PetTestPage() {
                         </div>
                         <div>
                             <h3 className="font-semibold mb-2">Dialysate (at 120 mins)</h3>
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div className="space-y-1"><Label>BUN (mg/dl)</Label><Input value={labValues.dialysateBun120} onChange={e => handleValueChange('dialysateBun120', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Creatinine (mg/dl)</Label><Input value={labValues.dialysateCreatinine120} onChange={e => handleValueChange('dialysateCreatinine120', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Glucose (mg/dl)</Label><Input value={labValues.dialysateGlucose120} onChange={e => handleValueChange('dialysateGlucose120', e.target.value)} /></div>
@@ -191,7 +191,7 @@ export default function PetTestPage() {
                         </div>
                         <div>
                             <h3 className="font-semibold mb-2">Dialysate (at 240 mins)</h3>
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div className="space-y-1"><Label>BUN (mg/dl)</Label><Input value={labValues.dialysateBun240} onChange={e => handleValueChange('dialysateBun240', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Creatinine (mg/dl)</Label><Input value={labValues.dialysateCreatinine240} onChange={e => handleValueChange('dialysateCreatinine240', e.target.value)} /></div>
                                 <div className="space-y-1"><Label>Glucose (mg/dl)</Label><Input value={labValues.dialysateGlucose240} onChange={e => handleValueChange('dialysateGlucose240', e.target.value)} /></div>
@@ -199,7 +199,7 @@ export default function PetTestPage() {
                         </div>
                         <div>
                              <h3 className="font-semibold mb-2">Drain Volume (at 240 mins)</h3>
-                             <div className="grid grid-cols-3 gap-3">
+                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div className="space-y-1"><Label>Volume (ml)</Label><Input value={labValues.drainVolume} onChange={e => handleValueChange('drainVolume', e.target.value)} /></div>
                             </div>
                         </div>
@@ -221,20 +221,22 @@ export default function PetTestPage() {
                                     <p className="text-sm font-medium text-blue-800">Membrane Transport Type</p>
                                     <p className="text-2xl font-bold text-blue-600">{getTransportType(ratios.dpCreatinine4)}</p>
                                 </div>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Time (Hours)</TableHead>
-                                            <TableHead>D/P Creatinine</TableHead>
-                                            <TableHead>D/D0 Glucose</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow><TableCell>0</TableCell><TableCell>0.00</TableCell><TableCell>1.00</TableCell></TableRow>
-                                        <TableRow><TableCell>2</TableCell><TableCell>{ratios.dpCreatinine2?.toFixed(2) ?? 'N/A'}</TableCell><TableCell>{ratios.dd0Glucose2?.toFixed(2) ?? 'N/A'}</TableCell></TableRow>
-                                        <TableRow><TableCell>4</TableCell><TableCell>{ratios.dpCreatinine4?.toFixed(2) ?? 'N/A'}</TableCell><TableCell>{ratios.dd0Glucose4?.toFixed(2) ?? 'N/A'}</TableCell></TableRow>
-                                    </TableBody>
-                                </Table>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Time (Hours)</TableHead>
+                                                <TableHead>D/P Creatinine</TableHead>
+                                                <TableHead>D/D0 Glucose</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            <TableRow><TableCell>0</TableCell><TableCell>0.00</TableCell><TableCell>1.00</TableCell></TableRow>
+                                            <TableRow><TableCell>2</TableCell><TableCell>{ratios.dpCreatinine2?.toFixed(2) ?? 'N/A'}</TableCell><TableCell>{ratios.dd0Glucose2?.toFixed(2) ?? 'N/A'}</TableCell></TableRow>
+                                            <TableRow><TableCell>4</TableCell><TableCell>{ratios.dpCreatinine4?.toFixed(2) ?? 'N/A'}</TableCell><TableCell>{ratios.dd0Glucose4?.toFixed(2) ?? 'N/A'}</TableCell></TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </div>
 
                                 <ResponsiveContainer width="100%" height={250}>
                                     <LineChart data={chartData}>
@@ -263,22 +265,24 @@ export default function PetTestPage() {
                     <CardTitle>Transport Classification Reference</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Transport Classification</TableHead>
-                                <TableHead>D/P Creatinine (4hr)</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {transportClassifications.map(item => (
-                                <TableRow key={item.type}>
-                                    <TableCell>{item.type}</TableCell>
-                                    <TableCell>{item.dpCreatinine}</TableCell>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Transport Classification</TableHead>
+                                    <TableHead>D/P Creatinine (4hr)</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {transportClassifications.map(item => (
+                                    <TableRow key={item.type}>
+                                        <TableCell>{item.type}</TableCell>
+                                        <TableCell>{item.dpCreatinine}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>

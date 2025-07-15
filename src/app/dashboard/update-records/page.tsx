@@ -127,10 +127,10 @@ export default function UpdateRecordsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl py-8">
+    <div className="container mx-auto max-w-5xl py-4 sm:py-8">
        <Card>
         <CardHeader>
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <CardTitle className="flex items-center gap-2 text-2xl">
                 <UserCog />
@@ -140,7 +140,7 @@ export default function UpdateRecordsPage() {
                 Select a patient to view and update their information.
               </CardDescription>
             </div>
-            <div className="w-1/3">
+            <div className="w-full sm:w-auto sm:min-w-[250px]">
                  <Select onValueChange={setSelectedPatientId} defaultValue={selectedPatientId}>
                     <SelectTrigger><SelectValue placeholder="Select a patient..." /></SelectTrigger>
                     <SelectContent>
