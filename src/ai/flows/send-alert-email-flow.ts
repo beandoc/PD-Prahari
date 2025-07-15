@@ -98,8 +98,13 @@ const prompt = ai.definePrompt({
         Issue: Patient reported cloudy peritoneal dialysis fluid.
         This is a potential sign of peritonitis and requires immediate attention.
         
-        1. Use the sendEmail tool to notify the clinic at ${clinicEmail}. The subject should be "Critical Alert: Cloudy PD Fluid for patient {{{patientName}}}". The body should contain all the details.
-        2. Use the sendWhatsAppMessage tool to send an alert to the hospital number ${hospitalWhatsAppNumber}. The message body MUST be exactly: "Suspicion of PD Peritonitis. Patient Name: {{{patientName}}}, Mobile: {{{patientMobile}}}".
+        You have two tasks:
+        1.  First, you MUST use the \`sendEmailTool\` to send an email to the clinic at ${clinicEmail}.
+            The subject of the email MUST be "Critical Alert: Cloudy PD Fluid for patient {{{patientName}}}".
+            The body of the email (the \`html\` parameter) should contain all the details of the alert.
+        
+        2.  Second, you MUST use the \`sendWhatsAppMessageTool\` to send an alert to the hospital number ${hospitalWhatsAppNumber}.
+            The message body (the \`body\` parameter) MUST be the following text EXACTLY: "Suspicion of PD Peritonitis. Patient Name: {{{patientName}}}, Mobile: {{{patientMobile}}}".
     `,
 });
 
