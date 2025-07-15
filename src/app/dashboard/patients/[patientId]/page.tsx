@@ -1,4 +1,6 @@
 
+'use client';
+
 import type { PatientData } from '@/lib/types';
 import { getSyncedPatientData } from '@/lib/data-sync';
 import PatientHeader from '@/components/dashboard/patient-header';
@@ -14,7 +16,6 @@ import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
-'use client';
 
 // This is the dedicated Client Component that handles state and data fetching.
 // It receives the patientId as a simple string prop.
@@ -76,7 +77,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 
 // This default export is the page component. It is a Server Component by default.
 // Its only job is to handle the server-side params and pass them to the Client Component.
-export default async function PatientDetailPage({ params }: { params: { patientId: string } }) {
+export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
   const { patientId } = params;
   // It then renders the Client Component, passing the ID as a prop.
   return <PatientDetailView patientId={patientId} />;
