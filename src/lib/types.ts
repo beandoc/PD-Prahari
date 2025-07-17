@@ -96,7 +96,7 @@ export interface PeritonitisEpisode {
   diagnosisDate: string;
   organismIsolated: string;
   treatmentRegimen: string;
-  outcome: 'Resolved' | 'Catheter Removal' | 'Transferred to HD' | 'Deceased';
+  outcome: 'Resolved' | 'Catheter Removal' | 'Transferred to HD' | 'Deceased' | 'In Treatment';
   resolutionDate?: string;
   admissionId?: string;
 }
@@ -208,9 +208,12 @@ export interface PatientData extends Patient {
   catheterDysfunction?: boolean;
   esiCount?: number;
   additionalNotes?: string;
+  nurseCounselingNotes?: string;
 
   // New fields for profile page
   contactInfo?: ContactInfo;
   admissions?: Admission[];
   mechanicalComplications?: MechanicalComplications;
 }
+
+    

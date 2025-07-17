@@ -13,6 +13,7 @@ import VitalsCard from '@/components/dashboard/vitals-card';
 import LabResultsCard from '@/components/dashboard/lab-results-card';
 import PDExchangeCard from '@/components/dashboard/pd-exchange-card';
 import PDParametersCard from '@/components/dashboard/pd-parameters-card';
+import CareTeamNotesCard from '@/components/dashboard/CareTeamNotesCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
@@ -85,6 +86,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
             </div>
         </div>
         <div className="lg:col-span-1 space-y-6">
+            <CareTeamNotesCard patient={patientData} />
             <ClinicVisitsCard data={patientData.clinicVisits} admissions={patientData.admissions || []} />
             <NutritionLifestyleCard data={patientData.nutritionLifestyle} />
             <PatientEducationCard topics={patientData.patientEducation} />
@@ -101,3 +103,5 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
   const { patientId } = params;
   return <PatientDetailView patientId={patientId} />;
 }
+
+    

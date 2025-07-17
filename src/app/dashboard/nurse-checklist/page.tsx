@@ -13,6 +13,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { format, parseISO } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { PatientData } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { MessageSquarePlus } from 'lucide-react';
+import { updatePatientData } from '@/lib/data-sync';
 
 const ChecklistItem = ({ id, label }: { id: string, label: string }) => (
     <div className="flex items-center space-x-3 py-2">
@@ -45,13 +49,25 @@ const FlagItem = ({ label, isFlagged, children }: { label: string, isFlagged: bo
 
 const ChecklistContent = () => {
     const searchParams = useSearchParams();
+    const { toast } = useToast();
     const [patient, setPatient] = useState<PatientData | null>(null);
+    const [remarks, setRemarks] = useState('');
 
     useEffect(() => {
         const patientId = searchParams.get('patientId') || allPatientData[0].patientId;
         const foundPatient = allPatientData.find(p => p.patientId === patientId) || allPatientData[0];
         setPatient(foundPatient);
+        setRemarks(foundPatient.nurseCounselingNotes || '');
     }, [searchParams]);
+
+    const handleSaveRemarks = () => {
+        if (!patient) return;
+        updatePatientData(patient.patientId, { nurseCounselingNotes: remarks });
+        toast({
+            title: "Remarks Saved",
+            description: `Counseling notes for ${patient.firstName} ${patient.lastName} have been updated.`,
+        });
+    }
 
     if (!patient) {
         return <Skeleton className="w-full h-[80vh]" />;
@@ -114,6 +130,22 @@ const ChecklistContent = () => {
                          <Label className="font-semibold">Additional Notes</Label>
                          <Textarea readOnly defaultValue={patient.additionalNotes || 'No additional notes.'} className="mt-1 bg-slate-50 font-sans" rows={3}/>
                     </div>
+                </CardContent>
+            </Card>
+
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><MessageSquarePlus /> Counseling & Remarks</CardTitle>
+                    <CardDescription>Document pre-procedure counseling, patient concerns, and other remarks here.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Textarea 
+                        placeholder="e.g., Counseled patient on catheter placement procedure. Patient understands the healing process and post-op care. Expressed some anxiety about body image..."
+                        value={remarks}
+                        onChange={(e) => setRemarks(e.target.value)}
+                        className="min-h-[120px]"
+                    />
+                    <Button onClick={handleSaveRemarks}>Save Remarks</Button>
                 </CardContent>
             </Card>
 
@@ -359,3 +391,5 @@ export default function NurseChecklistPage() {
         </div>
     );
 }
+
+    

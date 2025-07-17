@@ -363,5 +363,31 @@ export const allPatientData: PatientData[] = [
     nutritionLifestyle: { dailyProtein: { current: 60, target: 65 }, fluidRestriction: { current: 1.0, limit: 1.5 }, caloriesToday: { current: 1900, target: 2000 }, dailyActivity: { current: 5000, target: 5000 }},
     clinicVisits: { nextAppointment: '2025-08-20T09:30:00Z', lastVisitSummary: 'Post-catheter insertion follow-up.' },
     patientEducation: []
+  },
+  {
+    patientId: 'PAT-007',
+    nephroId: 'NPH-34567',
+    firstName: 'Leela',
+    lastName: 'Sharma',
+    dateOfBirth: '1985-05-18',
+    gender: 'Female',
+    contactPhone: '9777888999',
+    addressLine1: 'C-Wing, Marvel Enclave',
+    city: 'Pune',
+    stateProvince: 'Maharashtra',
+    postalCode: '411028',
+    pdStartDate: '',
+    pdExchangeType: 'Self',
+    underlyingKidneyDisease: 'Lupus Nephritis',
+    currentStatus: 'Awaiting Catheter',
+    physician: 'Dr. Sachin',
+    prescription: { exchange: '', pdStrength: '', dwellTimeHours: 0, dwellVolumeML: 0, exchangeTimeMinutes: 0 },
+    vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
+    nutritionLifestyle: { dailyProtein: { current: 0, target: 60 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 1800 }, dailyActivity: { current: 0, target: 3000 }},
+    clinicVisits: { nextAppointment: '2025-08-10T11:00:00Z', lastVisitSummary: 'Pre-PD workup complete. Patient consented for catheter insertion.' },
+    patientEducation: [],
+    nurseCounselingNotes: 'Patient is anxious about the procedure. Provided reassurance and educational materials. Scheduled a follow-up call to answer further questions.'
   }
 ];
+
+    
