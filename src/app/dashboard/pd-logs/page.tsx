@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { allPatientData } from '@/data/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,6 +12,7 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Info, TrendingU
 import { cn } from '@/lib/utils';
 import type { PatientData, PDEvent, Prescription } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getLiveAllPatientData } from '@/lib/data-sync';
 
 const StatCard = ({ title, value, icon, footer, variant = 'default' }: { title: string; value: string; icon: React.ReactNode; footer?: string; variant?: 'default' | 'success' | 'warning' | 'danger' }) => {
     const colors = {
@@ -40,11 +40,12 @@ export default function PdLogsPage() {
     const [pageSize, setPageSize] = useState(10);
     const [selectedPatientId, setSelectedPatientId] = useState<string>('');
     const [patientData, setPatientData] = useState<PatientData | null>(null);
-    const [sortedPatients, setSortedPatients] = useState<PatientData[]>([]);
+    const [allPatients, setAllPatients] = useState<PatientData[]>([]);
 
     useEffect(() => {
-        const sorted = [...allPatientData].sort((a, b) => a.firstName.localeCompare(b.firstName));
-        setSortedPatients(sorted);
+        const data = getLiveAllPatientData();
+        const sorted = [...data].sort((a, b) => a.firstName.localeCompare(b.firstName));
+        setAllPatients(sorted);
         if (sorted.length > 0) {
             const firstPatientId = sorted[0].patientId;
             setSelectedPatientId(firstPatientId);
@@ -55,7 +56,7 @@ export default function PdLogsPage() {
 
     const handlePatientChange = (patientId: string) => {
         setSelectedPatientId(patientId);
-        setPatientData(allPatientData.find(p => p.patientId === patientId) || null);
+        setPatientData(allPatients.find(p => p.patientId === patientId) || null);
         setPageIndex(0); // Reset to first page when patient changes
     };
 
@@ -75,11 +76,9 @@ export default function PdLogsPage() {
             strengthDisplay = strengths.join(', ');
         }
         
-        // --- Analytics Calculations ---
         const today = startOfDay(new Date());
         const prescribedDailyExchanges = patientData.prescription?.regimen?.length || 0;
         
-        // 1. Missed Logs
         let missedLogPercentage = 0;
         if (prescribedDailyExchanges > 0 && patientData.pdStartDate) {
             const date30DaysAgo = startOfDay(subDays(today, 30));
@@ -95,7 +94,6 @@ export default function PdLogsPage() {
             }
         }
 
-        // 2. UF Calculations
         const getDailyUf = (events: PDEvent[], startDate: Date, endDate: Date): Record<string, number> => {
             const dailyUfMap: Record<string, number> = {};
             events.forEach(event => {
@@ -116,7 +114,6 @@ export default function PdLogsPage() {
         const minUfLast3Months = ufValues.length > 0 ? Math.min(...ufValues) : 0;
         const maxUfLast3Months = ufValues.length > 0 ? Math.max(...ufValues) : 0;
 
-        // 3. UF Drop Alert
         const date60DaysAgo = subDays(today, 60);
         const baselineUfMap = getDailyUf(patientData.pdEvents, date90DaysAgo, date60DaysAgo);
         const baselineUfValues = Object.values(baselineUfMap);
@@ -128,12 +125,11 @@ export default function PdLogsPage() {
         const recentAvgUf = recentUfValues.length > 0 ? recentUfValues.reduce((a, b) => a + b, 0) / recentUfValues.length : null;
         
         let hasUfDropAlert = false;
-        if (baselineAvgUf !== null && recentAvgUf !== null && baselineAvgUf > 50) { // Check for meaningful baseline
-            if (recentAvgUf < baselineAvgUf * 0.75) { // 25% drop
+        if (baselineAvgUf !== null && recentAvgUf !== null && baselineAvgUf > 50) { 
+            if (recentAvgUf < baselineAvgUf * 0.75) { 
                 hasUfDropAlert = true;
             }
         }
-
 
         return {
             prescription: patientData.prescription,
@@ -181,7 +177,7 @@ export default function PdLogsPage() {
                     <Select onValueChange={handlePatientChange} value={selectedPatientId}>
                         <SelectTrigger><SelectValue placeholder="Select a patient..." /></SelectTrigger>
                         <SelectContent>
-                            {sortedPatients.map(p => (
+                            {allPatients.map(p => (
                                 <SelectItem key={p.patientId} value={p.patientId}>
                                     {p.firstName} {p.lastName} ({p.nephroId})
                                 </SelectItem>
@@ -347,7 +343,7 @@ export default function PdLogsPage() {
                                             }}
                                         >
                                             <SelectTrigger className="h-8 w-[70px]">
-                                                <SelectValue placeholder={pageSize} />
+                                                <SelectValue placeholder={`${pageSize}`} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {[5, 10, 20].map(size => (
@@ -383,3 +379,5 @@ export default function PdLogsPage() {
         </div>
     );
 }
+
+    

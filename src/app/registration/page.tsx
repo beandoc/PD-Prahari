@@ -31,7 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { indianStates } from '@/data/locations';
@@ -263,10 +262,10 @@ export default function ClinicianPatientRegistrationPage() {
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Contact Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <FormField control={form.control} name="contactPhone" render={({ field }) => (
-                            <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="addressLine1" render={({ field }) => (
-                            <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="state" render={({ field }) => (
                             <FormItem><FormLabel>State</FormLabel>
@@ -278,14 +277,14 @@ export default function ClinicianPatientRegistrationPage() {
                         )} />
                         <FormField control={form.control} name="city" render={({ field }) => (
                             <FormItem><FormLabel>City</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value ?? ''}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a city" /></SelectTrigger></FormControl>
                                     <SelectContent>{cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                                 </Select><FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="postalCode" render={({ field }) => (
-                            <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                   </section>
@@ -296,7 +295,7 @@ export default function ClinicianPatientRegistrationPage() {
                             <FormItem><FormLabel>Contact Name {age !== null && age < 18 && (<span className="text-destructive">*</span>)}</FormLabel><FormControl><Input placeholder="Enter guardian/contact name" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="emergencyContactPhone" render={({ field }) => (
-                            <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter guardian/contact phone" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter guardian/contact phone" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="emergencyContactRelation" render={({ field }) => (
                             <FormItem><FormLabel>Relation with Guardian</FormLabel>
@@ -319,7 +318,7 @@ export default function ClinicianPatientRegistrationPage() {
                             <FormItem><FormLabel>Contact Email (Optional)</FormLabel><FormControl><Input placeholder="Enter guardian/contact email" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                          <FormField control={form.control} name="emergencyContactWhatsapp" render={({ field }) => (
-                            <FormItem><FormLabel>WhatsApp Number (Optional)</FormLabel><FormControl><Input placeholder="Enter WhatsApp number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>WhatsApp Number (Optional)</FormLabel><FormControl><Input placeholder="Enter WhatsApp number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                   </section>

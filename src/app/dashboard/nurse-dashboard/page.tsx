@@ -5,7 +5,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
 import { format, addDays, parseISO, isToday, differenceInDays, addWeeks, isAfter } from 'date-fns';
 import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight, FlaskConical, Stethoscope, BookOpen } from 'lucide-react';
@@ -13,6 +12,7 @@ import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getLiveAllPatientData } from '@/lib/data-sync';
 
 type FilterType = 'awaiting_insertion' | 'in_training' | 'peritonitis_tx' | 'all';
 
@@ -57,29 +57,30 @@ const getAlertIcon = (type: AlertItem['type']) => {
 }
 
 export default function NurseDashboardPage() {
+    const [allPatientData, setAllPatientData] = useState<PatientData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [urgentAlerts, setUrgentAlerts] = useState<AlertItem[]>([]);
     const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-    const [isClient, setIsClient] = useState(false);
     
     useEffect(() => {
-        setIsClient(true);
+        const data = getLiveAllPatientData();
+        setAllPatientData(data);
+
         const alerts: AlertItem[] = [];
-        
-        allPatientData.forEach(p => {
+        data.forEach(p => {
+            // @ts-ignore - This is a temporary property for demonstration
             if (p.newCloudyAlert) {
-                alerts.push({
-                    patient: p, type: 'cloudy', details: p.newCloudyAlert.details, date: p.newCloudyAlert.date
-                });
+                // @ts-ignore
+                alerts.push({ patient: p, type: 'cloudy', details: p.newCloudyAlert.details, date: p.newCloudyAlert.date });
             }
         });
         
-        alerts.push({ patient: allPatientData[2], type: 'doctor_note', details: 'Dr. Parikshit: Please schedule a follow-up PET test for Priya D.', date: new Date() });
-        alerts.push({ patient: allPatientData[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) });
-        alerts.push({ patient: allPatientData[1], type: 'symptom', details: 'Patient reports mild ankle edema.', date: addDays(new Date(), -1) });
-
+        alerts.push({ patient: data[2], type: 'doctor_note', details: 'Dr. Parikshit: Please schedule a follow-up PET test for Priya D.', date: new Date() });
+        alerts.push({ patient: data[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) });
+        alerts.push({ patient: data[1], type: 'symptom', details: 'Patient reports mild ankle edema.', date: addDays(new Date(), -1) });
 
         setUrgentAlerts(alerts.sort((a, b) => b.date.getTime() - a.date.getTime()));
-
+        setIsLoading(false);
     }, []);
 
     const {
@@ -90,6 +91,8 @@ export default function NurseDashboardPage() {
         upcomingHomeVisits,
         upcomingPetTests,
     } = useMemo(() => {
+        if (isLoading) return { patientsAwaitingInsertion: [], patientsInTraining: [], patientsOnPeritonitisTx: [], todaysAppointments: 0, upcomingHomeVisits: [], upcomingPetTests: [] };
+
         const now = new Date();
         const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter');
         const patientsInTraining = allPatientData
@@ -136,7 +139,7 @@ export default function NurseDashboardPage() {
 
         return { patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointments, upcomingHomeVisits, upcomingPetTests };
 
-    }, []);
+    }, [allPatientData, isLoading]);
 
     const filteredPatients = useMemo(() => {
         switch (activeFilter) {
@@ -154,7 +157,7 @@ export default function NurseDashboardPage() {
         peritonitis_tx: 'Patients on Active Peritonitis Treatment'
     };
 
-    if (!isClient) {
+    if (isLoading) {
         return (
              <div className="space-y-6">
                  <Skeleton className="h-12 w-1/3" />
@@ -162,15 +165,13 @@ export default function NurseDashboardPage() {
                      {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
                  </div>
                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <Skeleton className="h-64 w-full" />
-                    <Skeleton className="h-64 w-full" />
-                    <Skeleton className="h-64 w-full" />
+                    <Skeleton className="h-64 w-full lg:col-span-1" />
+                    <Skeleton className="h-64 w-full lg:col-span-2" />
                  </div>
             </div>
         )
     }
 
-    
     return (
         <div className="space-y-6">
             <header>
@@ -384,5 +385,6 @@ export default function NurseDashboardPage() {
             </div>
         </div>
     );
+}
 
     

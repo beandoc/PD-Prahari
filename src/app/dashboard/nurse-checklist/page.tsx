@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { allPatientData } from '@/data/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { format, parseISO } from 'date-fns';
@@ -16,7 +15,7 @@ import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { MessageSquarePlus } from 'lucide-react';
-import { updatePatientData } from '@/lib/data-sync';
+import { getSyncedPatientData, updatePatientData } from '@/lib/data-sync';
 
 const ChecklistItem = ({ id, label }: { id: string, label: string }) => (
     <div className="flex items-center space-x-3 py-2">
@@ -52,12 +51,17 @@ const ChecklistContent = () => {
     const { toast } = useToast();
     const [patient, setPatient] = useState<PatientData | null>(null);
     const [remarks, setRemarks] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const patientId = searchParams.get('patientId') || allPatientData[0].patientId;
-        const foundPatient = allPatientData.find(p => p.patientId === patientId) || allPatientData[0];
-        setPatient(foundPatient);
-        setRemarks(foundPatient.nurseCounselingNotes || '');
+        const patientId = searchParams.get('patientId') || 'PAT-001';
+        getSyncedPatientData(patientId).then(data => {
+            if (data) {
+                setPatient(data);
+                setRemarks(data.nurseCounselingNotes || '');
+            }
+            setIsLoading(false);
+        });
     }, [searchParams]);
 
     const handleSaveRemarks = () => {
@@ -69,7 +73,7 @@ const ChecklistContent = () => {
         });
     }
 
-    if (!patient) {
+    if (isLoading || !patient) {
         return <Skeleton className="w-full h-[80vh]" />;
     }
 
@@ -380,14 +384,14 @@ const ChecklistContent = () => {
     );
 }
 
-// This is now a Server Component
 export default function NurseChecklistPage() {
     return (
         <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
-            {/* Suspense is a Client Component, so we wrap the part that uses client hooks */}
             <Suspense fallback={<Skeleton className="w-full h-[80vh]" />}>
                 <ChecklistContent />
             </Suspense>
         </div>
     );
 }
+
+    

@@ -1,12 +1,17 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { User, Phone, BriefcaseMedical, Pill, Inbox, Upload, Video, ShieldAlert, AlertTriangle, CheckCircle, SlidersHorizontal, Activity, BookOpen, Route, Users2, CalendarClock } from 'lucide-react';
-import { allPatientData } from '@/data/mock-data';
+import { getSyncedPatientData } from '@/lib/data-sync';
 import Link from 'next/link';
 import { format, parseISO, addMonths, differenceInMonths, differenceInYears } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import type { PatientData } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const getPDVintage = (startDate: string) => {
     if (!startDate) return 'N/A';
@@ -27,10 +32,37 @@ const getPDVintage = (startDate: string) => {
 
 
 export default function PatientProfilePage() {
-  const patient = allPatientData[0]; // Using first patient for demonstration
+  const [patient, setPatient] = useState<PatientData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+      // Using fixed patient for demonstration
+      getSyncedPatientData('PAT-001').then(data => {
+          setPatient(data);
+          setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading || !patient) {
+      return (
+          <div className="space-y-6">
+              <Skeleton className="h-10 w-1/3" />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2 space-y-6">
+                      <Skeleton className="h-64 w-full" />
+                      <Skeleton className="h-48 w-full" />
+                  </div>
+                  <div className="lg:col-span-1 space-y-6">
+                      <Skeleton className="h-32 w-full" />
+                      <Skeleton className="h-48 w-full" />
+                  </div>
+              </div>
+          </div>
+      );
+  }
+
   const latestAdequacy = patient.pdAdequacy.length > 0 ? patient.pdAdequacy.sort((a,b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime())[0] : null;
 
-  // Dummy dates for transfer set
   const lastTransferSetChangeDate = patient.pdStartDate ? new Date(patient.pdStartDate) : new Date();
   const nextTransferSetChangeDueDate = addMonths(lastTransferSetChangeDate, 6);
 
@@ -43,7 +75,6 @@ export default function PatientProfilePage() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left column for main info */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
@@ -205,7 +236,6 @@ export default function PatientProfilePage() {
           </Card>
         </div>
 
-        {/* Right column for contacts and actions */}
         <div className="space-y-6">
           {patient.contactInfo && (
             <Card className="bg-blue-50 border-blue-200">
@@ -257,3 +287,5 @@ export default function PatientProfilePage() {
     </div>
   );
 }
+
+    

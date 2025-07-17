@@ -1,15 +1,41 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, History, User, ArrowRight } from 'lucide-react';
-import { allPatientData } from '@/data/mock-data';
+import { getSyncedPatientData } from '@/lib/data-sync';
+import type { PatientData } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PatientPortalDashboard() {
-  const patient = allPatientData[0]; // Using first patient for demonstration
+  const [patient, setPatient] = useState<PatientData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Simple logic to check if logs have been submitted today.
-  // In a real app, this would be more robust.
+  useEffect(() => {
+      // Using fixed patient for demonstration
+      getSyncedPatientData('PAT-001').then(data => {
+          setPatient(data);
+          setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading || !patient) {
+      return (
+          <div className="space-y-6">
+              <Skeleton className="h-10 w-1/2" />
+              <Skeleton className="h-8 w-3/4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-48 w-full" />
+              </div>
+          </div>
+      );
+  }
+
   const hasLoggedToday = patient.pdEvents.some(
     event => new Date(event.exchangeDateTime).toDateString() === new Date().toDateString()
   );
@@ -71,3 +97,5 @@ export default function PatientPortalDashboard() {
     </div>
   );
 }
+
+    

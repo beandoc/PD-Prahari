@@ -6,41 +6,45 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart } from 'recharts';
 import { Droplets, History, TrendingUp } from 'lucide-react';
-import { allPatientData } from '@/data/mock-data';
-import type { PDEvent } from '@/lib/types';
+import { getSyncedPatientData } from '@/lib/data-sync';
+import type { PatientData, PDEvent } from '@/lib/types';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function LogHistoryPage() {
+    const [patientData, setPatientData] = useState<PatientData | null>(null);
     const [dailyUfData, setDailyUfData] = useState<{ date: string; uf: number; }[]>([]);
     const [allEvents, setAllEvents] = useState<PDEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const patientData = allPatientData[0];
+        // Using a fixed patient for demonstration
+        getSyncedPatientData('PAT-001').then(data => {
+            if (data) {
+                setPatientData(data);
+                const events = [...data.pdEvents].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
+                
+                const dailyUf: Record<string, number> = {};
+                events.forEach(event => {
+                    const day = format(startOfDay(new Date(event.exchangeDateTime)), 'yyyy-MM-dd');
+                    dailyUf[day] = (dailyUf[day] || 0) + event.ultrafiltrationML;
+                });
+                
+                const calculatedDailyUfData = Object.entries(dailyUf)
+                    .map(([date, uf]) => ({
+                        date: format(new Date(date), 'MMM d'),
+                        uf
+                    }))
+                    .slice(0, 30) // Show last 30 days
+                    .reverse();
 
-        const events = [...patientData.pdEvents].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
-        
-        const dailyUf: Record<string, number> = {};
-        
-        events.forEach(event => {
-            const day = format(startOfDay(new Date(event.exchangeDateTime)), 'yyyy-MM-dd');
-            dailyUf[day] = (dailyUf[day] || 0) + event.ultrafiltrationML;
+                setDailyUfData(calculatedDailyUfData);
+                setAllEvents(events);
+            }
+            setIsLoading(false);
         });
-        
-        const calculatedDailyUfData = Object.entries(dailyUf)
-            .map(([date, uf]) => ({
-                date: format(new Date(date), 'MMM d'),
-                uf
-            }))
-            .slice(0, 30) // Show last 30 days
-            .reverse();
-
-        setDailyUfData(calculatedDailyUfData);
-        setAllEvents(events);
-        setIsLoading(false);
     }, []);
 
   return (
@@ -140,3 +144,5 @@ export default function LogHistoryPage() {
     </div>
   );
 }
+
+    

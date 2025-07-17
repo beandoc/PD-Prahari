@@ -29,13 +29,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { indianStates } from '@/data/locations';
-import { allPatientData } from '@/data/mock-data';
 import type { PatientData } from '@/lib/types';
-import { updatePatientData } from '@/lib/data-sync';
+import { getLiveAllPatientData, updatePatientData } from '@/lib/data-sync';
 
 const formSchema = z.object({
   // Demographics
@@ -68,26 +66,34 @@ const formSchema = z.object({
 
 export default function UpdateRecordsPage() {
   const { toast } = useToast();
-  const [selectedPatientId, setSelectedPatientId] = useState<string>(allPatientData[0].patientId);
-  const [patient, setPatient] = useState<PatientData | null>(null);
+  const [allPatients, setAllPatients] = useState<PatientData[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const [cities, setCities] = useState<string[]>([]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
+  useEffect(() => {
+      const data = getLiveAllPatientData();
+      setAllPatients(data);
+      if (data.length > 0) {
+          setSelectedPatientId(data[0].patientId);
+      }
+  }, []);
+
   const selectedState = form.watch('state');
 
   useEffect(() => {
-    const selected = allPatientData.find(p => p.patientId === selectedPatientId);
+    const selected = allPatients.find(p => p.patientId === selectedPatientId);
     if (selected) {
-      setPatient(selected);
       form.reset({
         ...selected,
         gender: selected.gender || '',
         educationLevel: selected.educationLevel || '',
         contactPhone: selected.contactPhone || '',
         addressLine1: selected.addressLine1 || '',
+        state: selected.stateProvince || '',
         city: selected.city || '',
         postalCode: selected.postalCode || '',
         underlyingKidneyDisease: selected.underlyingKidneyDisease || '',
@@ -102,7 +108,7 @@ export default function UpdateRecordsPage() {
       const stateData = indianStates.find(s => s.name === selected.stateProvince);
       setCities(stateData ? stateData.cities.map(c => c.name) : []);
     }
-  }, [selectedPatientId, form]);
+  }, [selectedPatientId, form, allPatients]);
 
   useEffect(() => {
     if (selectedState) {
@@ -119,7 +125,11 @@ export default function UpdateRecordsPage() {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updatePatientData(selectedPatientId, values);
+    const dataToSave = {
+        ...values,
+        stateProvince: values.state
+    }
+    updatePatientData(selectedPatientId, dataToSave);
     toast({
       title: "Patient Record Updated",
       description: `Data for ${values.firstName} ${values.lastName} has been saved.`,
@@ -141,10 +151,10 @@ export default function UpdateRecordsPage() {
               </CardDescription>
             </div>
             <div className="w-full sm:w-auto sm:min-w-[250px]">
-                 <Select onValueChange={setSelectedPatientId} defaultValue={selectedPatientId}>
+                 <Select onValueChange={setSelectedPatientId} value={selectedPatientId}>
                     <SelectTrigger><SelectValue placeholder="Select a patient..." /></SelectTrigger>
                     <SelectContent>
-                        {allPatientData.map(p => (
+                        {allPatients.map(p => (
                             <SelectItem key={p.patientId} value={p.patientId}>{p.firstName} {p.lastName} ({p.nephroId})</SelectItem>
                         ))}
                     </SelectContent>
@@ -249,7 +259,7 @@ export default function UpdateRecordsPage() {
                         </FormItem>
                     )} />
                      <FormField control={form.control} name="distanceFromPDCenterKM" render={({ field }) => (
-                        <FormItem><FormLabel>Distance from PD Center (KM)</FormLabel><FormControl><Input type="number" placeholder="Enter distance" {...field} disabled /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Distance from PD Center (KM)</FormLabel><FormControl><Input type="number" placeholder="Enter distance" {...field} value={field.value ?? ''} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
                         <FormItem><FormLabel>PD Exchange Type</FormLabel>
@@ -312,3 +322,5 @@ export default function UpdateRecordsPage() {
     </div>
   );
 }
+
+    

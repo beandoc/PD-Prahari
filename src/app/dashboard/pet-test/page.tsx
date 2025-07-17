@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { allPatientData } from '@/data/mock-data';
+import { getLiveAllPatientData } from '@/lib/data-sync';
 import type { PatientData } from '@/lib/types';
 import { format, parseISO, differenceInYears } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -61,6 +61,7 @@ const getTransportType = (dpCreatinine4: number | null): string => {
 
 
 export default function PetTestPage() {
+    const [allPatients, setAllPatients] = useState<PatientData[]>([]);
     const [selectedPatientId, setSelectedPatientId] = useState<string>('');
     const [patient, setPatient] = useState<PatientData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -74,17 +75,19 @@ export default function PetTestPage() {
     const [ratios, setRatios] = useState<CalculatedRatios | null>(null);
 
     useEffect(() => {
-        if (allPatientData.length > 0) {
-            const firstPatientId = allPatientData[0].patientId;
+        const data = getLiveAllPatientData();
+        setAllPatients(data);
+        if (data.length > 0) {
+            const firstPatientId = data[0].patientId;
             setSelectedPatientId(firstPatientId);
-            setPatient(allPatientData[0]);
+            setPatient(data[0]);
         }
         setIsLoading(false);
     }, []);
 
     const handlePatientChange = (patientId: string) => {
         setSelectedPatientId(patientId);
-        setPatient(allPatientData.find(p => p.patientId === patientId) || null);
+        setPatient(allPatients.find(p => p.patientId === patientId) || null);
         setRatios(null);
     };
 
@@ -133,7 +136,7 @@ export default function PetTestPage() {
                     <Select onValueChange={handlePatientChange} value={selectedPatientId}>
                         <SelectTrigger><SelectValue placeholder="Select a patient..." /></SelectTrigger>
                         <SelectContent>
-                            {allPatientData.map(p => (
+                            {allPatients.map(p => (
                                 <SelectItem key={p.patientId} value={p.patientId}>
                                     {p.firstName} {p.lastName} ({p.nephroId})
                                 </SelectItem>
@@ -288,3 +291,5 @@ export default function PetTestPage() {
         </div>
     );
 }
+
+    
