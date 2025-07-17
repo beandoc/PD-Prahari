@@ -101,6 +101,6 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 
 // This is the default export for the page. It's a Server Component.
 // It correctly accesses `params.patientId` and passes it as a string prop.
-export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
+export default async function PatientDetailPage({ params }: { params: { patientId: string } }) {
   return <PatientDetailView patientId={params.patientId} />;
 }
