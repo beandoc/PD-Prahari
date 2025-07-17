@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
 import { format, addDays, parseISO, isToday, differenceInDays, addWeeks, isAfter } from 'date-fns';
-import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight, FlaskConical } from 'lucide-react';
+import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight, FlaskConical, Stethoscope } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -41,7 +41,7 @@ const MetricCard = ({ title, value, icon, onClick, isActive }: MetricCardProps) 
 
 interface AlertItem {
     patient: PatientData;
-    type: 'symptom' | 'supply' | 'cloudy' | 'exit_site';
+    type: 'symptom' | 'supply' | 'cloudy' | 'exit_site' | 'doctor_note';
     details: string;
     date: Date;
 }
@@ -51,7 +51,8 @@ const getAlertIcon = (type: AlertItem['type']) => {
         case 'symptom': return <AlertCircle className="h-4 w-4 text-orange-500" />;
         case 'supply': return <ShoppingBag className="h-4 w-4 text-blue-500" />;
         case 'cloudy': return <Droplets className="h-4 w-4 text-yellow-500" />;
-        case 'exit_site': return <MessageSquare className="h-4 w-4 text-red-500" />;
+        case 'exit_site': return <AlertCircle className="h-4 w-4 text-red-500" />;
+        case 'doctor_note': return <Stethoscope className="h-4 w-4 text-indigo-500" />;
     }
 }
 
@@ -77,7 +78,10 @@ export default function NurseDashboardPage() {
         });
         
         // Example static alerts for demonstration
+        alerts.push({ patient: allPatientData[2], type: 'doctor_note', details: 'Dr. Parikshit: Please schedule a follow-up PET test for Priya D.', date: new Date() });
         alerts.push({ patient: allPatientData[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) });
+        alerts.push({ patient: allPatientData[1], type: 'symptom', details: 'Patient reports mild ankle edema.', date: addDays(new Date(), -1) });
+
 
         setUrgentAlerts(alerts.sort((a, b) => b.date.getTime() - a.date.getTime()));
 
@@ -225,8 +229,8 @@ export default function NurseDashboardPage() {
                  <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <AlertCircle className="h-5 w-5 text-red-500" />
-                            Urgent Patient Alerts
+                            <MessageSquare className="h-5 w-5 text-red-500" />
+                            Notifications & Alerts
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
