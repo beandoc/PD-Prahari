@@ -4,7 +4,7 @@
 import type { PatientData } from '@/lib/types';
 import { getSyncedPatientData } from '@/lib/data-sync';
 import PatientHeader from '@/components/dashboard/patient-header';
-import PeritonitisHistoryCard from '@/components/dashboard/PeritonitisTrackingCard';
+import InfectionHistoryCard from '@/components/dashboard/PeritonitisTrackingCard';
 import MedicationsCard from '@/components/dashboard/medications-card';
 import NutritionLifestyleCard from '@/components/dashboard/NutritionLifestyleCard';
 import ClinicVisitsCard from '@/components/dashboard/ClinicVisitsCard';
@@ -60,7 +60,12 @@ function PatientDetailView({ patientId }: { patientId: string }) {
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                  <MedicationsCard medications={patientData.medications} />
-                 <PeritonitisHistoryCard episodes={patientData.peritonitisEpisodes} admissions={patientData.admissions || []}/>
+                 <InfectionHistoryCard 
+                    episodes={patientData.peritonitisEpisodes} 
+                    admissions={patientData.admissions || []}
+                    esiCount={patientData.esiCount}
+                    lastEsiDate={patientData.lastHomeVisitDate}
+                 />
             </div>
         </div>
         <div className="lg:col-span-1 space-y-6">
