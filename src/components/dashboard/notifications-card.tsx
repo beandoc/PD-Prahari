@@ -12,6 +12,7 @@ import type { PatientData } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Notification {
+    id: string;
     icon: React.ReactNode;
     title: string;
     description: React.ReactNode;
@@ -29,6 +30,7 @@ export default function NotificationsCard() {
 
         if (patientsWithCriticalAlerts.length > 0) {
             generatedNotifications.push({
+                id: 'critical-alerts',
                 icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
                 title: `${patientsWithCriticalAlerts.length} patient(s) with critical alerts`,
                 description: (
@@ -53,6 +55,7 @@ export default function NotificationsCard() {
              const latestImagePatient = patientsWithImagesForReview[0];
              const latestImage = latestImagePatient.uploadedImages?.find(img => img.requiresReview);
              generatedNotifications.push({
+                id: 'image-review',
                 icon: <Camera className="h-5 w-5 text-purple-500" />,
                 title: "New images for review",
                 description: (
@@ -68,6 +71,7 @@ export default function NotificationsCard() {
         // Placeholder for future notifications
         if (generatedNotifications.length === 0) {
             return [{
+                id: 'no-notifications',
                 icon: <Bell className="h-5 w-5" />,
                 title: "No new notifications",
                 description: "All patient statuses are normal.",
@@ -90,8 +94,8 @@ export default function NotificationsCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         <ul className="space-y-3">
-          {notifications.map((notification, index) => (
-            <li key={index} className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+          {notifications.map((notification) => (
+            <li key={notification.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="mt-1">{notification.icon}</div>
               <div className="flex-1">
                 <p className="font-medium text-sm">{notification.title}</p>

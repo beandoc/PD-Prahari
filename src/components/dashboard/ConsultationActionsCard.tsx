@@ -42,15 +42,15 @@ export default function ConsultationActionsCard({ patientId }: ConsultationActio
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <Button onClick={handleCompleteConsultation} size="lg">
+        <Button onClick={handleCompleteConsultation} size="lg" key="complete-consultation">
             <CheckCircle className="mr-2 h-4 w-4" /> Complete Consultation
         </Button>
-        <Button asChild variant="secondary">
+        <Button asChild variant="secondary" key="admit-patient">
           <Link href="#">
             <Hospital className="mr-2 h-4 w-4" /> Admit Patient
           </Link>
         </Button>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" key="pd-nurse-review">
           <Link href={`/dashboard/nurse-checklist?patientId=${patientId}`}>
             <ClipboardCheck className="mr-2 h-4 w-4" /> PD Nurse Review
           </Link>
