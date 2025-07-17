@@ -98,6 +98,7 @@ export default function PdLogsPage() {
 
         const getDailyUf = (events: PDEvent[], startDate: Date, endDate: Date): Record<string, number> => {
             const dailyUfMap: Record<string, number> = {};
+            if (!events) return dailyUfMap;
             events.forEach(event => {
                 const eventDate = parseISO(event.exchangeDateTime);
                 if (isWithinInterval(eventDate, { start: startDate, end: endDate })) {
@@ -250,7 +251,7 @@ export default function PdLogsPage() {
                                 )}
                             </Header>
                             <CardContent>
-                                {prescription && patientData.currentStatus === 'Active PD' ? (
+                                {prescription && prescription.regimen && patientData.currentStatus === 'Active PD' ? (
                                     <>
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                                             <div><p className="text-sm text-muted-foreground mb-1">Exchange</p><p className="font-medium">{prescription.exchange}</p></div>
