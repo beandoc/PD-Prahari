@@ -254,7 +254,7 @@ export default function NurseDashboardPage() {
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
                                                         <Clock className="h-4 w-4" />
-                                                        {p.clinicVisits.nextAppointment ? format(parseISO(p.clinicVisits.nextAppointment), 'p') : 'N/A'}
+                                                        {p.clinicVisits?.nextAppointment ? format(parseISO(p.clinicVisits.nextAppointment), 'p') : 'N/A'}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>{p.physician}</TableCell>

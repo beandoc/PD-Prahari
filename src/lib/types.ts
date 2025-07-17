@@ -19,7 +19,7 @@ export interface Patient {
   emergencyContactPhone?: string;
   physician: string;
   pdStartDate: string;
-  underlyingKidneyDisease: string;
+  underlyingKidneyDisease?: string;
   comorbidities?: string[];
   currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased' | 'Awaiting Catheter' | 'Catheter Removed';
   lastUpdated?: string;
@@ -196,7 +196,7 @@ export interface PatientData extends Patient {
 
   // Data for UI components
   nutritionLifestyle: NutritionLifestyleData;
-  clinicVisits: ClinicVisitData;
+  clinicVisits?: ClinicVisitData;
   patientEducation: EducationTopic[];
   
   // New fields for Nurse Checklist Reference Sheet

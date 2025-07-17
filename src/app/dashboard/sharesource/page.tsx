@@ -174,7 +174,9 @@ export default function AnalyticsPage() {
     });
 
     const totalPatientYears = totalPatientMonths / 12;
-    const peritonitisRate = totalPatientYears > 0 ? (totalEpisodes / totalPatientYears) : null;
+    // Edge case: if there are episodes but patient-years is zero, avoid division by zero.
+    // This can happen for new patients with an immediate infection.
+    const peritonitisRate = totalPatientYears > 0 ? (totalEpisodes / totalPatientYears) : (totalEpisodes > 0 ? Infinity : 0);
 
 
     const dropoutStatuses: Patient['currentStatus'][] = ['Deceased', 'Transferred to HD', 'Catheter Removed', 'Transplanted'];
@@ -211,7 +213,7 @@ export default function AnalyticsPage() {
     const flaggedUf: FlaggedUfPatient[] = [];
     const twoWeeksAgo = subDays(new Date(), 14);
     allPatientData.forEach(patient => {
-        if (patient.pdEvents.length < 14) return;
+        if (!patient.pdEvents || patient.pdEvents.length < 14) return;
         const recentEvents = patient.pdEvents.filter(e => isAfter(parseISO(e.exchangeDateTime), twoWeeksAgo));
         const baselineEvents = patient.pdEvents.filter(e => !isAfter(parseISO(e.exchangeDateTime), twoWeeksAgo));
         if (baselineEvents.length === 0 || recentEvents.length === 0) return;
@@ -289,7 +291,7 @@ export default function AnalyticsPage() {
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarX className="h-6 w-6 text-red-500 mx-auto mb-2" /><p className="text-3xl font-bold">{missedVisits}</p><p className="text-sm text-muted-foreground">Missed Visits</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarCheck className="h-6 w-6 text-green-500 mx-auto mb-2" /><p className="text-3xl font-bold">{thisWeekAppointments}</p><p className="text-sm text-muted-foreground">This Week's Appts</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><UserPlus className="h-6 w-6 text-indigo-500 mx-auto mb-2" /><p className="text-3xl font-bold">{newPDPatientsLastMonth}</p><p className="text-sm text-muted-foreground">New Patients (1mo)</p></div>
-                <div className="p-4 bg-slate-50 rounded-lg text-center"><Repeat className="h-6 w-6 text-yellow-500 mx-auto mb-2" /><p className="text-3xl font-bold">{peritonitisRate !== null ? peritonitisRate.toFixed(2) : 'N/A'}</p><p className="text-sm text-muted-foreground">Peritonitis Rate</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><Repeat className="h-6 w-6 text-yellow-500 mx-auto mb-2" /><p className="text-3xl font-bold">{peritonitisRate !== null ? (isFinite(peritonitisRate) ? peritonitisRate.toFixed(2) : 'High') : 'N/A'}</p><p className="text-sm text-muted-foreground">Peritonitis Rate</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><TrendingDown className="h-6 w-6 text-gray-600 mx-auto mb-2" /><p className="text-3xl font-bold">{dropouts}</p><p className="text-sm text-muted-foreground">Dropouts</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><ListTodo className="h-6 w-6 text-purple-500 mx-auto mb-2" /><p className="text-3xl font-bold">{awaitingInsertion}</p><p className="text-sm text-muted-foreground">Awaiting Insertion</p></div>
             </CardContent>

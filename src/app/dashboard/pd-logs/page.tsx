@@ -249,7 +249,7 @@ export default function PdLogsPage() {
                                         This patient does not have an active PD prescription. Current Status: {patientData.currentStatus}
                                      </CardDescription>
                                 )}
-                            </Header>
+                            </CardHeader>
                             <CardContent>
                                 {prescription && prescription.regimen && patientData.currentStatus === 'Active PD' ? (
                                     <>
@@ -381,4 +381,5 @@ export default function PdLogsPage() {
             )}
         </div>
     );
-}
+
+    

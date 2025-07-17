@@ -111,7 +111,7 @@ export default function UpdateRecordsPage() {
         city: selected.city || '',
         postalCode: selected.postalCode || '',
         underlyingKidneyDisease: selected.underlyingKidneyDisease || '',
-        nephrologist: selected.nephrologist || '',
+        nephrologist: selected.physician || '',
         pdExchangeType: selected.pdExchangeType || undefined,
         membraneTransportType: selected.membraneTransportType || undefined,
         distanceFromPDCenterKM: selected.distanceFromPDCenterKM || undefined,
@@ -142,6 +142,7 @@ export default function UpdateRecordsPage() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const dataToSave = {
         ...values,
+        physician: values.nephrologist, // Align with main data structure
         stateProvince: values.state
     }
     updatePatientData(selectedPatientId, dataToSave);
@@ -224,14 +225,14 @@ export default function UpdateRecordsPage() {
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Contact Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <FormField control={form.control} name="contactPhone" render={({ field }) => (
-                        <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="addressLine1" render={({ field }) => (
-                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="state" render={({ field }) => (
                         <FormItem><FormLabel>State</FormLabel>
-                            <Select onValueChange={handleStateChange} value={field.value}>
+                            <Select onValueChange={handleStateChange} value={field.value || ''}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select a state" /></SelectTrigger></FormControl>
                                 <SelectContent>{indianStates.map(s => <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>)}</SelectContent>
                             </Select><FormMessage />
@@ -239,14 +240,14 @@ export default function UpdateRecordsPage() {
                     )} />
                     <FormField control={form.control} name="city" render={({ field }) => (
                         <FormItem><FormLabel>City</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value || ''}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select a city" /></SelectTrigger></FormControl>
                                 <SelectContent>{cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                             </Select><FormMessage />
                         </FormItem>
                     )} />
                     <FormField control={form.control} name="postalCode" render={({ field }) => (
-                        <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
               </section>
@@ -286,7 +287,7 @@ export default function UpdateRecordsPage() {
                     )} />
                     <FormField control={form.control} name="membraneTransportType" render={({ field }) => (
                         <FormItem><FormLabel>Membrane Transport Type</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value || ''}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl>
                                 <SelectContent>
                                     <SelectItem value="High">High</SelectItem>
