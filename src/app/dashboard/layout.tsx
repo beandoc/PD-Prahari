@@ -23,6 +23,7 @@ import {
   UserCog,
   FlaskConical,
   MessageSquare,
+  ChevronLeft
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -115,6 +116,8 @@ export default function DashboardLayout({
   }, [pathname, isClient]);
 
   const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
+  const isDashboardPage = pathname === '/dashboard';
+  const backLinkHref = isNurseView ? '/dashboard/nurse-dashboard' : '/dashboard';
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -225,7 +228,14 @@ export default function DashboardLayout({
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">
-            {/* Can add breadcrumbs here */}
+             {!isDashboardPage && (
+              <Button asChild variant="outline" size="sm">
+                <Link href={backLinkHref}>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back to Dashboard
+                </Link>
+              </Button>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
