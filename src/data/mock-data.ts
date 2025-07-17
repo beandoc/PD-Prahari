@@ -34,6 +34,7 @@ export const allPatientData: PatientData[] = [
     catheterDysfunction: false,
     esiCount: 0,
     additionalNotes: 'Patient is highly motivated and has good family support. Compliant with diet and fluid restrictions.',
+    doctorNotes: 'Patient seems to be responding well to the new medication. Continue monitoring BP at home.',
     pdExchangeType: 'Self',
     underlyingKidneyDisease: 'Diabetic Nephropathy',
     comorbidities: ['Hypertension', 'Type 2 Diabetes'],

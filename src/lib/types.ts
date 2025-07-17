@@ -209,6 +209,7 @@ export interface PatientData extends Patient {
   esiCount?: number;
   additionalNotes?: string;
   nurseCounselingNotes?: string;
+  doctorNotes?: string;
   trainingDay?: number; // Added for training progress tracking
 
   // New fields for profile page

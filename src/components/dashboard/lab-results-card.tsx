@@ -17,15 +17,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Beaker, History } from 'lucide-react';
-import type { LabResult } from '@/lib/types';
+import { Beaker, History, PlusCircle } from 'lucide-react';
+import type { LabResult, PatientData } from '@/lib/types';
 import { format } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { updatePatientLabs } from '@/lib/data-sync';
 
 interface LabResultsCardProps {
-  labResults: LabResult[];
+  patient: PatientData;
 }
 
 const getStatus = (
@@ -37,6 +41,85 @@ const getStatus = (
   if (low && value < low) return 'low';
   return 'normal';
 };
+
+const keyTestNames = ['Hemoglobin', 'Creatinine', 'Albumin', 'Calcium', 'Phosphorus', 'iPTH'];
+
+const UpdateLabsModal = ({ patient, onUpdate }: { patient: PatientData, onUpdate: (newLabs: LabResult[]) => void }) => {
+    const [labValues, setLabValues] = useState<Record<string, string>>({});
+    const { toast } = useToast();
+
+    const handleValueChange = (testName: string, value: string) => {
+        setLabValues(prev => ({...prev, [testName]: value}));
+    };
+
+    const handleSave = () => {
+        const newLabResults: LabResult[] = Object.entries(labValues)
+            .filter(([, value]) => value && !isNaN(parseFloat(value)))
+            .map(([testName, value]) => {
+                const latestExisting = patient.labResults.find(lr => lr.testName === testName);
+                return {
+                    labResultId: `LAB-${Date.now()}-${testName}`,
+                    resultDateTime: new Date().toISOString(),
+                    testName: testName,
+                    resultValue: parseFloat(value),
+                    units: latestExisting?.units || '',
+                    referenceRangeLow: latestExisting?.referenceRangeLow,
+                    referenceRangeHigh: latestExisting?.referenceRangeHigh,
+                };
+            });
+        
+        if (newLabResults.length === 0) {
+            toast({ title: "No new values entered.", variant: "destructive" });
+            return;
+        }
+        
+        // This would be an API call in a real app
+        updatePatientLabs(patient.patientId, newLabResults);
+        onUpdate(newLabResults);
+        toast({ title: "Lab results updated successfully." });
+    };
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Update Labs
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Update Lab Results for {patient.firstName}</DialogTitle>
+                    <DialogDescription>
+                        Enter new values for the patient's lab tests. Only entered values will be saved.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-2 gap-4 py-4">
+                    {keyTestNames.map(testName => {
+                        const latestResult = patient.labResults.find(lr => lr.testName === testName);
+                        return (
+                             <div className="space-y-2" key={testName}>
+                                <Label htmlFor={testName}>{testName} ({latestResult?.units || 'N/A'})</Label>
+                                <Input 
+                                    id={testName}
+                                    type="number"
+                                    placeholder={latestResult ? String(latestResult.resultValue) : "e.g., 10.5"}
+                                    value={labValues[testName] || ''}
+                                    onChange={(e) => handleValueChange(testName, e.target.value)}
+                                />
+                            </div>
+                        )
+                    })}
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                  <DialogClose asChild>
+                    <Button onClick={handleSave}>Save Results</Button>
+                  </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 const FullHistoryModal = ({ allResults }: { allResults: LabResult[] }) => {
     return (
@@ -88,15 +171,20 @@ const FullHistoryModal = ({ allResults }: { allResults: LabResult[] }) => {
 };
 
 
-export default function LabResultsCard({ labResults }: LabResultsCardProps) {
+export default function LabResultsCard({ patient }: LabResultsCardProps) {
+  const [labResults, setLabResults] = useState(patient.labResults);
+
+  const handleUpdate = (newLabs: LabResult[]) => {
+      // In a real app, you would refetch data. Here we'll just update state.
+      setLabResults(prev => [...newLabs, ...prev]);
+  };
+
   const allSortedResults = useMemo(() => {
     return [...labResults].sort((a,b) => new Date(b.resultDateTime).getTime() - new Date(a.resultDateTime).getTime());
   }, [labResults]);
 
   const keyLabTests = useMemo(() => {
-    const testNames = ['Hemoglobin', 'Creatinine', 'Albumin', 'Calcium', 'Phosphorus', 'iPTH'];
-    
-    return testNames.map(testName => {
+    return keyTestNames.map(testName => {
         const latestResult = allSortedResults.find(lr => lr.testName === testName);
         return { name: testName, result: latestResult };
     });
@@ -113,7 +201,10 @@ export default function LabResultsCard({ labResults }: LabResultsCardProps) {
                 </CardTitle>
                 <CardDescription>Key laboratory findings.</CardDescription>
             </div>
-            <FullHistoryModal allResults={allSortedResults} />
+            <div className="flex items-center gap-2">
+                <UpdateLabsModal patient={patient} onUpdate={handleUpdate} />
+                <FullHistoryModal allResults={allSortedResults} />
+            </div>
         </div>
       </CardHeader>
       <CardContent className="grid gap-6">

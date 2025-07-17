@@ -2,9 +2,9 @@
 'use client';
 
 import { allPatientData } from '@/data/mock-data';
-import type { PatientData, PDEvent, Vital } from '@/lib/types';
+import type { PatientData, PDEvent, Vital, LabResult } from '@/lib/types';
 import { db } from './firebase';
-import { doc, getDoc, writeBatch, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, writeBatch, collection, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -105,6 +105,59 @@ export function updatePatientData(patientId: string, updatedData: Partial<Patien
         console.log("Patient profile updated in Firestore.");
     } catch (error) {
         console.error("Failed to update patient data in Firestore:", error);
+    }
+    */
+}
+
+/**
+ * Saves a new doctor's note for a patient.
+ * @param patientId The ID of the patient.
+ * @param note The note to save.
+ */
+export async function updatePatientNotes(patientId: string, note: string) {
+    console.log(`Saving note for patient ${patientId}:`, note);
+    // In a real app, you would save this to Firestore
+    /*
+    try {
+        const patientRef = doc(db, "patients", patientId);
+        await updateDoc(patientRef, {
+            doctorNotes: note,
+            lastUpdated: serverTimestamp()
+        });
+        console.log("Doctor's note saved to Firestore.");
+    } catch (error) {
+        console.error("Failed to save doctor's note:", error);
+    }
+    */
+}
+
+/**
+ * Saves new lab results for a patient.
+ * @param patientId The ID of the patient.
+ * @param newLabs An array of new LabResult objects.
+ */
+export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
+    console.log(`Updating labs for patient ${patientId}:`, newLabs);
+    // In a real app, this would be a batched write to a 'labResults' subcollection
+    /*
+    try {
+        const batch = writeBatch(db);
+        const labResultsCollectionRef = collection(db, "patients", patientId, "labResults");
+        
+        newLabs.forEach(lab => {
+            const labRef = doc(labResultsCollectionRef, lab.labResultId);
+            const labData = {
+                ...lab,
+                resultDateTime: Timestamp.fromDate(new Date(lab.resultDateTime)),
+                createdAt: serverTimestamp()
+            };
+            batch.set(labRef, labData);
+        });
+
+        await batch.commit();
+        console.log("New lab results saved to Firestore.");
+    } catch (error) {
+        console.error("Failed to save lab results:", error);
     }
     */
 }

@@ -72,7 +72,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
             <VitalsCard vitals={patientData.vitals} pdEvents={patientData.pdEvents} />
             <PDParametersCard patient={patientData} />
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <LabResultsCard labResults={patientData.labResults} />
+                <LabResultsCard patient={patientData} />
                 <PDExchangeCard pdEvents={patientData.pdEvents} />
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
