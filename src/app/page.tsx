@@ -55,7 +55,7 @@ export default function WelcomePage() {
                         <h2 className="text-2xl font-semibold mb-2">Patient</h2>
                         <p className="text-muted-foreground mb-6 h-12">Log your daily exchanges and view your health summary.</p>
                         <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
-                            <Link href="/patient-portal/login">Patient Login</Link>
+                            <Link href="/patient-login">Patient Login</Link>
                         </Button>
                     </CardContent>
                 </Card>
