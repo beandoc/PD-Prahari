@@ -48,7 +48,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import CalendarCard from '@/components/dashboard/calendar-card';
 import NotificationsCard from '@/components/dashboard/notifications-card';
 import InfectionHotspotCard from '@/components/dashboard/InfectionHotspotCard';
