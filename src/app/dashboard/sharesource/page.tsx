@@ -177,9 +177,15 @@ export default function AnalyticsPage() {
     const dropouts = allPatientData.filter(p => dropoutStatuses.includes(p.currentStatus)).length;
     const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
     
-    const missedVisits = allPatientData.filter(p => 
-        p.clinicVisits?.nextAppointment && isAfter(parseISO(p.clinicVisits.nextAppointment), today) === false && differenceInDays(today, parseISO(p.clinicVisits.nextAppointment)) > 0
-    ).length; 
+    const missedVisits = allPatientData.filter(p => {
+        // Ensure nextAppointment is a valid, non-empty string before parsing
+        if (!p.clinicVisits?.nextAppointment) {
+            return false;
+        }
+        const appointmentDate = parseISO(p.clinicVisits.nextAppointment);
+        // Check if the appointment date is in the past and not today
+        return isAfter(today, appointmentDate) && !isToday(appointmentDate);
+    }).length; 
 
     const flaggedInfections: FlaggedPatient[] = [];
     const sixMonthsAgo = subMonths(new Date(), 6);
@@ -236,6 +242,11 @@ export default function AnalyticsPage() {
     const handleNextUf = () => setUfIndex((prev) => (prev + 1) % flaggedUfPatients.length);
     const handlePrevUf = () => setUfIndex((prev) => (prev - 1 + flaggedUfPatients.length) % flaggedUfPatients.length);
     const currentUfPatient = flaggedUfPatients[ufIndex];
+    
+    const isToday = (date: Date) => {
+        return differenceInDays(startOfDay(date), startOfDay(new Date())) === 0;
+    };
+
 
     if (isLoading) {
         return (
