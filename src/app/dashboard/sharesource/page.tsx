@@ -131,7 +131,7 @@ export default function AnalyticsPage() {
     }).length;
 
     const startOfLastMonth = startOfMonth(subMonths(today, 1));
-    const endOfLastMonth = startOfMonth(today); // End of last month is start of this month
+    const endOfLastMonth = startOfMonth(today);
     const newPDPatientsLastMonth = allPatientData.filter(p => {
         if (!p.pdStartDate) return false;
         const startDate = parseISO(p.pdStartDate);
@@ -178,7 +178,7 @@ export default function AnalyticsPage() {
     const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
     
     const missedVisits = allPatientData.filter(p => 
-        p.clinicVisits?.nextAppointment && isAfter(today, parseISO(p.clinicVisits.nextAppointment))
+        p.clinicVisits?.nextAppointment && isAfter(parseISO(p.clinicVisits.nextAppointment), today) === false && differenceInDays(today, parseISO(p.clinicVisits.nextAppointment)) > 0
     ).length; 
 
     const flaggedInfections: FlaggedPatient[] = [];
