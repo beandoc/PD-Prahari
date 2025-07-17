@@ -17,15 +17,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
 // This is the dedicated Client Component that handles state and data fetching.
-// It receives the params object as a prop.
-function PatientDetailView({ params }: { params: { patientId: string } }) {
+// It receives a simple string `patientId` as a prop.
+function PatientDetailView({ patientId }: { patientId: string }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // The patientId is destructured here, inside the client-side hook
-    const { patientId } = params;
-
     async function fetchData() {
       if (!patientId) return;
       try {
@@ -40,7 +37,7 @@ function PatientDetailView({ params }: { params: { patientId: string } }) {
       }
     }
     fetchData();
-  }, [params]); // Use the stable params object as dependency
+  }, [patientId]); // Depend on the patientId prop
   
   if (loading || !patientData) {
     return (
@@ -92,8 +89,9 @@ function PatientDetailView({ params }: { params: { patientId: string } }) {
 }
 
 
-// This default export is the page component. It is a Server Component by default.
-// It receives the params object from Next.js and passes it directly to the client component.
+// This is the default export for the page. It's a Server Component.
+// It destructures the patientId from params and passes it as a string prop.
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
-  return <PatientDetailView params={params} />;
+  const { patientId } = params;
+  return <PatientDetailView patientId={patientId} />;
 }
