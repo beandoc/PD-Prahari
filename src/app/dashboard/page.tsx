@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -16,7 +16,7 @@ import {
   MessageCircle,
   Send,
 } from 'lucide-react';
-import { allPatientData } from '@/data/mock-data';
+import { getLiveAllPatientData } from '@/lib/data-sync';
 import type { PatientData } from '@/lib/types';
 import { generatePatientAlerts } from '@/lib/alerts';
 import type { Alert } from '@/lib/alerts';
@@ -48,7 +48,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CalendarCard from '@/components/dashboard/calendar-card';
 import NotificationsCard from '@/components/dashboard/notifications-card';
 import InfectionHotspotCard from '@/components/dashboard/InfectionHotspotCard';
@@ -58,6 +58,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
   if (alerts.length === 0) {
@@ -93,56 +95,103 @@ const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
   );
 };
 
-export default function DoctorDashboard() {
-  const [filter, setFilter] = useState<'all' | 'critical' | 'review' | 'notLogged'>('all');
-  const [date, setDate] = useState<DateRange | undefined>();
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const totalPatients = allPatientData.length;
-
-  const patientsWithCriticalAlerts = useMemo(() => {
-    return allPatientData.filter(patient => {
-      const alerts = generatePatientAlerts(patient);
-      return alerts.some(alert => alert.severity === 'critical');
-    }).length;
-  }, []);
-
-  const imagesForReview = useMemo(() => {
-    return allPatientData.reduce((count, patient) => {
-      return count + (patient.uploadedImages?.filter(img => img.requiresReview).length || 0);
-    }, 0);
-  }, []);
-  
-  const nonCompliantToday = useMemo(() => {
-    return allPatientData.filter(patient => {
+const getPatientsNotLoggedToday = (patients: PatientData[]) => {
+    return patients.filter(patient => {
        if (patient.currentStatus !== 'Active PD') return false;
        if (patient.pdEvents.length === 0) return true;
        const latestEvent = [...patient.pdEvents].sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
        const latestEventDate = new Date(latestEvent.exchangeDateTime);
        return differenceInDays(startOfToday(), latestEventDate) >= 1;
-    }).length;
+    });
+}
+
+
+export default function DoctorDashboard() {
+  const [activeFilter, setActiveFilter] = useState<'all' | 'critical' | 'review' | 'notLogged'>('all');
+  const [date, setDate] = useState<DateRange | undefined>();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [allPatientData, setAllPatientData] = useState<PatientData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('appointments');
+
+  useEffect(() => {
+    const data = getLiveAllPatientData();
+    setAllPatientData(data);
+    setIsLoading(false);
   }, []);
 
-   const todaysAppointments = useMemo(() => {
+  const {
+      totalPatients,
+      patientsWithCriticalAlerts,
+      imagesForReview,
+      nonCompliantToday
+  } = useMemo(() => {
+    if (isLoading) return { totalPatients: 0, patientsWithCriticalAlerts: 0, imagesForReview: 0, nonCompliantToday: 0 };
+    return {
+      totalPatients: allPatientData.length,
+      patientsWithCriticalAlerts: allPatientData.filter(p => generatePatientAlerts(p).some(a => a.severity === 'critical')).length,
+      imagesForReview: allPatientData.reduce((count, p) => count + (p.uploadedImages?.filter(img => img.requiresReview).length || 0), 0),
+      nonCompliantToday: getPatientsNotLoggedToday(allPatientData).length
+    };
+  }, [allPatientData, isLoading]);
+  
+  const todaysAppointments = useMemo(() => {
+    if (isLoading) return [];
     return allPatientData.filter(p => 
       p.clinicVisits?.nextAppointment && isToday(new Date(p.clinicVisits.nextAppointment))
     );
-  }, []);
+  }, [allPatientData, isLoading]);
 
-  const allPatientsSorted = useMemo(() => {
-    return [...allPatientData].sort((a, b) => a.lastName.localeCompare(b.lastName));
-  }, []);
 
   const filteredAllPatients = useMemo(() => {
-    if (!searchTerm) {
-        return allPatientsSorted;
+    let patients = [...allPatientData].sort((a, b) => a.lastName.localeCompare(b.lastName));
+
+    if (activeFilter === 'critical') {
+        patients = patients.filter(p => generatePatientAlerts(p).some(a => a.severity === 'critical'));
+    } else if (activeFilter === 'review') {
+        patients = patients.filter(p => p.uploadedImages?.some(img => img.requiresReview));
+    } else if (activeFilter === 'notLogged') {
+        patients = getPatientsNotLoggedToday(patients);
     }
-    return allPatientsSorted.filter(p => 
-        p.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.nephroId.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, allPatientsSorted]);
+    
+    if (searchTerm) {
+        return patients.filter(p => 
+            p.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.nephroId.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+    return patients;
+  }, [searchTerm, allPatientData, activeFilter]);
+
+  const handleFilterClick = (filter: 'all' | 'critical' | 'review' | 'notLogged') => {
+    setActiveFilter(filter);
+    setActiveTab('all_patients');
+  }
+
+  const filterDescriptions = {
+      all: `Showing ${filteredAllPatients.length} of ${allPatientData.length} patients.`,
+      critical: `Showing ${filteredAllPatients.length} patient(s) with critical alerts.`,
+      review: `Showing ${filteredAllPatients.length} patient(s) with images for review.`,
+      notLogged: `Showing ${filteredAllPatients.length} patient(s) who haven't logged today.`
+  };
+  
+  if (isLoading) {
+      return (
+          <div className="space-y-6">
+              <Skeleton className="h-10 w-1/3" />
+              <div className="grid gap-6 lg:grid-cols-3">
+                  <div className="lg:col-span-2 space-y-6">
+                      <Skeleton className="h-28 w-full" />
+                      <Skeleton className="h-96 w-full" />
+                  </div>
+                  <div className="lg:col-span-1 space-y-6">
+                      <Skeleton className="h-64 w-full" />
+                  </div>
+              </div>
+          </div>
+      )
+  }
 
 
   return (
@@ -155,7 +204,7 @@ export default function DoctorDashboard() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
+                <Card as="button" onClick={() => handleFilterClick('all')} className="text-left hover:bg-muted/50 transition-colors w-full">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -165,7 +214,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">managed in this clinic</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card as="button" onClick={() => handleFilterClick('critical')} className="text-left hover:bg-muted/50 transition-colors w-full">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
                         <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -175,7 +224,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">require immediate attention</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card as="button" onClick={() => handleFilterClick('review')} className="text-left hover:bg-muted/50 transition-colors w-full">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Images for Review</CardTitle>
                         <Camera className="h-4 w-4 text-muted-foreground" />
@@ -185,7 +234,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">newly uploaded photos</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card as="button" onClick={() => handleFilterClick('notLogged')} className="text-left hover:bg-muted/50 transition-colors w-full">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Not Logged Today</CardTitle>
                         <ClipboardX className="h-4 w-4 text-muted-foreground" />
@@ -196,7 +245,7 @@ export default function DoctorDashboard() {
                     </CardContent>
                 </Card>
             </div>
-            <Tabs defaultValue="appointments">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsTrigger value="appointments">Today's Appointments</TabsTrigger>
                 <TabsTrigger value="all_patients">All Patients</TabsTrigger>
@@ -235,7 +284,7 @@ export default function DoctorDashboard() {
                                         <div className="text-sm text-muted-foreground">{patient.nephroId}</div>
                                     </TableCell>
                                     <TableCell>
-                                        {format(new Date(patient.clinicVisits.nextAppointment), 'p')}
+                                        {patient.clinicVisits.nextAppointment ? format(new Date(patient.clinicVisits.nextAppointment), 'p') : 'N/A'}
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{patient.currentStatus}</Badge>
@@ -269,10 +318,16 @@ export default function DoctorDashboard() {
                             <div>
                                 <CardTitle>All Patients</CardTitle>
                                 <CardDescription>
-                                    Showing {filteredAllPatients.length} of {allPatientData.length} patients.
+                                   {filterDescriptions[activeFilter]}
                                 </CardDescription>
                             </div>
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+                                {activeFilter !== 'all' && (
+                                    <Button variant="outline" onClick={() => setActiveFilter('all')}>
+                                        <FilterX className="mr-2 h-4 w-4" />
+                                        Clear Filter
+                                    </Button>
+                                )}
                                 <div className="relative flex-1 sm:flex-initial">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input 
