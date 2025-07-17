@@ -10,15 +10,7 @@ import { KidneyIcon } from '@/components/kidney-icon';
 export default function NurseLoginPage() {
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-       <div className="relative flex items-center justify-center py-12 px-4">
-        <Image
-          src="https://placehold.co/500x500.png"
-          alt="Nurse illustration watermark"
-          width={500}
-          height={500}
-          data-ai-hint="nurse care abstract"
-          className="absolute inset-0 h-full w-full object-contain opacity-10"
-        />
+       <div className="relative flex items-center justify-center py-12 px-4 bg-background">
         <div className="relative mx-auto grid w-[380px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">PD Nurse Login</h1>
