@@ -183,8 +183,8 @@ export default function PatientDailyLogPage() {
         }
     }
 
-    // Save the new data to Firestore
-    await savePatientLog(patientData.patientId, newEvents, newVital);
+    // Save the new data using the sync service
+    savePatientLog(patientData.patientId, newEvents, newVital);
 
     toast({
         title: "Log Submitted!",

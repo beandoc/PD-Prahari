@@ -391,7 +391,3 @@ export default function NurseChecklistPage() {
         </div>
     );
 }
-
-    
-
-    

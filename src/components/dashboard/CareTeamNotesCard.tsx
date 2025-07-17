@@ -32,16 +32,16 @@ export default function CareTeamNotesCard({ patient, className }: CareTeamNotesC
       });
       return;
     }
-    // In a real app, this would save to a backend.
+    // Use the sync service to update the note
     updatePatientNotes(patient.patientId, doctorNote);
     toast({
       title: "Note Saved",
       description: "The doctor's note has been added to the patient's record.",
     });
-    // For demo purposes, we can imagine this refetches data or updates local state.
-    // For simplicity here, we'll just close the dialog.
     setDoctorNote('');
     setIsDialogOpen(false);
+    // In a real app with SWR/React Query, this would trigger a re-fetch/re-render.
+    // For our simulation, the parent component would need to re-fetch the data.
   };
   
   const openDialogWithDefault = () => {

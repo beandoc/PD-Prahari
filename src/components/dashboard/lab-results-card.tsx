@@ -73,7 +73,7 @@ const UpdateLabsModal = ({ patient, onUpdate }: { patient: PatientData, onUpdate
             return;
         }
         
-        // This would be an API call in a real app
+        // Use the sync service to update the labs
         updatePatientLabs(patient.patientId, newLabResults);
         onUpdate(newLabResults);
         toast({ title: "Lab results updated successfully." });
@@ -176,7 +176,7 @@ export default function LabResultsCard({ patient }: LabResultsCardProps) {
 
   const handleUpdate = (newLabs: LabResult[]) => {
       // In a real app, you would refetch data. Here we'll just update state.
-      setLabResults(prev => [...newLabs, ...prev]);
+      setLabResults(prev => [...newLabs, ...prev].sort((a,b) => new Date(b.resultDateTime).getTime() - new Date(a.resultDateTime).getTime()));
   };
 
   const allSortedResults = useMemo(() => {

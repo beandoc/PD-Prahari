@@ -261,7 +261,7 @@ export default function UpdateRecordsPage() {
                     )} />
                     <FormField control={form.control} name="membraneTransportType" render={({ field }) => (
                         <FormItem><FormLabel>Membrane Transport Type</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value} disabled>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl>
                                 <SelectContent>
                                     <SelectItem value="High">High</SelectItem>
@@ -312,5 +312,3 @@ export default function UpdateRecordsPage() {
     </div>
   );
 }
-
-    

@@ -19,14 +19,6 @@ interface ClinicVisitsCardProps {
   className?: string;
 }
 
-const getFirstSaturdayOfNextMonth = () => {
-    const today = new Date();
-    const firstDayOfNextMonth = startOfMonth(addMonths(today, 1));
-    let dayOfWeek = firstDayOfNextMonth.getDay(); // Sunday is 0, Saturday is 6
-    let daysToAdd = (6 - dayOfWeek + 7) % 7;
-    return new Date(firstDayOfNextMonth.setDate(firstDayOfNextMonth.getDate() + daysToAdd));
-};
-
 export default function ClinicVisitsCard({ patient, className }: ClinicVisitsCardProps) {
     const [nextAppointmentDate, setNextAppointmentDate] = useState(new Date(patient.clinicVisits.nextAppointment));
     const { toast } = useToast();
