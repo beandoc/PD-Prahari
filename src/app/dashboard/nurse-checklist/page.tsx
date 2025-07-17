@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { format, parseISO } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { PatientData } from '@/lib/types';
 
 const ChecklistItem = ({ id, label }: { id: string, label: string }) => (
     <div className="flex items-center space-x-3 py-2">
@@ -44,8 +45,17 @@ const FlagItem = ({ label, isFlagged, children }: { label: string, isFlagged: bo
 
 const ChecklistContent = () => {
     const searchParams = useSearchParams();
-    const patientId = searchParams.get('patientId') || allPatientData[0].patientId;
-    const patient = allPatientData.find(p => p.patientId === patientId) || allPatientData[0];
+    const [patient, setPatient] = useState<PatientData | null>(null);
+
+    useEffect(() => {
+        const patientId = searchParams.get('patientId') || allPatientData[0].patientId;
+        const foundPatient = allPatientData.find(p => p.patientId === patientId) || allPatientData[0];
+        setPatient(foundPatient);
+    }, [searchParams]);
+
+    if (!patient) {
+        return <Skeleton className="w-full h-[80vh]" />;
+    }
 
     const latestKtV = patient.pdAdequacy.length > 0 ? patient.pdAdequacy.sort((a,b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime())[0].totalKtV : undefined;
     const latestAlbumin = patient.labResults.filter(lr => lr.testName === 'Albumin').sort((a,b) => new Date(b.resultDateTime).getTime() - new Date(a.resultDateTime).getTime())[0]?.resultValue;

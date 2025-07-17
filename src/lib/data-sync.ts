@@ -6,13 +6,15 @@ import type { PatientData, PDEvent, Vital } from '@/lib/types';
 import { db } from './firebase';
 import { doc, getDoc, writeBatch, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Retrieves patient data, first trying Firestore, then falling back to mock data.
+ * It will retry once if it fails due to being offline.
  * @param patientId The ID of the patient.
  * @returns The most up-to-date patient data.
  */
-export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
+export async function getSyncedPatientData(patientId: string, retries = 1): Promise<PatientData | null> {
   try {
     const docRef = doc(db, "patients", patientId);
     const docSnap = await getDoc(docRef);
@@ -27,8 +29,13 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
       console.log("No such document in Firestore! Falling back to mock data.");
       return allPatientData.find(p => p.patientId === patientId) || null;
     }
-  } catch (error) {
-    console.error("Error getting document:", error);
+  } catch (error: any) {
+    if (retries > 0 && error.code === 'unavailable') {
+        console.warn(`Firestore client offline. Retrying in 500ms... (${retries} retries left)`);
+        await sleep(500);
+        return getSyncedPatientData(patientId, retries - 1);
+    }
+    console.error("Error getting document, falling back to mock data:", error);
     // Fallback to mock data on error
     return allPatientData.find(p => p.patientId === patientId) || null;
   }
