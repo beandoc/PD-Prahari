@@ -132,7 +132,7 @@ const ChecklistContent = () => {
                     </div>
                      <div>
                          <Label className="font-semibold">Additional Notes</Label>
-                         <Textarea readOnly defaultValue={patient.additionalNotes || 'No additional notes.'} className="mt-1 bg-slate-50 font-sans" rows={3}/>
+                         <Textarea readOnly value={patient.additionalNotes || 'No additional notes.'} className="mt-1 bg-slate-50 font-sans" rows={3}/>
                     </div>
                 </CardContent>
             </Card>
