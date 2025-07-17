@@ -11,12 +11,16 @@ import {
   ClipboardX,
   PlusCircle,
   FilterX,
+  Download,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
 import type { PatientData } from '@/lib/types';
 import { generatePatientAlerts } from '@/lib/alerts';
 import type { Alert } from '@/lib/alerts';
-import { differenceInDays, startOfToday } from 'date-fns';
+import { differenceInDays, startOfToday, format } from 'date-fns';
+import type { DateRange } from "react-day-picker";
+
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -47,6 +51,10 @@ import CalendarCard from '@/components/dashboard/calendar-card';
 import NotificationsCard from '@/components/dashboard/notifications-card';
 import InfectionHotspotCard from '@/components/dashboard/InfectionHotspotCard';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Label } from '@/components/ui/label';
 
 const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
   if (alerts.length === 0) {
@@ -84,6 +92,7 @@ const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
 
 export default function DoctorDashboard() {
   const [filter, setFilter] = useState<'all' | 'critical' | 'review' | 'notLogged'>('all');
+  const [date, setDate] = useState<DateRange | undefined>();
 
   const totalPatients = allPatientData.length;
 
@@ -291,8 +300,66 @@ export default function DoctorDashboard() {
                             Generate and view clinical reports.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">Report generation options will be available here.</p>
+                        <CardContent className="space-y-6">
+                            <div className="p-4 border rounded-lg space-y-4">
+                                <h4 className="font-semibold">PET Report</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                     <div className="space-y-1"><Label>Patient</Label><Select><SelectTrigger><SelectValue placeholder="Select Patient" /></SelectTrigger><SelectContent>{allPatientData.map(p => <SelectItem key={p.patientId} value={p.patientId}>{p.firstName} {p.lastName}</SelectItem>)}</SelectContent></Select></div>
+                                     <div className="space-y-1"><Label>Test Date</Label><Select><SelectTrigger><SelectValue placeholder="Select Date" /></SelectTrigger><SelectContent><SelectItem value="2025-06-01">June 1, 2025</SelectItem></SelectContent></Select></div>
+                                     <Button className="self-end"><Download className="mr-2 h-4 w-4" />Download</Button>
+                                </div>
+                            </div>
+                             <div className="p-4 border rounded-lg space-y-4">
+                                <h4 className="font-semibold">Discharge Report</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                     <div className="space-y-1"><Label>Patient</Label><Select><SelectTrigger><SelectValue placeholder="Select Patient" /></SelectTrigger><SelectContent>{allPatientData.map(p => <SelectItem key={p.patientId} value={p.patientId}>{p.firstName} {p.lastName}</SelectItem>)}</SelectContent></Select></div>
+                                      <div className="space-y-1"><Label>Date Range</Label><Popover>
+                                        <PopoverTrigger asChild>
+                                          <Button
+                                            id="date"
+                                            variant={"outline"}
+                                            className={cn(
+                                              "w-full justify-start text-left font-normal",
+                                              !date && "text-muted-foreground"
+                                            )}
+                                          >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {date?.from ? (
+                                              date.to ? (
+                                                <>
+                                                  {format(date.from, "LLL dd, y")} -{" "}
+                                                  {format(date.to, "LLL dd, y")}
+                                                </>
+                                              ) : (
+                                                format(date.from, "LLL dd, y")
+                                              )
+                                            ) : (
+                                              <span>Pick a date range</span>
+                                            )}
+                                          </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                          <Calendar
+                                            initialFocus
+                                            mode="range"
+                                            defaultMonth={date?.from}
+                                            selected={date}
+                                            onSelect={setDate}
+                                            numberOfMonths={2}
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                      </div>
+                                     <Button className="self-end"><Download className="mr-2 h-4 w-4" />Download</Button>
+                                </div>
+                            </div>
+                             <div className="p-4 border rounded-lg space-y-4">
+                                <h4 className="font-semibold">CAPD Procedure Notes</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                     <div className="space-y-1"><Label>Patient</Label><Select><SelectTrigger><SelectValue placeholder="Select Patient" /></SelectTrigger><SelectContent>{allPatientData.map(p => <SelectItem key={p.patientId} value={p.patientId}>{p.firstName} {p.lastName}</SelectItem>)}</SelectContent></Select></div>
+                                     <div className="md:col-span-2"><Button className="w-full self-end mt-5"><Download className="mr-2 h-4 w-4" />Download</Button></div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
