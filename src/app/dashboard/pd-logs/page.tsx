@@ -39,13 +39,21 @@ export default function PdLogsPage() {
         setPageIndex(0); // Reset to first page when patient changes
     };
 
-    const { prescription, pdEvents }: { prescription: Prescription | null; pdEvents: PDEvent[] } = useMemo(() => {
+    const { prescription, pdEvents, pdStrengthDisplay }: { prescription: Prescription | null; pdEvents: PDEvent[]; pdStrengthDisplay: string } = useMemo(() => {
         if (!patientData) {
-            return { prescription: null, pdEvents: [] };
+            return { prescription: null, pdEvents: [], pdStrengthDisplay: '' };
         }
+        
+        let strengthDisplay = patientData.prescription?.pdStrength || 'Not specified';
+        if (patientData.prescription?.regimen && patientData.prescription.regimen.length > 0) {
+            const strengths = [...new Set(patientData.prescription.regimen.map(r => r.dialysateType))];
+            strengthDisplay = strengths.join(', ');
+        }
+
         return {
             prescription: patientData.prescription,
             pdEvents: patientData.pdEvents,
+            pdStrengthDisplay: strengthDisplay,
         };
     }, [patientData]);
 
@@ -119,7 +127,7 @@ export default function PdLogsPage() {
                                     <>
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                                             <div><p className="text-sm text-muted-foreground mb-1">Exchange</p><p className="font-medium">{prescription.exchange}</p></div>
-                                            <div><p className="text-sm text-muted-foreground mb-1">PD Strength</p><p className="font-medium">{prescription.pdStrength}</p></div>
+                                            <div><p className="text-sm text-muted-foreground mb-1">PD Strength</p><p className="font-medium">{pdStrengthDisplay}</p></div>
                                             <div><p className="text-sm text-muted-foreground mb-1">Dwell Time</p><p className="font-medium">{prescription.dwellTimeHours} hours</p></div>
                                             <div><p className="text-sm text-muted-foreground mb-1">Dwell Vol</p><p className="font-medium">{prescription.dwellVolumeML} mL</p></div>
                                             <div><p className="text-sm text-muted-foreground mb-1">Exchange Time</p><p className="font-medium">{prescription.exchangeTimeMinutes} mins</p></div>
