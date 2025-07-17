@@ -72,9 +72,9 @@ const EditMedicationDialog = ({ patient, onUpdate }: { patient: PatientData, onU
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1">
                     {meds.map((med, index) => (
                         <div key={index} className="grid grid-cols-12 gap-2 items-end p-2 border rounded-lg">
-                           <div className="col-span-4 space-y-1"><Label>Name</Label><Input value={med.medicationName} onChange={e => handleFieldChange(index, 'medicationName', e.target.value)} /></div>
-                           <div className="col-span-3 space-y-1"><Label>Dosage</Label><Input value={med.dosage} onChange={e => handleFieldChange(index, 'dosage', e.target.value)} /></div>
-                           <div className="col-span-4 space-y-1"><Label>Frequency</Label><Input value={med.frequency} onChange={e => handleFieldChange(index, 'frequency', e.target.value)} /></div>
+                           <div className="col-span-4 space-y-1"><Label>Name</Label><Input value={med.medicationName || ''} onChange={e => handleFieldChange(index, 'medicationName', e.target.value)} /></div>
+                           <div className="col-span-3 space-y-1"><Label>Dosage</Label><Input value={med.dosage || ''} onChange={e => handleFieldChange(index, 'dosage', e.target.value)} /></div>
+                           <div className="col-span-4 space-y-1"><Label>Frequency</Label><Input value={med.frequency || ''} onChange={e => handleFieldChange(index, 'frequency', e.target.value)} /></div>
                            <div className="col-span-1"><Button variant="destructive" size="icon" onClick={() => removeMed(index)}><Trash2 className="h-4 w-4"/></Button></div>
                         </div>
                     ))}

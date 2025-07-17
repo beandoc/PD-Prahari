@@ -52,7 +52,7 @@ const formSchema = z.object({
   postalCode: z.string().optional(),
   
   // Clinical
-  physician: z.string(),
+  nephrologist: z.string(),
   underlyingKidneyDisease: z.string().optional(),
   pdStartDate: z.date().optional(),
   distanceFromPDCenterKM: z.coerce.number().optional(),
@@ -72,6 +72,20 @@ export default function UpdateRecordsPage() {
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      nephroId: '',
+      gender: '',
+      educationLevel: '',
+      contactPhone: '',
+      addressLine1: '',
+      state: '',
+      city: '',
+      postalCode: '',
+      nephrologist: '',
+      underlyingKidneyDisease: '',
+    }
   });
 
   useEffect(() => {
@@ -97,6 +111,7 @@ export default function UpdateRecordsPage() {
         city: selected.city || '',
         postalCode: selected.postalCode || '',
         underlyingKidneyDisease: selected.underlyingKidneyDisease || '',
+        nephrologist: selected.nephrologist || '',
         pdExchangeType: selected.pdExchangeType || undefined,
         membraneTransportType: selected.membraneTransportType || undefined,
         distanceFromPDCenterKM: selected.distanceFromPDCenterKM || undefined,
@@ -178,7 +193,7 @@ export default function UpdateRecordsPage() {
                         <FormItem><FormLabel>Nephro ID / UHID</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="dateOfBirth" render={({ field }) => (
-                        <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input value={format(field.value || new Date(), 'PPP')} disabled /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input value={field.value ? format(field.value, 'PPP') : ''} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="gender" render={({ field }) => (
                         <FormItem><FormLabel>Gender</FormLabel>
@@ -209,10 +224,10 @@ export default function UpdateRecordsPage() {
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Contact Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <FormField control={form.control} name="contactPhone" render={({ field }) => (
-                        <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="addressLine1" render={({ field }) => (
-                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="state" render={({ field }) => (
                         <FormItem><FormLabel>State</FormLabel>
@@ -231,18 +246,18 @@ export default function UpdateRecordsPage() {
                         </FormItem>
                     )} />
                     <FormField control={form.control} name="postalCode" render={({ field }) => (
-                        <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
               </section>
               <section>
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Clinical & PD Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <FormField control={form.control} name="physician" render={({ field }) => (
+                    <FormField control={form.control} name="nephrologist" render={({ field }) => (
                         <FormItem><FormLabel>Attending Nephrologist</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="underlyingKidneyDisease" render={({ field }) => (
-                        <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} value={field.value ?? ''} disabled /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="pdStartDate" render={({ field }) => (
                         <FormItem className="flex flex-col"><FormLabel>PD Start Date</FormLabel>

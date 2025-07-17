@@ -89,6 +89,7 @@ export default function DashboardLayout({
   const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
   const isDashboardPage = pathname === '/dashboard' || pathname === '/dashboard/nurse-dashboard';
   const backLinkHref = isNurseView ? '/dashboard/nurse-dashboard' : '/dashboard';
+  const userName = isNurseView ? 'Mr. Kamlesh' : 'Dr. Sachin';
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -209,7 +210,7 @@ export default function DashboardLayout({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-foreground hidden sm:inline-block">Dr. Sachin</span>
+            <span className="text-sm font-medium text-foreground hidden sm:inline-block">{userName}</span>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">

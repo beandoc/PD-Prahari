@@ -70,6 +70,8 @@ export default function PdLogsPage() {
             return { prescription: null, pdEvents: [], pdStrengthDisplay: '', analytics: null };
         }
         
+        const events = [...patientData.pdEvents].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
+        
         let strengthDisplay = patientData.prescription?.pdStrength || 'Not specified';
         if (patientData.prescription?.regimen && patientData.prescription.regimen.length > 0) {
             const strengths = [...new Set(patientData.prescription.regimen.map(r => r.dialysateType))];
@@ -133,7 +135,7 @@ export default function PdLogsPage() {
 
         return {
             prescription: patientData.prescription,
-            pdEvents: patientData.pdEvents,
+            pdEvents: events,
             pdStrengthDisplay: strengthDisplay,
             analytics: {
                 missedLogPercentage,
@@ -161,7 +163,7 @@ export default function PdLogsPage() {
                     <CardContent><Skeleton className="h-48 w-full" /></CardContent>
                 </Card>
             </div>
-        )
+        );
     }
 
     return (
@@ -246,7 +248,7 @@ export default function PdLogsPage() {
                                         This patient does not have an active PD prescription. Current Status: {patientData.currentStatus}
                                      </CardDescription>
                                 )}
-                            </CardHeader>
+                            </Header>
                             <CardContent>
                                 {prescription && patientData.currentStatus === 'Active PD' ? (
                                     <>
@@ -379,5 +381,3 @@ export default function PdLogsPage() {
         </div>
     );
 }
-
-    
