@@ -63,21 +63,16 @@ export default function NurseDashboardPage() {
     
     useEffect(() => {
         setIsClient(true);
-        // This effect will run on initial load and whenever allPatientData changes.
-        // In a real app, this would be handled by a real-time subscription.
         const alerts: AlertItem[] = [];
         
         allPatientData.forEach(p => {
-             // @ts-ignore - Check for our simulated new alert
             if (p.newCloudyAlert) {
                 alerts.push({
-                    // @ts-ignore
                     patient: p, type: 'cloudy', details: p.newCloudyAlert.details, date: p.newCloudyAlert.date
                 });
             }
         });
         
-        // Example static alerts for demonstration
         alerts.push({ patient: allPatientData[2], type: 'doctor_note', details: 'Dr. Parikshit: Please schedule a follow-up PET test for Priya D.', date: new Date() });
         alerts.push({ patient: allPatientData[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) });
         alerts.push({ patient: allPatientData[1], type: 'symptom', details: 'Patient reports mild ankle edema.', date: addDays(new Date(), -1) });
@@ -87,7 +82,6 @@ export default function NurseDashboardPage() {
 
     }, [isClient]);
 
-    // --- Data processing for dashboard metrics and filters ---
     const {
         patientsAwaitingInsertion,
         patientsInTraining,
@@ -104,9 +98,20 @@ export default function NurseDashboardPage() {
                 ...p,
                 trainingDay: differenceInDays(now, parseISO(p.pdStartDate!)) + 1
             }));
-        const patientsOnPeritonitisTx = allPatientData.filter(p => 
-            p.peritonitisEpisodes.some(ep => ep.outcome !== 'Resolved' && differenceInDays(now, parseISO(ep.diagnosisDate)) <= 30)
-        );
+        const patientsOnPeritonitisTx = allPatientData.map(p => {
+            const activeEpisode = p.peritonitisEpisodes.find(ep => ep.outcome === 'In Treatment' && differenceInDays(now, parseISO(ep.diagnosisDate)) <= 30);
+            if (activeEpisode) {
+                return {
+                    ...p,
+                    activeEpisode: {
+                        ...activeEpisode,
+                        treatmentDay: differenceInDays(now, parseISO(activeEpisode.diagnosisDate)) + 1
+                    }
+                };
+            }
+            return null;
+        }).filter((p): p is PatientData & { activeEpisode: any } => p !== null);
+
         const todaysAppointments = allPatientData.filter(p => 
             p.clinicVisits?.nextAppointment && isToday(parseISO(p.clinicVisits.nextAppointment))
         ).length;
@@ -121,7 +126,7 @@ export default function NurseDashboardPage() {
             .sort((a, b) => a.nextVisitDue.getTime() - b.nextVisitDue.getTime());
 
         const upcomingPetTests = allPatientData
-            .filter(p => p.pdStartDate && p.pdAdequacy.length === 0) // Only for patients who started PD and have no test yet
+            .filter(p => p.pdStartDate && p.pdAdequacy.length === 0)
             .map(p => ({
                 ...p,
                 petTestDueDate: addWeeks(parseISO(p.pdStartDate), 8)
@@ -195,9 +200,19 @@ export default function NurseDashboardPage() {
                              <TableHeader>
                                 <TableRow>
                                     <TableHead>Patient</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    {activeFilter === 'in_training' && <TableHead>Training Progress</TableHead>}
-                                    <TableHead>Physician</TableHead>
+                                    {activeFilter === 'peritonitis_tx' ? (
+                                        <>
+                                            <TableHead>Organism/Culture</TableHead>
+                                            <TableHead>Treatment/Day</TableHead>
+                                            <TableHead>Latest Cell Count</TableHead>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <TableHead>Status</TableHead>
+                                            {activeFilter === 'in_training' && <TableHead>Training Progress</TableHead>}
+                                            <TableHead>Physician</TableHead>
+                                        </>
+                                    )}
                                     <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -205,22 +220,43 @@ export default function NurseDashboardPage() {
                                 {filteredPatients.length > 0 ? filteredPatients.map(p => (
                                     <TableRow key={p.patientId}>
                                         <TableCell>
-                                            <p className="font-medium">{p.firstName} {p.lastName}</p>
+                                            <Link href={`/dashboard/patients/${p.patientId}`} className="font-medium hover:underline">
+                                                {p.firstName} {p.lastName}
+                                            </Link>
                                             <p className="text-sm text-muted-foreground">{p.nephroId}</p>
                                         </TableCell>
-                                        <TableCell>
-                                            <Badge variant={p.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{p.currentStatus}</Badge>
-                                        </TableCell>
-                                        {activeFilter === 'in_training' && (
-                                            <TableCell>
-                                                {p.trainingDay ? `Day ${p.trainingDay} of 90` : 'N/A'}
-                                            </TableCell>
+                                        {activeFilter === 'peritonitis_tx' ? (
+                                            <>
+                                                <TableCell>
+                                                    <p className="font-medium">{p.activeEpisode.organismIsolated}</p>
+                                                    <p className="text-sm text-muted-foreground">Culture Pending</p>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <p>{p.activeEpisode.treatmentRegimen}</p>
+                                                    <Badge variant="destructive">Day {p.activeEpisode.treatmentDay}</Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <p>1200 cells/mm³</p>
+                                                    <p className="text-xs text-muted-foreground">95% Neutrophils</p>
+                                                </TableCell>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <TableCell>
+                                                    <Badge variant={p.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{p.currentStatus}</Badge>
+                                                </TableCell>
+                                                {activeFilter === 'in_training' && (
+                                                    <TableCell>
+                                                        {p.trainingDay ? `Day ${p.trainingDay} of 90` : 'N/A'}
+                                                    </TableCell>
+                                                )}
+                                                <TableCell>{p.physician}</TableCell>
+                                            </>
                                         )}
-                                        <TableCell>{p.physician}</TableCell>
                                         <TableCell className="text-right">
                                             <Button asChild variant="outline" size="sm">
-                                                <Link href={`/dashboard/nurse-checklist?patientId=${p.patientId}`}>
-                                                    View Checklist <ArrowRight className="ml-2 h-4 w-4" />
+                                                <Link href={`/dashboard/patients/${p.patientId}`}>
+                                                    {activeFilter === 'peritonitis_tx' ? "Manage" : "View Checklist"} <ArrowRight className="ml-2 h-4 w-4" />
                                                 </Link>
                                             </Button>
                                         </TableCell>
