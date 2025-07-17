@@ -32,6 +32,32 @@ interface FlaggedUfPatient {
     recentUf: number;
 }
 
+// --- ML Model Simulation ---
+// In a real application, this would be an API call to a proper ML model.
+// For this prototype, we simulate the model's output.
+const calculatePeritonitisRisk = (patient: PatientData): number => {
+    let score = 0;
+    // Recent peritonitis is a major factor
+    if (patient.peritonitisEpisodes.some(ep => isAfter(parseISO(ep.diagnosisDate), subMonths(new Date(), 6)))) {
+        score += 50;
+    }
+    // ESI is a known risk factor
+    if (patient.esiCount && patient.esiCount > 0) {
+        score += 25;
+    }
+    // Lower albumin can indicate higher risk
+    const latestAlbumin = patient.labResults.find(lr => lr.testName === 'Albumin');
+    if (latestAlbumin && latestAlbumin.resultValue < 3.5) {
+        score += 15;
+    }
+    // Assisted PD can sometimes be a risk factor
+    if (patient.pdExchangeType === 'Assisted') {
+        score += 10;
+    }
+    return Math.min(100, score + Math.random() * 5); // Add some noise
+};
+// --- End of ML Simulation ---
+
 const getDailyUf = (events: PDEvent[]): Record<string, number> => {
     const dailyUfMap: Record<string, number> = {};
     events.forEach(event => {
@@ -70,9 +96,10 @@ export default function AnalyticsPage() {
       awaitingInsertion,
       missedVisits,
       flaggedInfectionPatients,
-      flaggedUfPatients
+      flaggedUfPatients,
+      peritonitisRiskList,
   } = useMemo(() => {
-    if (isLoading) return { patientsWithStatus: [], totalActivePDPatients: 0, thisWeekAppointments: 0, newPDPatientsLastMonth: 0, activePeritonitisEpisodes: 0, dropouts: 0, awaitingInsertion: 0, missedVisits: 0, flaggedInfectionPatients: [], flaggedUfPatients: [] };
+    if (isLoading) return { patientsWithStatus: [], totalActivePDPatients: 0, thisWeekAppointments: 0, newPDPatientsLastMonth: 0, activePeritonitisEpisodes: 0, dropouts: 0, awaitingInsertion: 0, missedVisits: 0, flaggedInfectionPatients: [], flaggedUfPatients: [], peritonitisRiskList: [] };
 
     const today = new Date();
 
@@ -156,11 +183,20 @@ export default function AnalyticsPage() {
         }
     });
 
+    const peritonitisRiskList = allPatientData
+      .map(p => ({
+        ...p,
+        riskScore: calculatePeritonitisRisk(p),
+      }))
+      .sort((a, b) => b.riskScore - a.riskScore)
+      .slice(0, 3);
+
     return {
         patientsWithStatus, totalActivePDPatients, thisWeekAppointments, newPDPatientsLastMonth, activePeritonitisEpisodes,
         dropouts, awaitingInsertion, missedVisits,
         flaggedInfectionPatients: flaggedInfections.sort((a, b) => b.date.getTime() - a.date.getTime()),
-        flaggedUfPatients: flaggedUf
+        flaggedUfPatients: flaggedUf,
+        peritonitisRiskList
     };
   }, [allPatientData, isLoading]);
 
@@ -182,7 +218,8 @@ export default function AnalyticsPage() {
                         {Array.from({length: 7}).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
                     </CardContent>
                  </Card>
-                 <div className="grid gap-6 lg:grid-cols-2">
+                 <div className="grid gap-6 lg:grid-cols-3">
+                    <Skeleton className="h-64 w-full" />
                     <Skeleton className="h-64 w-full" />
                     <Skeleton className="h-64 w-full" />
                  </div>
@@ -219,7 +256,30 @@ export default function AnalyticsPage() {
             </CardContent>
         </Card>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                         <ShieldAlert className="text-red-500" />
+                        Peritonitis Risk Score
+                    </CardTitle>
+                    <CardDescription>
+                        Top 3 patients with the highest risk, predicted by ML model.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ul className="space-y-3">
+                        {peritonitisRiskList.map(p => (
+                            <li key={p.patientId} className="flex items-center justify-between p-3 rounded-lg bg-red-50 border border-red-200">
+                                <Link href={`/dashboard/patients/${p.patientId}`} className="font-semibold hover:underline">
+                                    {p.firstName} {p.lastName}
+                                </Link>
+                                <Badge variant="destructive" className="text-base">{p.riskScore.toFixed(0)}</Badge>
+                            </li>
+                        ))}
+                    </ul>
+                </CardContent>
+            </Card>
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -276,7 +336,7 @@ export default function AnalyticsPage() {
              <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <AlertTriangle className="text-red-500" />
+                        <AlertTriangle className="text-yellow-500" />
                         Infective complications (last 6 months)
                     </CardTitle>
                     {flaggedInfectionPatients.length > 0 ? (
