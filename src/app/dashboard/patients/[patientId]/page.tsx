@@ -21,9 +21,11 @@ import { useState, useEffect } from 'react';
 function PatientDetailView({ params }: { params: { patientId: string } }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState(true);
-  const { patientId } = params;
 
   useEffect(() => {
+    // The patientId is destructured here, inside the client-side hook
+    const { patientId } = params;
+
     async function fetchData() {
       if (!patientId) return;
       try {
@@ -38,7 +40,7 @@ function PatientDetailView({ params }: { params: { patientId: string } }) {
       }
     }
     fetchData();
-  }, [patientId]);
+  }, [params]); // Use the stable params object as dependency
   
   if (loading || !patientData) {
     return (
