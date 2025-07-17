@@ -98,8 +98,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 
 
 // This is the default export for the page. It's a Server Component.
-// It destructures the patientId from params and passes it as a string prop.
+// It correctly accesses `params.patientId` and passes it as a string prop.
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
-  const { patientId } = params;
-  return <PatientDetailView patientId={patientId} />;
+  return <PatientDetailView patientId={params.patientId} />;
 }
