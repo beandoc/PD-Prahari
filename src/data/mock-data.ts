@@ -327,21 +327,41 @@ export const allPatientData: PatientData[] = [
     city: 'Pune',
     stateProvince: 'Maharashtra',
     postalCode: '411001',
-    pdStartDate: '', // Not started yet
+    pdStartDate: '2025-07-01',
     pdExchangeType: 'Self',
     underlyingKidneyDisease: 'Hypertensive Nephrosclerosis',
-    currentStatus: 'Awaiting Catheter', // Under counselling
+    currentStatus: 'Active PD',
     physician: 'Dr. Sachin',
     prescription: {
-      exchange: 'Pending',
-      pdStrength: 'Pending',
-      dwellTimeHours: 0,
-      dwellVolumeML: 0,
-      exchangeTimeMinutes: 0,
+      exchange: '3x Daily',
+      pdStrength: 'Dextrose 1.5%',
+      dwellTimeHours: 4,
+      dwellVolumeML: 2000,
+      exchangeTimeMinutes: 30,
+      regimen: [
+        { name: 'Exchange 1 (Morning)', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4 },
+        { name: 'Exchange 2 (Afternoon)', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4 },
+        { name: 'Exchange 3 (Night)', dialysateType: 'Icodextrin 7.5%', fillVolumeML: 2000, dwellTimeHours: 8 },
+      ]
     },
-    vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
-    nutritionLifestyle: { dailyProtein: { current: 0, target: 65 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 2000 }, dailyActivity: { current: 0, target: 5000 }},
-    clinicVisits: { nextAppointment: '2025-08-20T09:30:00Z', lastVisitSummary: 'Pre-PD counselling session.' },
+    vitals: [
+        { vitalId: 'VIT-A-1', measurementDateTime: '2025-07-28T08:00:00Z', systolicBP: 140, diastolicBP: 85, heartRateBPM: 78, weightKG: 72 }
+    ], 
+    labResults: [], 
+    pdEvents: [
+        { exchangeId: 'PD-A-1', exchangeDateTime: '2025-07-29T08:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2100, ultrafiltrationML: 100, recordedBy: 'Patient' },
+        { exchangeId: 'PD-A-2', exchangeDateTime: '2025-07-29T13:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2120, ultrafiltrationML: 120, recordedBy: 'Patient' },
+        { exchangeId: 'PD-A-3', exchangeDateTime: '2025-07-28T08:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2080, ultrafiltrationML: 80, recordedBy: 'Patient' },
+        { exchangeId: 'PD-A-4', exchangeDateTime: '2025-07-28T13:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2150, ultrafiltrationML: 150, recordedBy: 'Patient' },
+        { exchangeId: 'PD-A-5', exchangeDateTime: '2025-07-27T08:00:00Z', dialysateType: 'Dextrose 1.5%', fillVolumeML: 2000, dwellTimeHours: 4, drainVolumeML: 2110, ultrafiltrationML: 110, recordedBy: 'Patient' }
+    ], 
+    peritonitisEpisodes: [], 
+    medications: [], 
+    urineOutputLogs: [], 
+    pdAdequacy: [], 
+    patientReportedOutcomes: [],
+    nutritionLifestyle: { dailyProtein: { current: 60, target: 65 }, fluidRestriction: { current: 1.0, limit: 1.5 }, caloriesToday: { current: 1900, target: 2000 }, dailyActivity: { current: 5000, target: 5000 }},
+    clinicVisits: { nextAppointment: '2025-08-20T09:30:00Z', lastVisitSummary: 'Post-catheter insertion follow-up.' },
     patientEducation: []
   }
 ];
