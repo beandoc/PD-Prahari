@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, Clock, Hospital, Download, CalendarPlus } from 'lucide-react';
-import type { ClinicVisitData, Admission, PatientData } from '@/lib/types';
+import type { PatientData } from '@/lib/types';
 import { format, differenceInDays, parseISO, addMonths, startOfMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
