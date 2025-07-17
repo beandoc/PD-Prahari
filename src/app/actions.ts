@@ -4,6 +4,8 @@
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent } from '@/lib/types';
+import { allPatientData } from '@/data/mock-data';
+import { differenceInMonths, parseISO } from 'date-fns';
 
 function formatDataForAI(patientData: PatientData) {
   return {
@@ -87,6 +89,11 @@ export async function getSuggestionsAction(patientData: PatientData) {
 
 export async function triggerCloudyFluidAlert(patientData: PatientData, event: PDEvent) {
     try {
+        if (!patientData.physician) {
+            console.error('Cannot trigger alert: Patient physician is not defined.');
+            return { success: false, error: 'Patient physician is not defined.' };
+        }
+        
         await sendCloudyFluidAlert({
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             patientId: patientData.nephroId,
@@ -100,4 +107,48 @@ export async function triggerCloudyFluidAlert(patientData: PatientData, event: P
         console.error('Error triggering cloudy fluid alert:', error);
         return { success: false, error: 'Failed to trigger alert.' };
     }
+}
+
+export async function getPeritonitisRate(): Promise<number | null> {
+    const patients = allPatientData;
+    let totalPatientMonths = 0;
+    let totalEpisodes = 0;
+    const today = new Date();
+
+    patients.forEach(patient => {
+        if (patient.pdStartDate) {
+            const startDate = parseISO(patient.pdStartDate);
+            const endDate = patient.currentStatus === 'Active PD'
+                ? today
+                : (patient.lastUpdated ? parseISO(patient.lastUpdated) : today);
+
+            const monthsOnDialysis = differenceInMonths(endDate, startDate);
+            if (monthsOnDialysis > 0) {
+                totalPatientMonths += monthsOnDialysis;
+            }
+
+            const sortedEpisodes = [...patient.peritonitisEpisodes].sort((a, b) => parseISO(a.diagnosisDate).getTime() - parseISO(b.diagnosisDate).getTime());
+            let lastEpisodeDate: Date | null = null;
+            let lastOrganism: string | null = null;
+
+            sortedEpisodes.forEach(episode => {
+                const currentEpisodeDate = parseISO(episode.diagnosisDate);
+                if (lastEpisodeDate && lastOrganism === episode.organismIsolated && differenceInMonths(currentEpisodeDate, lastEpisodeDate) < 1) {
+                    // This is a relapse, do not increment totalEpisodes
+                } else {
+                    totalEpisodes++;
+                }
+                lastEpisodeDate = currentEpisodeDate;
+                lastOrganism = episode.organismIsolated;
+            });
+        }
+    });
+
+    const totalPatientYears = totalPatientMonths / 12;
+
+    if (totalPatientYears === 0) {
+      return totalEpisodes > 0 ? Infinity : 0.0;
+    }
+    
+    return totalEpisodes / totalPatientYears;
 }

@@ -14,6 +14,7 @@ import { AlertTriangle, Droplets, TrendingUp, Users, CalendarX, CalendarCheck, U
 import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears, isAfter, startOfDay, parseISO, differenceInMonths, differenceInWeeks, differenceInDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getPeritonitisRate } from '@/app/actions';
 
 
 interface FlaggedPatient {
@@ -79,11 +80,15 @@ export default function AnalyticsPage() {
   const [infectionIndex, setInfectionIndex] = useState(0);
   const [ufIndex, setUfIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [peritonitisRate, setPeritonitisRate] = useState<number | null>(null);
 
   useEffect(() => {
     const data = getLiveAllPatientData();
     setAllPatientData(data);
-    setIsLoading(false);
+    getPeritonitisRate().then(rate => {
+        setPeritonitisRate(rate);
+        setIsLoading(false);
+    });
   }, []);
 
   const {
@@ -91,7 +96,6 @@ export default function AnalyticsPage() {
       totalActivePDPatients,
       thisWeekAppointments,
       newPDPatientsLastMonth,
-      peritonitisRate,
       dropouts,
       awaitingInsertion,
       missedVisits,
@@ -99,14 +103,14 @@ export default function AnalyticsPage() {
       flaggedUfPatients,
       peritonitisRiskList,
   } = useMemo(() => {
-    if (isLoading) return { patientsWithStatus: [], totalActivePDPatients: 0, thisWeekAppointments: 0, newPDPatientsLastMonth: 0, peritonitisRate: null, dropouts: 0, awaitingInsertion: 0, missedVisits: 0, flaggedInfectionPatients: [], flaggedUfPatients: [], peritonitisRiskList: [] };
-
     const today = new Date();
-    
     const isToday = (date: Date) => {
         return differenceInDays(startOfDay(date), startOfDay(new Date())) === 0;
     };
 
+    if (isLoading) return { patientsWithStatus: [], totalActivePDPatients: 0, thisWeekAppointments: 0, newPDPatientsLastMonth: 0, dropouts: 0, awaitingInsertion: 0, missedVisits: 0, flaggedInfectionPatients: [], flaggedUfPatients: [], peritonitisRiskList: [] };
+
+    
     const patientsWithStatus = allPatientData.map(patient => {
         const alerts = generatePatientAlerts(patient);
         let status: 'critical' | 'warning' | 'stable' = 'stable';
@@ -142,54 +146,15 @@ export default function AnalyticsPage() {
         return isWithinInterval(startDate, { start: startOfLastMonth, end: endOfLastMonth });
     }).length;
 
-    // Calculate Peritonitis Rate
-    let totalPatientMonths = 0;
-    let totalEpisodes = 0;
-
-    allPatientData.forEach(patient => {
-      if (patient.pdStartDate) {
-        const startDate = parseISO(patient.pdStartDate);
-        const endDate = patient.currentStatus === 'Active PD' ? today : (patient.lastUpdated ? parseISO(patient.lastUpdated) : today);
-        const monthsOnDialysis = differenceInMonths(endDate, startDate);
-        if (monthsOnDialysis > 0) {
-          totalPatientMonths += monthsOnDialysis;
-        }
-
-        const sortedEpisodes = [...patient.peritonitisEpisodes].sort((a,b) => parseISO(a.diagnosisDate).getTime() - parseISO(b.diagnosisDate).getTime());
-        let lastEpisodeDate: Date | null = null;
-        let lastOrganism: string | null = null;
-
-        sortedEpisodes.forEach(episode => {
-            const currentEpisodeDate = parseISO(episode.diagnosisDate);
-            // Check for relapse: same organism within 4 weeks. If so, don't count it as a new episode.
-            if (lastEpisodeDate && lastOrganism === episode.organismIsolated && differenceInWeeks(currentEpisodeDate, lastEpisodeDate) <= 4) {
-                 // This is a relapse, do not increment totalEpisodes
-            } else {
-                totalEpisodes++;
-            }
-            lastEpisodeDate = currentEpisodeDate;
-            lastOrganism = episode.organismIsolated;
-        });
-      }
-    });
-
-    const totalPatientYears = totalPatientMonths / 12;
-    // Edge case: if there are episodes but patient-years is zero, avoid division by zero.
-    // This can happen for new patients with an immediate infection.
-    const peritonitisRate = totalPatientYears > 0 ? (totalEpisodes / totalPatientYears) : (totalEpisodes > 0 ? Infinity : 0);
-
-
     const dropoutStatuses: Patient['currentStatus'][] = ['Deceased', 'Transferred to HD', 'Catheter Removed', 'Transplanted'];
     const dropouts = allPatientData.filter(p => dropoutStatuses.includes(p.currentStatus)).length;
     const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
     
     const missedVisits = allPatientData.filter(p => {
-        // Ensure nextAppointment is a valid, non-empty string before parsing
         if (!p.clinicVisits?.nextAppointment || p.clinicVisits.nextAppointment === '') {
             return false;
         }
         const appointmentDate = parseISO(p.clinicVisits.nextAppointment);
-        // Check if the appointment date is in the past and not today
         return isAfter(today, appointmentDate) && !isToday(appointmentDate);
     }).length; 
 
@@ -233,7 +198,7 @@ export default function AnalyticsPage() {
       .slice(0, 3);
 
     return {
-        patientsWithStatus, totalActivePDPatients, thisWeekAppointments, newPDPatientsLastMonth, peritonitisRate,
+        patientsWithStatus, totalActivePDPatients, thisWeekAppointments, newPDPatientsLastMonth,
         dropouts, awaitingInsertion, missedVisits,
         flaggedInfectionPatients: flaggedInfections.sort((a, b) => b.date.getTime() - a.date.getTime()),
         flaggedUfPatients: flaggedUf,
@@ -290,7 +255,7 @@ export default function AnalyticsPage() {
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><Users className="h-6 w-6 text-blue-500 mx-auto mb-2" /><p className="text-3xl font-bold">{totalActivePDPatients}</p><p className="text-sm text-muted-foreground">Total PD Patients</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarX className="h-6 w-6 text-red-500 mx-auto mb-2" /><p className="text-3xl font-bold">{missedVisits}</p><p className="text-sm text-muted-foreground">Missed Visits</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarCheck className="h-6 w-6 text-green-500 mx-auto mb-2" /><p className="text-3xl font-bold">{thisWeekAppointments}</p><p className="text-sm text-muted-foreground">This Week's Appts</p></div>
-                <div className="p-4 bg-slate-50 rounded-lg text-center"><UserPlus className="h-6 w-6 text-indigo-500 mx-auto mb-2" /><p className="text-3xl font-bold">{newPDPatientsLastMonth}</p><p className="text-sm text-muted-foreground">New Patients (1mo)</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><UserPlus className="h-6 w-6 text-indigo-500 mx-auto mb-2" /><p className="text-3xl font-bold">{newPDPatientsLastMonth}</p><p className="text-sm text-muted-foreground">New Patients</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><Repeat className="h-6 w-6 text-yellow-500 mx-auto mb-2" /><p className="text-3xl font-bold">{peritonitisRate !== null ? (isFinite(peritonitisRate) ? peritonitisRate.toFixed(2) : 'High') : 'N/A'}</p><p className="text-sm text-muted-foreground">Peritonitis Rate</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><TrendingDown className="h-6 w-6 text-gray-600 mx-auto mb-2" /><p className="text-3xl font-bold">{dropouts}</p><p className="text-sm text-muted-foreground">Dropouts</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><ListTodo className="h-6 w-6 text-purple-500 mx-auto mb-2" /><p className="text-3xl font-bold">{awaitingInsertion}</p><p className="text-sm text-muted-foreground">Awaiting Insertion</p></div>
