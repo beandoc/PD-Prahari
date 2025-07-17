@@ -212,14 +212,14 @@ export default function NurseDashboardPage() {
                                     ) : activeFilter === 'todays_appointments' ? (
                                         <>
                                             <TableHead>Appointment Time</TableHead>
-                                            <TableHead>Physician</TableHead>
+                                            <TableHead>Nephrologist</TableHead>
                                             <TableHead>Visit Reason</TableHead>
                                         </>
                                     ) : (
                                         <>
                                             <TableHead>Status</TableHead>
                                             {activeFilter === 'in_training' && <TableHead>Training Progress</TableHead>}
-                                            <TableHead>Physician</TableHead>
+                                            <TableHead>Nephrologist</TableHead>
                                         </>
                                     )}
                                     <TableHead className="text-right">Action</TableHead>

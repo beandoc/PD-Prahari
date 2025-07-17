@@ -78,7 +78,7 @@ const formSchema = z.object({
   emergencyContactWhatsapp: z.string().optional(),
 
   // Clinical
-  physician: z.string().min(1, { message: 'Attending physician is required.' }),
+  physician: z.string().min(1, { message: 'Attending nephrologist is required.' }),
   underlyingKidneyDisease: z.string().optional(),
   pdStartDate: z.date().optional(),
 }).superRefine((data, ctx) => {
@@ -331,9 +331,9 @@ export default function ClinicianPatientRegistrationPage() {
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Clinical Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <FormField control={form.control} name="physician" render={({ field }) => (
-                            <FormItem><FormLabel>Attending Physician <span className="text-destructive">*</span></FormLabel>
+                            <FormItem><FormLabel>Attending Nephrologist <span className="text-destructive">*</span></FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a physician" /></SelectTrigger></FormControl>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a nephrologist" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         <SelectItem value="Dr. Atul">Dr. Atul</SelectItem>
                                         <SelectItem value="Dr. Parikshit">Dr. Parikshit</SelectItem>
@@ -387,5 +387,3 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
-
-    

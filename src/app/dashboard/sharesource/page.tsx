@@ -327,7 +327,7 @@ export default function AnalyticsPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Patient</TableHead>
-                        <TableHead>Physician</TableHead>
+                        <TableHead>Nephrologist</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Alerts</TableHead>
                       </TableRow>

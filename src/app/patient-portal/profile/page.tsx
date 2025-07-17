@@ -85,7 +85,7 @@ export default function PatientProfilePage() {
                 <div className="space-y-1"><p className="font-medium">Nephro ID</p><p className="text-muted-foreground">{patient.nephroId}</p></div>
                 <div className="space-y-1"><p className="font-medium">Date of Birth</p><p className="text-muted-foreground">{patient.dateOfBirth ? format(parseISO(patient.dateOfBirth), 'PPP') : 'N/A'}</p></div>
                 <div className="space-y-1"><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
-                <div className="space-y-1"><p className="font-medium">Primary Physician</p><p className="text-muted-foreground">{patient.physician}</p></div>
+                <div className="space-y-1"><p className="font-medium">Primary Nephrologist</p><p className="text-muted-foreground">{patient.physician}</p></div>
                 <div className="space-y-1 flex items-start gap-2"><BookOpen className="h-4 w-4 mt-0.5 text-muted-foreground" /><p className="font-medium text-muted-foreground">{patient.educationLevel || 'N/A'}</p></div>
                 <div className="space-y-1 flex items-start gap-2"><Route className="h-4 w-4 mt-0.5 text-muted-foreground" /><p className="font-medium text-muted-foreground">{patient.distanceFromPDCenterKM ? `${patient.distanceFromPDCenterKM} km from center` : 'N/A'}</p></div>
                 <div className="space-y-1 flex items-start gap-2"><Users2 className="h-4 w-4 mt-0.5 text-muted-foreground" /><p className="font-medium text-muted-foreground">{patient.pdExchangeType}</p></div>
@@ -287,5 +287,3 @@ export default function PatientProfilePage() {
     </div>
   );
 }
-
-    

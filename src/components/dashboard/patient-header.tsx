@@ -45,7 +45,7 @@ export default function PatientHeader({ patient }: PatientHeaderProps) {
                  <div className="font-semibold"><Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'} className="text-sm">{patient.currentStatus}</Badge></div>
               </div>
                <div>
-                 <div className="text-xs text-muted-foreground">Physician</div>
+                 <div className="text-xs text-muted-foreground">Primary Nephrologist</div>
                  <div className="font-semibold">{patient.physician}</div>
               </div>
             </CardContent>

@@ -212,7 +212,7 @@ export default function UpdateRecordsPage() {
                         <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="addressLine1" render={({ field }) => (
-                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="state" render={({ field }) => (
                         <FormItem><FormLabel>State</FormLabel>
@@ -239,7 +239,7 @@ export default function UpdateRecordsPage() {
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Clinical & PD Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <FormField control={form.control} name="physician" render={({ field }) => (
-                        <FormItem><FormLabel>Attending Physician</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Attending Nephrologist</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="underlyingKidneyDisease" render={({ field }) => (
                         <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} value={field.value ?? ''} disabled /></FormControl><FormMessage /></FormItem>
@@ -322,5 +322,3 @@ export default function UpdateRecordsPage() {
     </div>
   );
 }
-
-    

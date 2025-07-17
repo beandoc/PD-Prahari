@@ -379,7 +379,7 @@ export default function DoctorDashboard() {
                             <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[250px]">Patient</TableHead>
-                                <TableHead>Physician</TableHead>
+                                <TableHead>Nephrologist</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Alerts</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>

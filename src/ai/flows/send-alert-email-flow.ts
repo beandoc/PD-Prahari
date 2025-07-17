@@ -17,7 +17,7 @@ const CloudyFluidAlertInputSchema = z.object({
   patientId: z.string().describe('The unique identifier for the patient.'),
   patientMobile: z.string().optional().describe('The mobile number of the patient.'),
   reportedAt: z.string().describe('The date and time the cloudy fluid was reported.'),
-  physician: z.string().describe('The name of the attending physician.'),
+  physician: z.string().describe('The name of the attending nephrologist.'),
   clinicPhoneNumber: z.string().optional().describe("The clinic's WhatsApp enabled phone number."),
 });
 export type CloudyFluidAlertInput = z.infer<typeof CloudyFluidAlertInputSchema>;
