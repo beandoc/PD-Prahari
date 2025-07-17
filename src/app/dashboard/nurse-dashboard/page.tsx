@@ -7,14 +7,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { format, addDays, parseISO, isToday, differenceInDays, addWeeks, isAfter } from 'date-fns';
-import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight, FlaskConical, Stethoscope, BookOpen } from 'lucide-react';
+import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight, FlaskConical, Stethoscope, BookOpen, Clock } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getLiveAllPatientData } from '@/lib/data-sync';
 
-type FilterType = 'awaiting_insertion' | 'in_training' | 'peritonitis_tx' | 'all';
+type FilterType = 'awaiting_insertion' | 'in_training' | 'peritonitis_tx' | 'todays_appointments' | 'all';
 
 interface MetricCardProps {
     title: string;
@@ -87,11 +87,11 @@ export default function NurseDashboardPage() {
         patientsAwaitingInsertion,
         patientsInTraining,
         patientsOnPeritonitisTx,
-        todaysAppointments,
+        todaysAppointmentsList,
         upcomingHomeVisits,
         upcomingPetTests,
     } = useMemo(() => {
-        if (isLoading) return { patientsAwaitingInsertion: [], patientsInTraining: [], patientsOnPeritonitisTx: [], todaysAppointments: 0, upcomingHomeVisits: [], upcomingPetTests: [] };
+        if (isLoading) return { patientsAwaitingInsertion: [], patientsInTraining: [], patientsOnPeritonitisTx: [], todaysAppointmentsList: [], upcomingHomeVisits: [], upcomingPetTests: [] };
 
         const now = new Date();
         const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter');
@@ -115,9 +115,9 @@ export default function NurseDashboardPage() {
             return null;
         }).filter((p): p is PatientData & { activeEpisode: any } => p !== null);
 
-        const todaysAppointments = allPatientData.filter(p => 
+        const todaysAppointmentsList = allPatientData.filter(p => 
             p.clinicVisits?.nextAppointment && isToday(parseISO(p.clinicVisits.nextAppointment))
-        ).length;
+        );
 
         const upcomingHomeVisits = allPatientData
             .filter(p => p.lastHomeVisitDate)
@@ -137,7 +137,7 @@ export default function NurseDashboardPage() {
             .filter(p => isAfter(p.petTestDueDate, now) && p.petTestDueDate < addDays(now, 60))
             .sort((a, b) => a.petTestDueDate.getTime() - b.petTestDueDate.getTime());
 
-        return { patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointments, upcomingHomeVisits, upcomingPetTests };
+        return { patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointmentsList, upcomingHomeVisits, upcomingPetTests };
 
     }, [allPatientData, isLoading]);
 
@@ -146,15 +146,17 @@ export default function NurseDashboardPage() {
             case 'awaiting_insertion': return patientsAwaitingInsertion;
             case 'in_training': return patientsInTraining;
             case 'peritonitis_tx': return patientsOnPeritonitisTx;
+            case 'todays_appointments': return todaysAppointmentsList;
             default: return [];
         }
-    }, [activeFilter, patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx]);
+    }, [activeFilter, patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointmentsList]);
 
     const filterTitles: Record<FilterType, string> = {
         all: 'Patient List',
         awaiting_insertion: 'Patients Awaiting Catheter Insertion',
         in_training: 'Patients in Training (First 90 Days)',
-        peritonitis_tx: 'Patients on Active Peritonitis Treatment'
+        peritonitis_tx: 'Patients on Active Peritonitis Treatment',
+        todays_appointments: "Today's Scheduled Appointments"
     };
 
     if (isLoading) {
@@ -183,7 +185,7 @@ export default function NurseDashboardPage() {
                 <MetricCard title="Awaiting Catheter Insertion" value={patientsAwaitingInsertion.length} icon={<UserPlus className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('awaiting_insertion')} isActive={activeFilter === 'awaiting_insertion'} />
                 <MetricCard title="Patients in Training (90d)" value={patientsInTraining.length} icon={<BookOpen className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('in_training')} isActive={activeFilter === 'in_training'} />
                 <MetricCard title="Active Peritonitis Tx" value={patientsOnPeritonitisTx.length} icon={<ShieldAlert className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('peritonitis_tx')} isActive={activeFilter === 'peritonitis_tx'} />
-                <MetricCard title="Today's Appointments" value={todaysAppointments} icon={<CalendarCheck className="h-4 w-4 text-muted-foreground" />} onClick={() => {}} isActive={false} />
+                <MetricCard title="Today's Appointments" value={todaysAppointmentsList.length} icon={<CalendarCheck className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('todays_appointments')} isActive={activeFilter === 'todays_appointments'} />
             </div>
 
             {activeFilter !== 'all' && (
@@ -206,6 +208,12 @@ export default function NurseDashboardPage() {
                                             <TableHead>Organism/Culture</TableHead>
                                             <TableHead>Treatment/Day</TableHead>
                                             <TableHead>Latest Cell Count</TableHead>
+                                        </>
+                                    ) : activeFilter === 'todays_appointments' ? (
+                                        <>
+                                            <TableHead>Appointment Time</TableHead>
+                                            <TableHead>Physician</TableHead>
+                                            <TableHead>Visit Reason</TableHead>
                                         </>
                                     ) : (
                                         <>
@@ -240,6 +248,17 @@ export default function NurseDashboardPage() {
                                                     <p>1200 cells/mm³</p>
                                                     <p className="text-xs text-muted-foreground">95% Neutrophils</p>
                                                 </TableCell>
+                                            </>
+                                        ) : activeFilter === 'todays_appointments' ? (
+                                             <>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="h-4 w-4" />
+                                                        {p.clinicVisits.nextAppointment ? format(parseISO(p.clinicVisits.nextAppointment), 'p') : 'N/A'}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>{p.physician}</TableCell>
+                                                <TableCell className="text-sm text-muted-foreground">Routine Follow-up</TableCell>
                                             </>
                                         ) : (
                                             <>
@@ -386,5 +405,3 @@ export default function NurseDashboardPage() {
         </div>
     );
 }
-
-    
