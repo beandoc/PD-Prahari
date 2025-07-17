@@ -80,7 +80,7 @@ export default function NurseDashboardPage() {
 
         setUrgentAlerts(alerts.sort((a, b) => b.date.getTime() - a.date.getTime()));
 
-    }, [isClient]);
+    }, []);
 
     const {
         patientsAwaitingInsertion,
@@ -99,7 +99,7 @@ export default function NurseDashboardPage() {
                 trainingDay: differenceInDays(now, parseISO(p.pdStartDate!)) + 1
             }));
         const patientsOnPeritonitisTx = allPatientData.map(p => {
-            const activeEpisode = p.peritonitisEpisodes.find(ep => ep.outcome === 'In Treatment' && differenceInDays(now, parseISO(ep.diagnosisDate)) <= 30);
+            const activeEpisode = p.peritonitisEpisodes.find(ep => ep.outcome === 'In Treatment');
             if (activeEpisode) {
                 return {
                     ...p,
@@ -136,7 +136,7 @@ export default function NurseDashboardPage() {
 
         return { patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointments, upcomingHomeVisits, upcomingPetTests };
 
-    }, [isClient]);
+    }, []);
 
     const filteredPatients = useMemo(() => {
         switch (activeFilter) {
@@ -255,7 +255,7 @@ export default function NurseDashboardPage() {
                                         )}
                                         <TableCell className="text-right">
                                             <Button asChild variant="outline" size="sm">
-                                                <Link href={`/dashboard/patients/${p.patientId}`}>
+                                                <Link href={`/dashboard/nurse-checklist?patientId=${p.patientId}`}>
                                                     {activeFilter === 'peritonitis_tx' ? "Manage" : "View Checklist"} <ArrowRight className="ml-2 h-4 w-4" />
                                                 </Link>
                                             </Button>
@@ -384,4 +384,5 @@ export default function NurseDashboardPage() {
             </div>
         </div>
     );
-}
+
+    
