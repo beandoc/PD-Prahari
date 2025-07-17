@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { allPatientData } from '@/data/mock-data';
 import Link from 'next/link';
 import { format, addDays, parseISO, isToday, differenceInDays, addWeeks, isAfter } from 'date-fns';
-import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight, FlaskConical, Stethoscope } from 'lucide-react';
+import { UserPlus, UserCog, ShieldAlert, Home, AlertCircle, Droplets, ShoppingBag, MessageSquare, CalendarCheck, FilterX, User, ArrowRight, FlaskConical, Stethoscope, BookOpen } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -98,7 +98,12 @@ export default function NurseDashboardPage() {
     } = useMemo(() => {
         const now = new Date();
         const patientsAwaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter');
-        const patientsInTraining = allPatientData.filter(p => p.pdStartDate && differenceInDays(now, parseISO(p.pdStartDate)) <= 90 && p.currentStatus === 'Active PD');
+        const patientsInTraining = allPatientData
+            .filter(p => p.pdStartDate && differenceInDays(now, parseISO(p.pdStartDate)) <= 90 && p.currentStatus === 'Active PD')
+            .map(p => ({
+                ...p,
+                trainingDay: differenceInDays(now, parseISO(p.pdStartDate!)) + 1
+            }));
         const patientsOnPeritonitisTx = allPatientData.filter(p => 
             p.peritonitisEpisodes.some(ep => ep.outcome !== 'Resolved' && differenceInDays(now, parseISO(ep.diagnosisDate)) <= 30)
         );
@@ -140,7 +145,7 @@ export default function NurseDashboardPage() {
     const filterTitles: Record<FilterType, string> = {
         all: 'Patient List',
         awaiting_insertion: 'Patients Awaiting Catheter Insertion',
-        in_training: 'Patients in Training (Last 90 Days)',
+        in_training: 'Patients in Training (First 90 Days)',
         peritonitis_tx: 'Patients on Active Peritonitis Treatment'
     };
 
@@ -170,7 +175,7 @@ export default function NurseDashboardPage() {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <MetricCard title="Awaiting Catheter Insertion" value={patientsAwaitingInsertion.length} icon={<UserPlus className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('awaiting_insertion')} isActive={activeFilter === 'awaiting_insertion'} />
-                <MetricCard title="Patients in Training (90d)" value={patientsInTraining.length} icon={<UserCog className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('in_training')} isActive={activeFilter === 'in_training'} />
+                <MetricCard title="Patients in Training (90d)" value={patientsInTraining.length} icon={<BookOpen className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('in_training')} isActive={activeFilter === 'in_training'} />
                 <MetricCard title="Active Peritonitis Tx" value={patientsOnPeritonitisTx.length} icon={<ShieldAlert className="h-4 w-4 text-muted-foreground" />} onClick={() => setActiveFilter('peritonitis_tx')} isActive={activeFilter === 'peritonitis_tx'} />
                 <MetricCard title="Today's Appointments" value={todaysAppointments} icon={<CalendarCheck className="h-4 w-4 text-muted-foreground" />} onClick={() => {}} isActive={false} />
             </div>
@@ -191,6 +196,7 @@ export default function NurseDashboardPage() {
                                 <TableRow>
                                     <TableHead>Patient</TableHead>
                                     <TableHead>Status</TableHead>
+                                    {activeFilter === 'in_training' && <TableHead>Training Progress</TableHead>}
                                     <TableHead>Physician</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
@@ -205,6 +211,11 @@ export default function NurseDashboardPage() {
                                         <TableCell>
                                             <Badge variant={p.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{p.currentStatus}</Badge>
                                         </TableCell>
+                                        {activeFilter === 'in_training' && (
+                                            <TableCell>
+                                                {p.trainingDay ? `Day ${p.trainingDay} of 90` : 'N/A'}
+                                            </TableCell>
+                                        )}
                                         <TableCell>{p.physician}</TableCell>
                                         <TableCell className="text-right">
                                             <Button asChild variant="outline" size="sm">
@@ -216,7 +227,7 @@ export default function NurseDashboardPage() {
                                     </TableRow>
                                 )) : (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="h-24 text-center">No patients match this filter.</TableCell>
+                                        <TableCell colSpan={5} className="h-24 text-center">No patients match this filter.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
