@@ -415,7 +415,7 @@ export default function DoctorDashboard() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><MessageCircle className="h-5 w-5" /> Push Notifications</CardTitle>
                             <CardDescription>
-                                Send a broadcast message to PD Nurses or Patients.
+                                Send a broadcast message to the PD Coordinator or Patients.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -426,7 +426,7 @@ export default function DoctorDashboard() {
                                         <SelectValue placeholder="Select a group..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="nurses">All PD Nurses</SelectItem>
+                                        <SelectItem value="nurses">PD Coordinator</SelectItem>
                                         <SelectItem value="patients">All Patients</SelectItem>
                                         <SelectItem value="specific_patient">A Specific Patient</SelectItem>
                                     </SelectContent>
