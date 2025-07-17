@@ -17,10 +17,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
 // This is the dedicated Client Component that handles state and data fetching.
-// It receives the patientId as a simple string prop.
-function PatientDetailView({ patientId }: { patientId: string }) {
+// It receives the params object as a prop.
+function PatientDetailView({ params }: { params: { patientId: string } }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { patientId } = params;
 
   useEffect(() => {
     async function fetchData() {
@@ -90,8 +91,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 
 
 // This default export is the page component. It is a Server Component by default.
-// It destructures the patientId from params and passes it as a string prop.
+// It receives the params object from Next.js and passes it directly to the client component.
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
-  const { patientId } = params;
-  return <PatientDetailView patientId={patientId} />;
+  return <PatientDetailView params={params} />;
 }
