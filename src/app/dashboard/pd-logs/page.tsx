@@ -70,7 +70,7 @@ export default function PdLogsPage() {
             return { prescription: null, pdEvents: [], pdStrengthDisplay: '', analytics: null };
         }
         
-        const events = [...patientData.pdEvents].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
+        const events = [...(patientData.pdEvents || [])].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
         
         let strengthDisplay = patientData.prescription?.pdStrength || 'Not specified';
         if (patientData.prescription?.regimen && patientData.prescription.regimen.length > 0) {
@@ -90,7 +90,7 @@ export default function PdLogsPage() {
             
             if (daysSinceStart > 0) {
                 const totalExpectedLogs = daysSinceStart * prescribedDailyExchanges;
-                const loggedEventsLast30Days = patientData.pdEvents.filter(e => isWithinInterval(parseISO(e.exchangeDateTime), { start: loggingStartDate, end: today })).length;
+                const loggedEventsLast30Days = (patientData.pdEvents || []).filter(e => isWithinInterval(parseISO(e.exchangeDateTime), { start: loggingStartDate, end: today })).length;
                 const missedLogs = Math.max(0, totalExpectedLogs - loggedEventsLast30Days);
                 missedLogPercentage = totalExpectedLogs > 0 ? (missedLogs / totalExpectedLogs) * 100 : 0;
             }
@@ -110,7 +110,7 @@ export default function PdLogsPage() {
         };
 
         const date90DaysAgo = subDays(today, 90);
-        const dailyUfLast90Days = getDailyUf(patientData.pdEvents, date90DaysAgo, today);
+        const dailyUfLast90Days = getDailyUf(patientData.pdEvents || [], date90DaysAgo, today);
         const ufValues = Object.values(dailyUfLast90Days);
 
         const avgUfLast3Months = ufValues.length > 0 ? ufValues.reduce((a, b) => a + b, 0) / ufValues.length : 0;
@@ -118,12 +118,12 @@ export default function PdLogsPage() {
         const maxUfLast3Months = ufValues.length > 0 ? Math.max(...ufValues) : 0;
 
         const date60DaysAgo = subDays(today, 60);
-        const baselineUfMap = getDailyUf(patientData.pdEvents, date90DaysAgo, date60DaysAgo);
+        const baselineUfMap = getDailyUf(patientData.pdEvents || [], date90DaysAgo, date60DaysAgo);
         const baselineUfValues = Object.values(baselineUfMap);
         const baselineAvgUf = baselineUfValues.length > 0 ? baselineUfValues.reduce((a, b) => a + b, 0) / baselineUfValues.length : null;
 
         const date30DaysAgo = subDays(today, 30);
-        const recentUfMap = getDailyUf(patientData.pdEvents, date30DaysAgo, today);
+        const recentUfMap = getDailyUf(patientData.pdEvents || [], date30DaysAgo, today);
         const recentUfValues = Object.values(recentUfMap);
         const recentAvgUf = recentUfValues.length > 0 ? recentUfValues.reduce((a, b) => a + b, 0) / recentUfValues.length : null;
         
@@ -156,7 +156,7 @@ export default function PdLogsPage() {
 
     if (isLoading) {
         return (
-             <div className="space-y-4">
+            <div className="space-y-4">
                 <Skeleton className="h-12 w-1/2" />
                 <Skeleton className="h-10 w-1/4" />
                 <Card>
