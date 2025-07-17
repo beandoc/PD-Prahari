@@ -3,51 +3,23 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 import { Lock, User } from 'lucide-react';
 
 export default function NephrologistLoginPage() {
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-      <div className="hidden bg-muted lg:flex lg:flex-col lg:items-center lg:justify-center p-8">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="flex justify-center items-center gap-3 mb-2">
-                 <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={40} height={40} />
-                <h1 className="text-4xl font-bold">
-                PD Prahari
+      <div className="flex items-center justify-center py-12 px-4">
+        <div className="mx-auto grid w-[380px] gap-6">
+          <div className="grid gap-2 text-center">
+             <div className="flex justify-center items-center gap-3 mb-4">
+                <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={48} height={48} />
+                <h1 className="text-3xl font-bold">
+                  PD Prahari
                 </h1>
             </div>
-            <p className="text-xl mt-2 text-muted-foreground">Your Companion in Kidney Care</p>
-          </div>
-          <Card>
-            <CardContent className="p-4">
-              <Image
-                src="https://placehold.co/400x400.png"
-                alt="Kidney care illustration"
-                width="400"
-                height="400"
-                data-ai-hint="kidney care"
-                className="rounded-lg"
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      <div className="relative flex items-center justify-center py-12 px-4">
-        <Image
-          src="https://placehold.co/500x500.png"
-          alt="Department Logo Watermark"
-          width={500}
-          height={500}
-          data-ai-hint="nephrology department logo"
-          className="absolute inset-0 h-full w-full object-contain opacity-10"
-        />
-        <div className="relative mx-auto grid w-[380px] gap-6">
-          <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">Nephrologist Login</h1>
+            <h2 className="text-2xl font-bold text-primary">Nephrologist Login</h2>
             <p className="text-balance text-muted-foreground">
-              Enter your credentials to access the clinical dashboard
+              Enter your credentials to access the clinical dashboard.
             </p>
           </div>
           <div className="grid gap-4">
@@ -75,6 +47,16 @@ export default function NephrologistLoginPage() {
             </Link>
           </div>
         </div>
+      </div>
+       <div className="hidden bg-muted lg:block">
+        <Image
+          src="https://placehold.co/1200x900.png"
+          alt="Nephrologist reviewing data"
+          width="1200"
+          height="900"
+          data-ai-hint="doctor medical professional"
+          className="h-full w-full object-cover"
+        />
       </div>
     </div>
   );

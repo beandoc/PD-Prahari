@@ -3,19 +3,23 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Lock, User, UserRoundCog } from 'lucide-react';
-import { KidneyIcon } from '@/components/kidney-icon';
+import { Lock, User } from 'lucide-react';
 
 export default function NurseLoginPage() {
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-       <div className="relative flex items-center justify-center py-12 px-4 bg-background">
-        <div className="relative mx-auto grid w-[380px] gap-6">
+      <div className="flex items-center justify-center py-12 px-4 theme-nurse bg-background">
+        <div className="mx-auto grid w-[380px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">PD Nurse Login</h1>
+             <div className="flex justify-center items-center gap-3 mb-4">
+                <Image src="/pdlogoimage.png" alt="PD Prahari Logo" width={48} height={48} />
+                <h1 className="text-3xl font-bold">
+                  PD Prahari
+                </h1>
+            </div>
+            <h2 className="text-2xl font-bold text-primary">PD Nurse Login</h2>
             <p className="text-balance text-muted-foreground">
-              Enter your credentials to access the nurse portal
+              Enter your credentials to access the nurse portal.
             </p>
           </div>
           <div className="grid gap-4">
@@ -38,30 +42,15 @@ export default function NurseLoginPage() {
           </div>
         </div>
       </div>
-       <div className="hidden bg-muted lg:flex lg:flex-col lg:items-center lg:justify-center p-8">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="flex justify-center items-center gap-3 mb-2">
-                 <UserRoundCog className="h-10 w-10 text-primary" />
-                <h1 className="text-4xl font-bold">
-                Nurse Portal
-                </h1>
-            </div>
-            <p className="text-xl mt-2 text-muted-foreground">Dedicated Tools for Patient Care</p>
-          </div>
-          <Card>
-            <CardContent className="p-4">
-              <Image
-                src="https://placehold.co/400x400.png"
-                alt="Nurse helping patient illustration"
-                width="400"
-                height="400"
-                data-ai-hint="nurse helping patient"
-                className="rounded-lg"
-              />
-            </CardContent>
-          </Card>
-        </div>
+       <div className="hidden bg-muted lg:block">
+        <Image
+          src="https://placehold.co/1200x900.png"
+          alt="Nurse helping a patient"
+          width="1200"
+          height="900"
+          data-ai-hint="nurse patient care"
+          className="h-full w-full object-cover"
+        />
       </div>
     </div>
   );
