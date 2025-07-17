@@ -23,8 +23,14 @@ function PatientDetailView({ patientId }: { patientId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // This function runs only on the client, after the component mounts.
     async function fetchData() {
-      if (!patientId) return;
+      // Ensure we have a patientId before fetching.
+      if (!patientId) {
+        setLoading(false);
+        return;
+      };
+
       try {
         setLoading(true);
         const data = await getSyncedPatientData(patientId);
@@ -37,7 +43,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
       }
     }
     fetchData();
-  }, [patientId]); // Depend on the patientId prop
+  }, [patientId]); // The effect re-runs if patientId changes.
   
   if (loading || !patientData) {
     return (
