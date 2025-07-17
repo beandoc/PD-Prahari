@@ -103,5 +103,3 @@ export default function PatientDetailPage({ params }: { params: { patientId: str
   const { patientId } = params;
   return <PatientDetailView patientId={patientId} />;
 }
-
-    

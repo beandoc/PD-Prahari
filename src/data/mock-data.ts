@@ -1,5 +1,10 @@
 
 import type { PatientData } from '@/lib/types';
+import { format, startOfToday } from 'date-fns';
+
+// Helper to get today's date formatted for appointments
+const todayStr = startOfToday().toISOString();
+
 
 export const allPatientData: PatientData[] = [
   {
@@ -254,7 +259,7 @@ export const allPatientData: PatientData[] = [
     pdAdequacy: [{ testId: 'KT-003', testDate: '2025-05-15', totalKtV: 1.9, peritonealKtV: 1.3, notes: 'Good total clearance, significant contribution from RKF.'}],
     patientReportedOutcomes: [{ surveyId: 'PRO-003', surveyId: 'PRO-003', surveyDate: '2025-05-15', surveyTool: 'KDQOL-36', score: 85, summary: 'Patient reports high quality of life.' }],
     nutritionLifestyle: { dailyProtein: { current: 50, target: 55 }, fluidRestriction: { current: 1.1, limit: 1.2 }, caloriesToday: { current: 1700, target: 1800 }, dailyActivity: { current: 4500, target: 6000 }},
-    clinicVisits: { nextAppointment: '2026-01-10T09:00:00Z', lastVisitSummary: 'Anemia management discussed. Continue EPO.' },
+    clinicVisits: { nextAppointment: todayStr, lastVisitSummary: 'Anemia management discussed. Continue EPO.' },
     patientEducation: [{ id: 'edu2', title: 'Infection Prevention', description: 'Keep your catheter site safe', icon: 'ShieldCheck' }]
   },
   {
@@ -384,10 +389,8 @@ export const allPatientData: PatientData[] = [
     prescription: { exchange: '', pdStrength: '', dwellTimeHours: 0, dwellVolumeML: 0, exchangeTimeMinutes: 0 },
     vitals: [], labResults: [], pdEvents: [], peritonitisEpisodes: [], medications: [], urineOutputLogs: [], pdAdequacy: [], patientReportedOutcomes: [],
     nutritionLifestyle: { dailyProtein: { current: 0, target: 60 }, fluidRestriction: { current: 0, limit: 1.5 }, caloriesToday: { current: 0, target: 1800 }, dailyActivity: { current: 0, target: 3000 }},
-    clinicVisits: { nextAppointment: '2025-08-10T11:00:00Z', lastVisitSummary: 'Pre-PD workup complete. Patient consented for catheter insertion.' },
+    clinicVisits: { nextAppointment: todayStr, lastVisitSummary: 'Pre-PD workup complete. Patient consented for catheter insertion.' },
     patientEducation: [],
     nurseCounselingNotes: 'Patient is anxious about the procedure. Provided reassurance and educational materials. Scheduled a follow-up call to answer further questions.'
   }
 ];
-
-    

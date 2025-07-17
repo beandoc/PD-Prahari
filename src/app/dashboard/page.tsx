@@ -13,12 +13,14 @@ import {
   FilterX,
   Download,
   Calendar as CalendarIcon,
+  MessageCircle,
+  Send,
 } from 'lucide-react';
 import { allPatientData } from '@/data/mock-data';
 import type { PatientData } from '@/lib/types';
 import { generatePatientAlerts } from '@/lib/alerts';
 import type { Alert } from '@/lib/alerts';
-import { differenceInDays, startOfToday, format } from 'date-fns';
+import { differenceInDays, startOfToday, format, isToday } from 'date-fns';
 import type { DateRange } from "react-day-picker";
 
 
@@ -55,6 +57,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
   if (alerts.length === 0) {
@@ -93,6 +96,7 @@ const AlertsCell = ({ alerts }: { alerts: Alert[] }) => {
 export default function DoctorDashboard() {
   const [filter, setFilter] = useState<'all' | 'critical' | 'review' | 'notLogged'>('all');
   const [date, setDate] = useState<DateRange | undefined>();
+  const [searchTerm, setSearchTerm] = useState('');
 
   const totalPatients = allPatientData.length;
 
@@ -119,32 +123,27 @@ export default function DoctorDashboard() {
     }).length;
   }, []);
 
-  const filteredPatients = useMemo(() => {
-    switch (filter) {
-      case 'critical':
-        return allPatientData.filter(p => generatePatientAlerts(p).some(a => a.severity === 'critical'));
-      case 'review':
-        return allPatientData.filter(p => p.uploadedImages?.some(img => img.requiresReview));
-      case 'notLogged':
-        return allPatientData.filter(p => {
-            if (p.currentStatus !== 'Active PD') return false;
-            if (p.pdEvents.length === 0) return true;
-            const latestEvent = [...p.pdEvents].sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime())[0];
-            const latestEventDate = new Date(latestEvent.exchangeDateTime);
-            return differenceInDays(startOfToday(), latestEventDate) >= 1;
-        });
-      case 'all':
-      default:
-        return allPatientData;
-    }
-  }, [filter]);
+   const todaysAppointments = useMemo(() => {
+    return allPatientData.filter(p => 
+      p.clinicVisits?.nextAppointment && isToday(new Date(p.clinicVisits.nextAppointment))
+    );
+  }, []);
 
-  const filterTitles = {
-    all: 'All Patients',
-    critical: 'Patients with Critical Alerts',
-    review: 'Patients with Images for Review',
-    notLogged: "Patients Who Haven't Logged Today",
-  };
+  const allPatientsSorted = useMemo(() => {
+    return [...allPatientData].sort((a, b) => a.lastName.localeCompare(b.lastName));
+  }, []);
+
+  const filteredAllPatients = useMemo(() => {
+    if (!searchTerm) {
+        return allPatientsSorted;
+    }
+    return allPatientsSorted.filter(p => 
+        p.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.nephroId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, allPatientsSorted]);
+
 
   return (
     <div className="space-y-6">
@@ -156,7 +155,7 @@ export default function DoctorDashboard() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className={cn("hover:bg-muted/50 cursor-pointer transition-colors", filter === 'all' && 'ring-2 ring-primary')} onClick={() => setFilter('all')}>
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -166,7 +165,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">managed in this clinic</p>
                     </CardContent>
                 </Card>
-                <Card className={cn("hover:bg-muted/50 cursor-pointer transition-colors", filter === 'critical' && 'ring-2 ring-primary')} onClick={() => setFilter('critical')}>
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
                         <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -176,7 +175,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">require immediate attention</p>
                     </CardContent>
                 </Card>
-                <Card className={cn("hover:bg-muted/50 cursor-pointer transition-colors", filter === 'review' && 'ring-2 ring-primary')} onClick={() => setFilter('review')}>
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Images for Review</CardTitle>
                         <Camera className="h-4 w-4 text-muted-foreground" />
@@ -186,7 +185,7 @@ export default function DoctorDashboard() {
                         <p className="text-xs text-muted-foreground">newly uploaded photos</p>
                     </CardContent>
                 </Card>
-                <Card className={cn("hover:bg-muted/50 cursor-pointer transition-colors", filter === 'notLogged' && 'ring-2 ring-primary')} onClick={() => setFilter('notLogged')}>
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Not Logged Today</CardTitle>
                         <ClipboardX className="h-4 w-4 text-muted-foreground" />
@@ -197,102 +196,149 @@ export default function DoctorDashboard() {
                     </CardContent>
                 </Card>
             </div>
-            <Tabs defaultValue="clinical">
+            <Tabs defaultValue="appointments">
               <TabsList>
-                <TabsTrigger value="clinical">Clinical</TabsTrigger>
-                <TabsTrigger value="adequacy">Adequacy</TabsTrigger>
+                <TabsTrigger value="appointments">Today's Appointments</TabsTrigger>
+                <TabsTrigger value="all_patients">All Patients</TabsTrigger>
                 <TabsTrigger value="reports">Reports</TabsTrigger>
-                <TabsTrigger value="clinic_settings">Clinic Settings</TabsTrigger>
+                <TabsTrigger value="notifications">Push Notifications</TabsTrigger>
               </TabsList>
-              <TabsContent value="clinical">
+
+              <TabsContent value="appointments">
                 <Card>
                   <CardHeader>
-                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                          <div>
-                              <CardTitle>{filterTitles[filter]}</CardTitle>
-                              <CardDescription>
-                                  Showing {filteredPatients.length} of {allPatientData.length} patients.
-                              </CardDescription>
-                          </div>
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-                              {filter !== 'all' && (
-                                <Button variant="ghost" onClick={() => setFilter('all')} className="w-full sm:w-auto">
-                                  <FilterX className="mr-2 h-4 w-4" />
-                                  Clear Filter
-                                </Button>
-                              )}
-                              <div className="relative flex-1 sm:flex-initial">
-                                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                  <Input type="search" placeholder="Patient Search..." className="pl-8 w-full" />
-                              </div>
-                               <Button asChild className="w-full sm:w-auto">
-                                <Link href="/registration">
-                                  <PlusCircle className="mr-2 h-4 w-4" />
-                                  Add Patient
-                                </Link>
-                              </Button>
-                          </div>
-                      </div>
+                      <CardTitle>Today's Appointments ({todaysAppointments.length})</CardTitle>
+                      <CardDescription>Patients scheduled for CAPD OPD consultation today.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="border rounded-lg overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[250px]">Patient</TableHead>
-                            <TableHead>Physician</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Alerts</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredPatients.map(patient => {
-                            const alerts = generatePatientAlerts(patient);
-                            return (
-                            <TableRow key={patient.patientId} className={alerts.some(a => a.severity === 'critical') ? 'bg-red-50/50' : (alerts.length > 0 ? 'bg-yellow-50/50' : '')}>
-                              <TableCell>
-                                <Link href={`/dashboard/patients/${patient.patientId}`} className="font-medium hover:underline">
-                                    {patient.lastName}, {patient.firstName}
-                                </Link>
-                                <div className="text-sm text-muted-foreground">{patient.nephroId}</div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm text-muted-foreground">{patient.physician}</div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{patient.currentStatus}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <AlertsCell alerts={alerts} />
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Button variant="ghost" size="sm" asChild>
-                                  <Link href={`/dashboard/patients/${patient.patientId}`}>View</Link>
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          )})}
-                        </TableBody>
-                      </Table>
-                    </div>
+                     {todaysAppointments.length > 0 ? (
+                        <div className="border rounded-lg overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[200px]">Patient</TableHead>
+                                    <TableHead>Appointment Time</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Alerts</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                {todaysAppointments.map(patient => {
+                                    const alerts = generatePatientAlerts(patient);
+                                    return (
+                                    <TableRow key={patient.patientId} className={alerts.some(a => a.severity === 'critical') ? 'bg-red-50/50' : ''}>
+                                    <TableCell>
+                                        <Link href={`/dashboard/patients/${patient.patientId}`} className="font-medium hover:underline">
+                                            {patient.lastName}, {patient.firstName}
+                                        </Link>
+                                        <div className="text-sm text-muted-foreground">{patient.nephroId}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {format(new Date(patient.clinicVisits.nextAppointment), 'p')}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{patient.currentStatus}</Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <AlertsCell alerts={alerts} />
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="sm" asChild>
+                                        <Link href={`/dashboard/patients/${patient.patientId}`}>Start Consultation</Link>
+                                        </Button>
+                                    </TableCell>
+                                    </TableRow>
+                                )})}
+                                </TableBody>
+                            </Table>
+                        </div>
+                     ) : (
+                        <div className="text-center text-muted-foreground p-8 border rounded-lg border-dashed">
+                            No appointments scheduled for today.
+                        </div>
+                     )}
                   </CardContent>
                 </Card>
               </TabsContent>
-               <TabsContent value="adequacy">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Adequacy</CardTitle>
-                            <CardDescription>
-                            Review patient dialysis adequacy metrics.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">Adequacy data and visualizations will be displayed here.</p>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                <TabsContent value="reports">
+
+              <TabsContent value="all_patients">
+                <Card>
+                    <CardHeader>
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <div>
+                                <CardTitle>All Patients</CardTitle>
+                                <CardDescription>
+                                    Showing {filteredAllPatients.length} of {allPatientData.length} patients.
+                                </CardDescription>
+                            </div>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+                                <div className="relative flex-1 sm:flex-initial">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                        type="search" 
+                                        placeholder="Search by name or ID..." 
+                                        className="pl-8 w-full"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <Button asChild className="w-full sm:w-auto">
+                                <Link href="/registration">
+                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                    Add Patient
+                                </Link>
+                                </Button>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="border rounded-lg overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[250px]">Patient</TableHead>
+                                <TableHead>Physician</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Alerts</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                            {filteredAllPatients.map(patient => {
+                                const alerts = generatePatientAlerts(patient);
+                                return (
+                                <TableRow key={patient.patientId} className={alerts.some(a => a.severity === 'critical') ? 'bg-red-50/50' : (alerts.length > 0 ? 'bg-yellow-50/50' : '')}>
+                                <TableCell>
+                                    <Link href={`/dashboard/patients/${patient.patientId}`} className="font-medium hover:underline">
+                                        {patient.lastName}, {patient.firstName}
+                                    </Link>
+                                    <div className="text-sm text-muted-foreground">{patient.nephroId}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="text-sm text-muted-foreground">{patient.physician}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{patient.currentStatus}</Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <AlertsCell alerts={alerts} />
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="ghost" size="sm" asChild>
+                                    <Link href={`/dashboard/patients/${patient.patientId}`}>View</Link>
+                                    </Button>
+                                </TableCell>
+                                </TableRow>
+                            )})}
+                            </TableBody>
+                        </Table>
+                        </div>
+                    </CardContent>
+                </Card>
+              </TabsContent>
+
+               <TabsContent value="reports">
                     <Card>
                         <CardHeader>
                             <CardTitle>Reports</CardTitle>
@@ -363,16 +409,37 @@ export default function DoctorDashboard() {
                         </CardContent>
                     </Card>
                 </TabsContent>
-                <TabsContent value="clinic_settings">
+
+                <TabsContent value="notifications">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Clinic Settings</CardTitle>
+                            <CardTitle className="flex items-center gap-2"><MessageCircle className="h-5 w-5" /> Push Notifications</CardTitle>
                             <CardDescription>
-                            Manage clinic-wide settings and configurations.
+                                Send a broadcast message to PD Nurses or Patients.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">Settings for the clinic will be managed from this section.</p>
+                        <CardContent className="space-y-6">
+                           <div className="space-y-2">
+                                <Label>Select Recipient Group</Label>
+                                <Select>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a group..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="nurses">All PD Nurses</SelectItem>
+                                        <SelectItem value="patients">All Patients</SelectItem>
+                                        <SelectItem value="specific_patient">A Specific Patient</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                           </div>
+                           <div className="space-y-2">
+                                <Label htmlFor="notification-message">Message</Label>
+                                <Textarea id="notification-message" placeholder="Type your notification here. It will be sent to the selected group." rows={5} />
+                           </div>
+                           <Button className="w-full">
+                                <Send className="mr-2 h-4 w-4" />
+                                Send Notification
+                           </Button>
                         </CardContent>
                     </Card>
                 </TabsContent>
