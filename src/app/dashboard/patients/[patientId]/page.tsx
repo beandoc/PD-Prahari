@@ -17,10 +17,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
 // This is the dedicated Client Component that handles state and data fetching.
-// It receives the patientId as a simple string prop.
-function PatientDetailView({ patientId }: { patientId: string }) {
+// It receives the full params object.
+function PatientDetailView({ params }: { params: { patientId: string } }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { patientId } = params;
 
   useEffect(() => {
     async function fetchData() {
@@ -92,6 +93,6 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 // This default export is the page component. It is a Server Component by default.
 // Its only job is to handle the server-side params and pass them to the Client Component.
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
-  // Pass the patientId directly to the client component.
-  return <PatientDetailView patientId={params.patientId} />;
+  // Pass the entire params object directly to the client component.
+  return <PatientDetailView params={params} />;
 }
