@@ -20,16 +20,26 @@ import { useState, useEffect } from 'react';
 // It receives the patientId as a simple string prop.
 function PatientDetailView({ patientId }: { patientId: string }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getSyncedPatientData(patientId);
-      setPatientData(data);
+      if (!patientId) return;
+      try {
+        setLoading(true);
+        const data = await getSyncedPatientData(patientId);
+        setPatientData(data);
+      } catch (error) {
+        console.error("Failed to fetch patient data:", error);
+        setPatientData(null); // Reset on error
+      } finally {
+        setLoading(false);
+      }
     }
     fetchData();
   }, [patientId]);
   
-  if (!patientData) {
+  if (loading || !patientData) {
     return (
       <div className="p-8 space-y-4">
         <Skeleton className="h-16 w-1/2" />
