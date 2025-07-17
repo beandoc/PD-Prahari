@@ -8,11 +8,31 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Info } from 'lucide-react';
+import { format, subDays, startOfDay, differenceInDays, isWithinInterval, parseISO } from 'date-fns';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Info, TrendingUp, TrendingDown, Percent, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PatientData, PDEvent, Prescription } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+
+const StatCard = ({ title, value, icon, footer, variant = 'default' }: { title: string; value: string; icon: React.ReactNode; footer?: string; variant?: 'default' | 'success' | 'warning' | 'danger' }) => {
+    const colors = {
+        default: 'text-gray-600 bg-gray-50 border-gray-200',
+        success: 'text-green-600 bg-green-50 border-green-200',
+        warning: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+        danger: 'text-red-600 bg-red-50 border-red-200'
+    };
+    return (
+        <div className={cn("p-4 rounded-lg", colors[variant])}>
+            <div className="flex items-center gap-2">
+                {icon}
+                <p className="text-sm font-semibold">{title}</p>
+            </div>
+            <p className="text-2xl font-bold mt-1">{value}</p>
+            {footer && <p className="text-xs text-muted-foreground mt-1">{footer}</p>}
+        </div>
+    );
+};
+
 
 export default function PdLogsPage() {
     const [isLoading, setIsLoading] = useState(true);
@@ -39,9 +59,14 @@ export default function PdLogsPage() {
         setPageIndex(0); // Reset to first page when patient changes
     };
 
-    const { prescription, pdEvents, pdStrengthDisplay }: { prescription: Prescription | null; pdEvents: PDEvent[]; pdStrengthDisplay: string } = useMemo(() => {
+    const { 
+        prescription, 
+        pdEvents, 
+        pdStrengthDisplay,
+        analytics 
+    } = useMemo(() => {
         if (!patientData) {
-            return { prescription: null, pdEvents: [], pdStrengthDisplay: '' };
+            return { prescription: null, pdEvents: [], pdStrengthDisplay: '', analytics: null };
         }
         
         let strengthDisplay = patientData.prescription?.pdStrength || 'Not specified';
@@ -49,11 +74,78 @@ export default function PdLogsPage() {
             const strengths = [...new Set(patientData.prescription.regimen.map(r => r.dialysateType))];
             strengthDisplay = strengths.join(', ');
         }
+        
+        // --- Analytics Calculations ---
+        const today = startOfDay(new Date());
+        const prescribedDailyExchanges = patientData.prescription?.regimen?.length || 0;
+        
+        // 1. Missed Logs
+        let missedLogPercentage = 0;
+        if (prescribedDailyExchanges > 0 && patientData.pdStartDate) {
+            const date30DaysAgo = startOfDay(subDays(today, 30));
+            const startDate = parseISO(patientData.pdStartDate);
+            const loggingStartDate = isWithinInterval(date30DaysAgo, {start: new Date(0), end: startDate}) ? startDate : date30DaysAgo;
+            const daysSinceStart = differenceInDays(today, loggingStartDate) + 1;
+            
+            if (daysSinceStart > 0) {
+                const totalExpectedLogs = daysSinceStart * prescribedDailyExchanges;
+                const loggedEventsLast30Days = patientData.pdEvents.filter(e => isWithinInterval(parseISO(e.exchangeDateTime), { start: loggingStartDate, end: today })).length;
+                const missedLogs = Math.max(0, totalExpectedLogs - loggedEventsLast30Days);
+                missedLogPercentage = totalExpectedLogs > 0 ? (missedLogs / totalExpectedLogs) * 100 : 0;
+            }
+        }
+
+        // 2. UF Calculations
+        const getDailyUf = (events: PDEvent[], startDate: Date, endDate: Date): Record<string, number> => {
+            const dailyUfMap: Record<string, number> = {};
+            events.forEach(event => {
+                const eventDate = parseISO(event.exchangeDateTime);
+                if (isWithinInterval(eventDate, { start: startDate, end: endDate })) {
+                    const day = startOfDay(eventDate).toISOString().split('T')[0];
+                    dailyUfMap[day] = (dailyUfMap[day] || 0) + event.ultrafiltrationML;
+                }
+            });
+            return dailyUfMap;
+        };
+
+        const date90DaysAgo = subDays(today, 90);
+        const dailyUfLast90Days = getDailyUf(patientData.pdEvents, date90DaysAgo, today);
+        const ufValues = Object.values(dailyUfLast90Days);
+
+        const avgUfLast3Months = ufValues.length > 0 ? ufValues.reduce((a, b) => a + b, 0) / ufValues.length : 0;
+        const minUfLast3Months = ufValues.length > 0 ? Math.min(...ufValues) : 0;
+        const maxUfLast3Months = ufValues.length > 0 ? Math.max(...ufValues) : 0;
+
+        // 3. UF Drop Alert
+        const date60DaysAgo = subDays(today, 60);
+        const baselineUfMap = getDailyUf(patientData.pdEvents, date90DaysAgo, date60DaysAgo);
+        const baselineUfValues = Object.values(baselineUfMap);
+        const baselineAvgUf = baselineUfValues.length > 0 ? baselineUfValues.reduce((a, b) => a + b, 0) / baselineUfValues.length : null;
+
+        const date30DaysAgo = subDays(today, 30);
+        const recentUfMap = getDailyUf(patientData.pdEvents, date30DaysAgo, today);
+        const recentUfValues = Object.values(recentUfMap);
+        const recentAvgUf = recentUfValues.length > 0 ? recentUfValues.reduce((a, b) => a + b, 0) / recentUfValues.length : null;
+        
+        let hasUfDropAlert = false;
+        if (baselineAvgUf !== null && recentAvgUf !== null && baselineAvgUf > 50) { // Check for meaningful baseline
+            if (recentAvgUf < baselineAvgUf * 0.75) { // 25% drop
+                hasUfDropAlert = true;
+            }
+        }
+
 
         return {
             prescription: patientData.prescription,
             pdEvents: patientData.pdEvents,
             pdStrengthDisplay: strengthDisplay,
+            analytics: {
+                missedLogPercentage,
+                hasUfDropAlert,
+                avgUfLast3Months,
+                minUfLast3Months,
+                maxUfLast3Months,
+            }
         };
     }, [patientData]);
 
@@ -99,13 +191,50 @@ export default function PdLogsPage() {
                 </div>
             </header>
             
-            {!patientData ? (
+            {!patientData || !analytics ? (
                  <Card>
                     <CardContent className="p-16 text-center text-muted-foreground">
                         Please select a patient to view their data.
                     </CardContent>
                  </Card>
             ) : (
+                <>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Log Analytics</CardTitle>
+                        <CardDescription>A quick summary of patient adherence and UF trends.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <StatCard 
+                            title="Missed Logs (30d)"
+                            value={`${analytics.missedLogPercentage.toFixed(0)}%`}
+                            icon={<Percent className="h-5 w-5" />}
+                            variant={analytics.missedLogPercentage > 20 ? 'danger' : 'default'}
+                        />
+                        <StatCard 
+                            title="UF Drop Alert (1mo)"
+                            value={analytics.hasUfDropAlert ? "Active" : "None"}
+                            icon={<TrendingDown className="h-5 w-5" />}
+                            variant={analytics.hasUfDropAlert ? 'danger' : 'success'}
+                            footer={analytics.hasUfDropAlert ? 'Significant drop detected' : 'UF trend is stable'}
+                        />
+                        <StatCard 
+                            title="Average UF (3mo)"
+                            value={`${analytics.avgUfLast3Months.toFixed(0)} mL`}
+                            icon={<Target className="h-5 w-5" />}
+                            variant="default"
+                            footer={`Min: ${analytics.minUfLast3Months} / Max: ${analytics.maxUfLast3Months}`}
+                        />
+                         <StatCard 
+                            title="UF Trend (3mo)"
+                            value="Stable"
+                            icon={<TrendingUp className="h-5 w-5" />}
+                            variant="success"
+                            footer="Patient UF is consistent"
+                        />
+                    </CardContent>
+                </Card>
+
                 <Tabs defaultValue="logs" className="w-full">
                     <TabsList>
                         <TabsTrigger value="prescription">Prescription</TabsTrigger>
@@ -249,6 +378,7 @@ export default function PdLogsPage() {
                         </Card>
                     </TabsContent>
                 </Tabs>
+                </>
             )}
         </div>
     );
