@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { allPatientData } from '@/data/mock-data';
+import { getLiveAllPatientData } from '@/lib/data-sync';
 import type { Patient, PatientData, PDEvent } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { generatePatientAlerts } from '@/lib/alerts';
 import Link from 'next/link';
 import { AlertTriangle, Droplets, TrendingUp, Users, CalendarX, CalendarCheck, UserPlus, ShieldAlert, TrendingDown, ListTodo, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears, isAfter, startOfDay } from 'date-fns';
+import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears, isAfter, startOfDay, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -49,12 +49,15 @@ const getAverageUf = (dailyUfMap: Record<string, number>): number => {
 
 
 export default function AnalyticsPage() {
+  const [allPatientData, setAllPatientData] = useState<PatientData[]>([]);
   const [infectionIndex, setInfectionIndex] = useState(0);
   const [ufIndex, setUfIndex] = useState(0);
-  const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true);
+    const data = getLiveAllPatientData();
+    setAllPatientData(data);
+    setIsLoading(false);
   }, []);
 
   const {
@@ -69,6 +72,8 @@ export default function AnalyticsPage() {
       flaggedInfectionPatients,
       flaggedUfPatients
   } = useMemo(() => {
+    if (isLoading) return { patientsWithStatus: [], totalActivePDPatients: 0, thisWeekAppointments: 0, newPDPatientsLastMonth: 0, activePeritonitisEpisodes: 0, dropouts: 0, awaitingInsertion: 0, missedVisits: 0, flaggedInfectionPatients: [], flaggedUfPatients: [] };
+
     const today = new Date();
 
     const patientsWithStatus = allPatientData.map(patient => {
@@ -81,10 +86,10 @@ export default function AnalyticsPage() {
         }
         return { ...patient, alerts, status };
     }).sort((a, b) => {
-        if (a.status === 'critical') return -1;
-        if (b.status === 'critical') return 1;
-        if (a.status === 'warning') return -1;
-        if (b.status === 'warning') return 1;
+        if (a.status === 'critical' && b.status !== 'critical') return -1;
+        if (b.status === 'critical' && a.status !== 'critical') return 1;
+        if (a.status === 'warning' && b.status !== 'warning') return -1;
+        if (b.status === 'warning' && a.status !== 'warning') return 1;
         return 0;
     });
     
@@ -94,39 +99,43 @@ export default function AnalyticsPage() {
     const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
     const thisWeekAppointments = allPatientData.filter(p => {
         if (!p.clinicVisits?.nextAppointment) return false;
-        const apptDate = new Date(p.clinicVisits.nextAppointment);
+        const apptDate = parseISO(p.clinicVisits.nextAppointment);
         return isWithinInterval(apptDate, { start: startOfThisWeek, end: endOfThisWeek });
     }).length;
 
     const startOfLastMonth = startOfMonth(subMonths(today, 1));
-    const endOfThisMonth = startOfMonth(today);
+    const endOfLastMonth = startOfMonth(today); // End of last month is start of this month
     const newPDPatientsLastMonth = allPatientData.filter(p => {
-        const startDate = new Date(p.pdStartDate);
-        return isWithinInterval(startDate, { start: startOfLastMonth, end: endOfThisMonth });
+        if (!p.pdStartDate) return false;
+        const startDate = parseISO(p.pdStartDate);
+        return isWithinInterval(startDate, { start: startOfLastMonth, end: endOfLastMonth });
     }).length;
 
     const oneYearAgo = subYears(today, 1);
     const activePeritonitisEpisodes = allPatientData.reduce((acc, patient) => {
-        const recentEpisodes = patient.peritonitisEpisodes.filter(ep => new Date(ep.diagnosisDate) >= oneYearAgo).length;
+        const recentEpisodes = patient.peritonitisEpisodes.filter(ep => isAfter(parseISO(ep.diagnosisDate), oneYearAgo)).length;
         return acc + recentEpisodes;
     }, 0);
 
     const dropoutStatuses: Patient['currentStatus'][] = ['Deceased', 'Transferred to HD', 'Catheter Removed', 'Transplanted'];
     const dropouts = allPatientData.filter(p => dropoutStatuses.includes(p.currentStatus)).length;
     const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
-    const missedVisits = 2; // Placeholder
+    
+    const missedVisits = allPatientData.filter(p => 
+        p.clinicVisits?.nextAppointment && isAfter(today, parseISO(p.clinicVisits.nextAppointment))
+    ).length; // Simplified: just counts overdue appointments as "missed"
 
     const flaggedInfections: FlaggedPatient[] = [];
     const sixMonthsAgo = subMonths(new Date(), 6);
     allPatientData.forEach(patient => {
         patient.peritonitisEpisodes.forEach(episode => {
-            const episodeDate = new Date(episode.diagnosisDate);
+            const episodeDate = parseISO(episode.diagnosisDate);
             if (isAfter(episodeDate, sixMonthsAgo)) {
                 flaggedInfections.push({ patientId: patient.patientId, firstName: patient.firstName, lastName: patient.lastName, type: 'Peritonitis', date: episodeDate });
             }
         });
         if (patient.esiCount && patient.esiCount > 0 && patient.lastHomeVisitDate) {
-             const esiDate = new Date(patient.lastHomeVisitDate); // Approximate date
+             const esiDate = parseISO(patient.lastHomeVisitDate); // Approximate date
              if (isAfter(esiDate, sixMonthsAgo)) {
                  flaggedInfections.push({ patientId: patient.patientId, firstName: patient.firstName, lastName: patient.lastName, type: 'Exit Site Infection', date: esiDate });
              }
@@ -137,8 +146,8 @@ export default function AnalyticsPage() {
     const twoWeeksAgo = subDays(new Date(), 14);
     allPatientData.forEach(patient => {
         if (patient.pdEvents.length < 14) return;
-        const recentEvents = patient.pdEvents.filter(e => isAfter(new Date(e.exchangeDateTime), twoWeeksAgo));
-        const baselineEvents = patient.pdEvents.filter(e => !isAfter(new Date(e.exchangeDateTime), twoWeeksAgo));
+        const recentEvents = patient.pdEvents.filter(e => isAfter(parseISO(e.exchangeDateTime), twoWeeksAgo));
+        const baselineEvents = patient.pdEvents.filter(e => !isAfter(parseISO(e.exchangeDateTime), twoWeeksAgo));
         if (baselineEvents.length === 0 || recentEvents.length === 0) return;
         const recentAvg = getAverageUf(getDailyUf(recentEvents));
         const baselineAvg = getAverageUf(getDailyUf(baselineEvents));
@@ -153,7 +162,7 @@ export default function AnalyticsPage() {
         flaggedInfectionPatients: flaggedInfections.sort((a, b) => b.date.getTime() - a.date.getTime()),
         flaggedUfPatients: flaggedUf
     };
-  }, []);
+  }, [allPatientData, isLoading]);
 
     const handleNextInfection = () => setInfectionIndex((prev) => (prev + 1) % flaggedInfectionPatients.length);
     const handlePrevInfection = () => setInfectionIndex((prev) => (prev - 1 + flaggedInfectionPatients.length) % flaggedInfectionPatients.length);
@@ -163,7 +172,7 @@ export default function AnalyticsPage() {
     const handlePrevUf = () => setUfIndex((prev) => (prev - 1 + flaggedUfPatients.length) % flaggedUfPatients.length);
     const currentUfPatient = flaggedUfPatients[ufIndex];
 
-    if (!isClient) {
+    if (isLoading) {
         return (
             <div className="space-y-8">
                  <Skeleton className="h-12 w-1/3" />
@@ -201,7 +210,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><Users className="h-6 w-6 text-blue-500 mx-auto mb-2" /><p className="text-3xl font-bold">{totalActivePDPatients}</p><p className="text-sm text-muted-foreground">Total PD Patients</p></div>
-                <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarX className="h-6 w-6 text-red-500 mx-auto mb-2" /><p className="text-3xl font-bold">{missedVisits}</p><p className="text-sm text-muted-foreground">Missed Visits (2mo)</p></div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarX className="h-6 w-6 text-red-500 mx-auto mb-2" /><p className="text-3xl font-bold">{missedVisits}</p><p className="text-sm text-muted-foreground">Missed Visits</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><CalendarCheck className="h-6 w-6 text-green-500 mx-auto mb-2" /><p className="text-3xl font-bold">{thisWeekAppointments}</p><p className="text-sm text-muted-foreground">This Week's Appts</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><UserPlus className="h-6 w-6 text-indigo-500 mx-auto mb-2" /><p className="text-3xl font-bold">{newPDPatientsLastMonth}</p><p className="text-sm text-muted-foreground">New Patients (1mo)</p></div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center"><ShieldAlert className="h-6 w-6 text-yellow-500 mx-auto mb-2" /><p className="text-3xl font-bold">{activePeritonitisEpisodes}</p><p className="text-sm text-muted-foreground">Peritonitis (1yr)</p></div>
