@@ -77,8 +77,8 @@ export default function DashboardLayout({
   const [isNurseView, setIsNurseView] = useState(false);
 
   useEffect(() => {
-    // Simplified logic to determine the view based on the current path.
-    // This removes reliance on sessionStorage and referrer for more stable navigation.
+    // This logic determines which set of navigation links to show.
+    // The theme itself is now handled globally in RootLayout.
     const isNursePath = pathname.startsWith('/dashboard/nurse-') ||
                         pathname === '/dashboard/pet-test' ||
                         pathname === '/dashboard/update-records';
@@ -89,10 +89,9 @@ export default function DashboardLayout({
   const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
   const isDashboardPage = pathname === '/dashboard' || pathname === '/dashboard/nurse-dashboard';
   const backLinkHref = isNurseView ? '/dashboard/nurse-dashboard' : '/dashboard';
-  const themeClass = isNurseView ? 'theme-nurse' : 'theme-doctor';
 
   return (
-    <div className={cn("grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]", themeClass)}>
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
