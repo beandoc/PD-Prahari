@@ -9,7 +9,7 @@ import { KidneyIcon } from '@/components/kidney-icon';
 
 export default function PatientLoginPage() {
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 bg-background">
        <div className="relative flex items-center justify-center py-12 px-4">
         <Image
           src="https://placehold.co/500x500.png"
