@@ -1,9 +1,12 @@
 
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Hospital, ClipboardCheck, Save } from 'lucide-react';
+import { Hospital, ClipboardCheck, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 interface ConsultationActionsCardProps {
     patientId: string;
@@ -11,13 +14,24 @@ interface ConsultationActionsCardProps {
 
 export default function ConsultationActionsCard({ patientId }: ConsultationActionsCardProps) {
     const { toast } = useToast();
+    const router = useRouter();
 
-    const handleSave = () => {
+    const handleCompleteConsultation = () => {
         toast({
-            title: "Consultation Saved",
-            description: "All changes for this consultation have been saved.",
+            title: "Consultation Completed",
+            description: "Patient's status has been updated on the dashboard.",
         });
-        // In a real app, this would trigger a data submission to the backend.
+        
+        // Use session storage to pass the "completed" status back to the dashboard
+        if (typeof window !== 'undefined') {
+            const completed = new Set(JSON.parse(sessionStorage.getItem('completedConsultations') || '[]'));
+            completed.add(patientId);
+            sessionStorage.setItem('completedConsultations', JSON.stringify(Array.from(completed)));
+            // Set a temporary flag that the dashboard page can read on load
+            sessionStorage.setItem('justCompletedPatient', patientId);
+        }
+
+        router.push('/dashboard');
     };
     
   return (
@@ -28,8 +42,8 @@ export default function ConsultationActionsCard({ patientId }: ConsultationActio
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <Button onClick={handleSave} size="lg">
-            <Save className="mr-2 h-4 w-4" /> Save Consultation
+        <Button onClick={handleCompleteConsultation} size="lg">
+            <CheckCircle className="mr-2 h-4 w-4" /> Complete Consultation
         </Button>
         <Button asChild variant="secondary">
           <Link href="#">
@@ -38,7 +52,7 @@ export default function ConsultationActionsCard({ patientId }: ConsultationActio
         </Button>
         <Button asChild variant="outline">
           <Link href={`/dashboard/nurse-checklist?patientId=${patientId}`}>
-            <ClipboardCheck className="mr-2 h-4 w-4" /> Send to PD Nurse for Checklist
+            <ClipboardCheck className="mr-2 h-4 w-4" /> PD Nurse Review
           </Link>
         </Button>
       </CardContent>

@@ -15,6 +15,7 @@ import {
   Calendar as CalendarIcon,
   MessageCircle,
   Send,
+  CheckCircle,
 } from 'lucide-react';
 import { getLiveAllPatientData } from '@/lib/data-sync';
 import type { PatientData } from '@/lib/types';
@@ -113,10 +114,25 @@ export default function DoctorDashboard() {
   const [allPatientData, setAllPatientData] = useState<PatientData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('appointments');
+  const [completedConsultations, setCompletedConsultations] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const data = getLiveAllPatientData();
     setAllPatientData(data);
+
+    // Persist completed consultations in session storage
+    const storedCompleted = sessionStorage.getItem('completedConsultations');
+    if (storedCompleted) {
+        setCompletedConsultations(new Set(JSON.parse(storedCompleted)));
+    }
+
+    // Check if we need to mark a consultation as complete from another page
+    const completedId = sessionStorage.getItem('justCompletedPatient');
+    if (completedId) {
+        setCompletedConsultations(prev => new Set(prev).add(completedId));
+        sessionStorage.removeItem('justCompletedPatient');
+    }
+    
     setIsLoading(false);
   }, []);
 
@@ -267,7 +283,7 @@ export default function DoctorDashboard() {
                                 <TableRow>
                                     <TableHead className="w-[200px]">Patient</TableHead>
                                     <TableHead>Appointment Time</TableHead>
-                                    <TableHead>Status</TableHead>
+                                    <TableHead>Consultation Status</TableHead>
                                     <TableHead>Alerts</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
@@ -275,8 +291,9 @@ export default function DoctorDashboard() {
                                 <TableBody>
                                 {todaysAppointments.map(patient => {
                                     const alerts = generatePatientAlerts(patient);
+                                    const isCompleted = completedConsultations.has(patient.patientId);
                                     return (
-                                    <TableRow key={patient.patientId} className={alerts.some(a => a.severity === 'critical') ? 'bg-red-50/50' : ''}>
+                                    <TableRow key={patient.patientId} className={isCompleted ? 'bg-green-50/50' : (alerts.some(a => a.severity === 'critical') ? 'bg-red-50/50' : '')}>
                                     <TableCell>
                                         <Link href={`/dashboard/patients/${patient.patientId}`} className="font-medium hover:underline">
                                             {patient.lastName}, {patient.firstName}
@@ -287,14 +304,23 @@ export default function DoctorDashboard() {
                                         {patient.clinicVisits.nextAppointment ? format(new Date(patient.clinicVisits.nextAppointment), 'p') : 'N/A'}
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={patient.currentStatus === 'Active PD' ? 'secondary' : 'outline'}>{patient.currentStatus}</Badge>
+                                        {isCompleted ? (
+                                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                                <CheckCircle className="mr-1 h-3 w-3" />
+                                                Completed
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="outline">Pending</Badge>
+                                        )}
                                     </TableCell>
                                     <TableCell>
                                         <AlertsCell alerts={alerts} />
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm" asChild>
-                                        <Link href={`/dashboard/patients/${patient.patientId}`}>Start Consultation</Link>
+                                        <Button variant="ghost" size="sm" asChild disabled={isCompleted}>
+                                            <Link href={`/dashboard/patients/${patient.patientId}`}>
+                                                {isCompleted ? 'Viewed' : 'Start Consultation'}
+                                            </Link>
                                         </Button>
                                     </TableCell>
                                     </TableRow>
