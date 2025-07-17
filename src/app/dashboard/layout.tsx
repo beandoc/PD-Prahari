@@ -77,32 +77,13 @@ export default function DashboardLayout({
   const [isNurseView, setIsNurseView] = useState(false);
 
   useEffect(() => {
-    // Simplified logic: determine view based on the current path.
-    // This is more stable than relying on referrer or session storage.
+    // Simplified logic to determine the view based on the current path.
+    // This removes reliance on sessionStorage and referrer for more stable navigation.
     const isNursePath = pathname.startsWith('/dashboard/nurse-') ||
-                        pathname.startsWith('/dashboard/update-records') ||
-                        pathname.startsWith('/dashboard/pet-test');
-    
-    // A secondary check for shared pages if coming from a nurse-specific context
-    const cameFromNursePage = sessionStorage.getItem('userRole') === 'nurse';
-    
-    if (isNursePath) {
-        setIsNurseView(true);
-        sessionStorage.setItem('userRole', 'nurse');
-    } else if (pathname.startsWith('/dashboard')) {
-        // Default to doctor view for any main dashboard page unless explicitly a nurse path.
-        // This prevents flipping back and forth on shared pages like /pd-logs.
-        // If they navigate to a shared page but their role was nurse, keep it.
-        if (cameFromNursePage && (pathname === '/dashboard/pd-logs' || pathname === '/dashboard/messages' || pathname === '/dashboard/telehealth' || pathname === '/registration')) {
-            setIsNurseView(true);
-        } else {
-            setIsNurseView(false);
-            sessionStorage.removeItem('userRole');
-        }
-    } else {
-        // For external pages like patient portal, maintain role if it was set
-        setIsNurseView(cameFromNursePage);
-    }
+                        pathname === '/dashboard/pet-test' ||
+                        pathname === '/dashboard/update-records';
+
+    setIsNurseView(isNursePath);
   }, [pathname]);
 
   const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
