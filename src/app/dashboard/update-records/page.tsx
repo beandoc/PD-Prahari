@@ -238,7 +238,7 @@ export default function UpdateRecordsPage() {
                         <FormItem className="flex flex-col"><FormLabel>PD Start Date</FormLabel>
                         <Popover><PopoverTrigger asChild>
                             <FormControl>
-                                <Button disabled variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")} disabled>
                                     {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -312,3 +312,5 @@ export default function UpdateRecordsPage() {
     </div>
   );
 }
+
+    

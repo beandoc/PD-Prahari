@@ -236,7 +236,7 @@ export default function ClinicianPatientRegistrationPage() {
                         )} />
                         <FormField control={form.control} name="gender" render={({ field }) => (
                             <FormItem><FormLabel>Gender</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl>
                                     <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
                                 </Select><FormMessage />
@@ -244,7 +244,7 @@ export default function ClinicianPatientRegistrationPage() {
                         )} />
                         <FormField control={form.control} name="educationLevel" render={({ field }) => (
                             <FormItem><FormLabel>Educational Qualification</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select education level" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         <SelectItem value="No formal education">No formal education</SelectItem>
@@ -270,7 +270,7 @@ export default function ClinicianPatientRegistrationPage() {
                         )} />
                         <FormField control={form.control} name="state" render={({ field }) => (
                             <FormItem><FormLabel>State</FormLabel>
-                                <Select onValueChange={handleStateChange} defaultValue={field.value}>
+                                <Select onValueChange={handleStateChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a state" /></SelectTrigger></FormControl>
                                     <SelectContent>{indianStates.map(s => <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>)}</SelectContent>
                                 </Select><FormMessage />
@@ -278,7 +278,7 @@ export default function ClinicianPatientRegistrationPage() {
                         )} />
                         <FormField control={form.control} name="city" render={({ field }) => (
                             <FormItem><FormLabel>City</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a city" /></SelectTrigger></FormControl>
                                     <SelectContent>{cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                                 </Select><FormMessage />
@@ -300,7 +300,7 @@ export default function ClinicianPatientRegistrationPage() {
                         )} />
                         <FormField control={form.control} name="emergencyContactRelation" render={({ field }) => (
                             <FormItem><FormLabel>Relation with Guardian</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a relation" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         <SelectItem value="Father">Father</SelectItem>
@@ -333,7 +333,7 @@ export default function ClinicianPatientRegistrationPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <FormField control={form.control} name="physician" render={({ field }) => (
                             <FormItem><FormLabel>Attending Physician <span className="text-destructive">*</span></FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a physician" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         <SelectItem value="Dr. Atul">Dr. Atul</SelectItem>
@@ -388,3 +388,5 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
+
+    
