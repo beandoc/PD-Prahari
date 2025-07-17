@@ -102,6 +102,10 @@ export default function AnalyticsPage() {
     if (isLoading) return { patientsWithStatus: [], totalActivePDPatients: 0, thisWeekAppointments: 0, newPDPatientsLastMonth: 0, peritonitisRate: null, dropouts: 0, awaitingInsertion: 0, missedVisits: 0, flaggedInfectionPatients: [], flaggedUfPatients: [], peritonitisRiskList: [] };
 
     const today = new Date();
+    
+    const isToday = (date: Date) => {
+        return differenceInDays(startOfDay(date), startOfDay(new Date())) === 0;
+    };
 
     const patientsWithStatus = allPatientData.map(patient => {
         const alerts = generatePatientAlerts(patient);
@@ -179,7 +183,7 @@ export default function AnalyticsPage() {
     
     const missedVisits = allPatientData.filter(p => {
         // Ensure nextAppointment is a valid, non-empty string before parsing
-        if (!p.clinicVisits?.nextAppointment) {
+        if (!p.clinicVisits?.nextAppointment || p.clinicVisits.nextAppointment === '') {
             return false;
         }
         const appointmentDate = parseISO(p.clinicVisits.nextAppointment);
@@ -242,11 +246,6 @@ export default function AnalyticsPage() {
     const handleNextUf = () => setUfIndex((prev) => (prev + 1) % flaggedUfPatients.length);
     const handlePrevUf = () => setUfIndex((prev) => (prev - 1 + flaggedUfPatients.length) % flaggedUfPatients.length);
     const currentUfPatient = flaggedUfPatients[ufIndex];
-    
-    const isToday = (date: Date) => {
-        return differenceInDays(startOfDay(date), startOfDay(new Date())) === 0;
-    };
-
 
     if (isLoading) {
         return (
