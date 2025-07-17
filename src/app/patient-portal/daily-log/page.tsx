@@ -123,6 +123,8 @@ export default function PatientDailyLogPage() {
   };
 
   const handleConfirmSubmit = async () => {
+    setShowUfModal(false);
+
     // Create new Vitals and PDEvent objects
     const logDateTime = date.toISOString();
     
@@ -166,19 +168,16 @@ export default function PatientDailyLogPage() {
         if (event.isEffluentCloudy) {
             toast({
                 title: "Cloudy Fluid Alert!",
-                description: "Your care team has been notified immediately.",
+                description: "Notifying your care team immediately...",
                 variant: "destructive",
             });
-            // This is the external alert
-            await triggerCloudyFluidAlert(patientData, event);
-            
-            // This is the internal alert for demonstration
-            // In a real app, this would be a real-time event (e.g., WebSocket)
-            const patientForAlert = allPatientData.find(p => p.patientId === patientData.patientId);
-            if (patientForAlert) {
-                 // Add a temporary flag to the mock data to simulate a new alert.
-                 // @ts-ignore
-                patientForAlert.newCloudyAlert = { details: 'Reported cloudy effluent bag.', date: new Date() };
+            const result = await triggerCloudyFluidAlert(patientData, event);
+            if (!result.success) {
+                 toast({
+                    title: "Alert Notification Failed",
+                    description: "Could not automatically notify care team. Please contact them directly.",
+                    variant: "destructive",
+                });
             }
         }
     }
@@ -191,7 +190,6 @@ export default function PatientDailyLogPage() {
         description: "Your health data has been successfully saved.",
     });
 
-    setShowUfModal(false);
   };
   
   return (

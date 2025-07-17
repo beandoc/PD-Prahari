@@ -4,8 +4,8 @@
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent } from '@/lib/types';
-import { allPatientData } from '@/data/mock-data';
-import { differenceInMonths, parseISO } from 'date-fns';
+import { getLiveAllPatientData } from '@/lib/data-sync';
+import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 
 function formatDataForAI(patientData: PatientData) {
   return {
@@ -78,6 +78,9 @@ function formatDataForAI(patientData: PatientData) {
 
 export async function getSuggestionsAction(patientData: PatientData) {
   try {
+    if (!patientData.prescription?.regimen) {
+        return { success: false, error: 'Patient has no active prescription. Cannot generate suggestions.' };
+    }
     const formattedData = formatDataForAI(patientData);
     const result = await getMedicationAdjustmentSuggestions(formattedData);
     return { success: true, suggestions: result.suggestions };
@@ -110,7 +113,7 @@ export async function triggerCloudyFluidAlert(patientData: PatientData, event: P
 }
 
 export async function getPeritonitisRate(): Promise<number | null> {
-    const patients = allPatientData;
+    const patients = getLiveAllPatientData();
     let totalPatientMonths = 0;
     let totalEpisodes = 0;
     const today = new Date();
@@ -145,10 +148,60 @@ export async function getPeritonitisRate(): Promise<number | null> {
     });
 
     const totalPatientYears = totalPatientMonths / 12;
-
-    if (totalPatientYears === 0) {
-      return totalEpisodes > 0 ? Infinity : 0.0;
-    }
     
+    // Handle edge case where totalPatientYears is 0 to avoid division by zero
+    if (totalPatientYears === 0) {
+        return totalEpisodes > 0 ? Infinity : 0.0;
+    }
+
     return totalEpisodes / totalPatientYears;
+}
+
+export async function getClinicKpis() {
+    const allPatientData = getLiveAllPatientData();
+    const today = startOfDay(new Date());
+
+    const isToday = (date: Date) => {
+        return startOfDay(date).getTime() === today.getTime();
+    };
+
+    const totalActivePDPatients = allPatientData.filter(p => p.currentStatus === 'Active PD').length;
+
+    const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 });
+    const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
+    const thisWeekAppointments = allPatientData.filter(p => {
+        if (!p.clinicVisits?.nextAppointment || p.clinicVisits.nextAppointment === '') return false;
+        const apptDate = parseISO(p.clinicVisits.nextAppointment);
+        return isWithinInterval(apptDate, { start: startOfThisWeek, end: endOfThisWeek });
+    }).length;
+
+    const startOfLastMonth = startOfMonth(subMonths(today, 1));
+    const endOfLastMonth = endOfMonth(subMonths(today, 1));
+    const newPDPatientsLastMonth = allPatientData.filter(p => {
+        if (!p.pdStartDate) return false;
+        const startDate = parseISO(p.pdStartDate);
+        return isWithinInterval(startDate, { start: startOfLastMonth, end: endOfLastMonth });
+    }).length;
+
+    const dropoutStatuses = ['Deceased', 'Transferred to HD', 'Catheter Removed', 'Transplanted'];
+    const dropouts = allPatientData.filter(p => dropoutStatuses.includes(p.currentStatus)).length;
+    
+    const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
+    
+    const missedVisits = allPatientData.filter(p => {
+        if (!p.clinicVisits?.nextAppointment || p.clinicVisits.nextAppointment === '') {
+            return false;
+        }
+        const appointmentDate = parseISO(p.clinicVisits.nextAppointment);
+        return isAfter(today, appointmentDate) && !isToday(appointmentDate);
+    }).length;
+
+    return {
+        totalActivePDPatients,
+        thisWeekAppointments,
+        newPDPatientsLastMonth,
+        dropouts,
+        awaitingInsertion,
+        missedVisits,
+    };
 }

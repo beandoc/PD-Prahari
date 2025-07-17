@@ -1,10 +1,10 @@
-import type { Patient } from '@/lib/types';
+import type { PatientData } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Stethoscope } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PatientHeaderProps {
-  patient: Patient;
+  patient: PatientData;
 }
 
 const calculateAge = (birthDate: string) => {

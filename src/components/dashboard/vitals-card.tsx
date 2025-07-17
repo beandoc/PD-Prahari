@@ -23,14 +23,19 @@ import {
   Activity,
   Gauge,
   Droplets,
+  Sparkles,
 } from 'lucide-react';
-import type { Vital, PDEvent } from '@/lib/types';
+import type { Vital, PDEvent, PatientData } from '@/lib/types';
 import { format, startOfDay, subDays, subMonths, isAfter } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { getSuggestionsAction } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '../ui/skeleton';
 
 interface VitalsCardProps {
   vitals: Vital[];
   pdEvents: PDEvent[];
+  patient: PatientData;
 }
 
 type TimeRange = '7d' | '30d' | '90d';
@@ -64,9 +69,12 @@ const filterDataByTimeRange = (data: {date: string}[], range: TimeRange) => {
     return data.filter(item => new Date(item.date) >= startDate);
 }
 
-export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
+export default function VitalsCard({ vitals, pdEvents, patient }: VitalsCardProps) {
+  const { toast } = useToast();
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [ufTimeRange, setUfTimeRange] = useState<TimeRange>('30d');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   if (!vitals || vitals.length === 0) {
     return (
@@ -86,6 +94,22 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
       </Card>
     );
   }
+
+  const handleGetSuggestions = async () => {
+    setIsGenerating(true);
+    setSuggestions([]);
+    const result = await getSuggestionsAction(patient);
+    if (result.success && result.suggestions) {
+        setSuggestions(result.suggestions.map(s => `${s.medicationName}: ${s.suggestedChange} - ${s.reasoning}`));
+    } else {
+        toast({
+            title: "Error Generating Suggestions",
+            description: result.error || "An unknown error occurred.",
+            variant: "destructive",
+        });
+    }
+    setIsGenerating(false);
+  };
 
   const latestVitals = vitals[0];
 
@@ -273,6 +297,30 @@ export default function VitalsCard({ vitals, pdEvents }: VitalsCardProps) {
                 />
               </AreaChart>
             </ChartContainer>
+          </div>
+
+          <div className="border-t pt-4">
+              <Button onClick={handleGetSuggestions} disabled={isGenerating} className="w-full">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {isGenerating ? 'Analyzing Data...' : 'Get AI Medication Suggestions'}
+              </Button>
+              {isGenerating && (
+                  <div className="space-y-2 mt-4">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-5/6" />
+                      <Skeleton className="h-4 w-2/3" />
+                  </div>
+              )}
+              {suggestions.length > 0 && (
+                  <div className="mt-4 space-y-2 text-sm p-4 bg-blue-50/50 border border-blue-200 rounded-lg">
+                      <h4 className="font-semibold text-blue-800">AI Suggestions:</h4>
+                      <ul className="list-disc list-inside space-y-1">
+                          {suggestions.map((s, i) => (
+                              <li key={i}>{s}</li>
+                          ))}
+                      </ul>
+                  </div>
+              )}
           </div>
         </div>
       </CardContent>
