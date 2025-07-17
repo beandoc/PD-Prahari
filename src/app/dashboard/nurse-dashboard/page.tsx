@@ -81,7 +81,7 @@ export default function NurseDashboardPage() {
 
         setUrgentAlerts(alerts.sort((a, b) => b.date.getTime() - a.date.getTime()));
 
-    }, [isClient, allPatientData]);
+    }, [isClient]);
 
     // --- Data processing for dashboard metrics and filters ---
     const {
@@ -122,7 +122,7 @@ export default function NurseDashboardPage() {
 
         return { patientsAwaitingInsertion, patientsInTraining, patientsOnPeritonitisTx, todaysAppointments, upcomingHomeVisits, upcomingPetTests };
 
-    }, []);
+    }, [isClient]);
 
     const filteredPatients = useMemo(() => {
         switch (activeFilter) {

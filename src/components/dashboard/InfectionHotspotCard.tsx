@@ -119,10 +119,10 @@ export default function InfectionHotspotCard({ patients }: InfectionHotspotCardP
                     </div>
                 </div>
                 <div className="flex justify-between items-center">
-                    <Button variant="outline" size="sm" onClick={handlePrev}>
+                    <Button variant="outline" size="sm" onClick={handlePrev} disabled={flaggedPatients.length <= 1}>
                         <ChevronLeft className="h-4 w-4 mr-1" /> Previous
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleNext}>
+                    <Button variant="outline" size="sm" onClick={handleNext} disabled={flaggedPatients.length <= 1}>
                         Next <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                 </div>

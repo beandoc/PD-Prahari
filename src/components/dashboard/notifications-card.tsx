@@ -1,32 +1,84 @@
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Bell, MessageSquare, Plus, UserPlus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+'use client';
 
-const notifications = [
-    {
-        icon: <MessageSquare className="h-5 w-5 text-blue-500" />,
-        title: "You have 3 new messages",
-        time: "1h ago",
-        isNew: true,
-    },
-    {
-        icon: <Plus className="h-5 w-5 text-green-500" />,
-        title: "New treatment plan available",
-        description: "For patient: John Smith",
-        time: "3h ago",
-        isNew: true,
-    },
-    {
-        icon: <UserPlus className="h-5 w-5 text-purple-500" />,
-        title: "New appointment request",
-        description: "From patient: Sarah White",
-        time: "1d ago",
-        isNew: false,
-    }
-];
+import { useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Bell, AlertTriangle, Camera } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { allPatientData } from '@/data/mock-data';
+import { generatePatientAlerts } from '@/lib/alerts';
+import type { PatientData } from '@/lib/types';
+import { formatDistanceToNow } from 'date-fns';
+
+interface Notification {
+    icon: React.ReactNode;
+    title: string;
+    description: React.ReactNode;
+    time: string;
+    isNew: boolean;
+}
 
 export default function NotificationsCard() {
+    const notifications: Notification[] = useMemo(() => {
+        const generatedNotifications: Notification[] = [];
+
+        const patientsWithCriticalAlerts = allPatientData.filter(p => 
+            generatePatientAlerts(p).some(a => a.severity === 'critical')
+        );
+
+        if (patientsWithCriticalAlerts.length > 0) {
+            generatedNotifications.push({
+                icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
+                title: `${patientsWithCriticalAlerts.length} patient(s) with critical alerts`,
+                description: (
+                    <span className="text-xs">
+                        {patientsWithCriticalAlerts.slice(0, 2).map((p, i) => (
+                           <span key={p.patientId}>
+                             <Link href={`/dashboard/patients/${p.patientId}`} className="hover:underline font-medium">{p.firstName} {p.lastName}</Link>
+                             {i < patientsWithCriticalAlerts.slice(0, 2).length - 1 && ', '}
+                           </span>
+                        ))}
+                        {patientsWithCriticalAlerts.length > 2 && ` and ${patientsWithCriticalAlerts.length - 2} more...`}
+                    </span>
+                ),
+                time: "Just now",
+                isNew: true,
+            });
+        }
+        
+        const patientsWithImagesForReview = allPatientData.filter(p => p.uploadedImages?.some(img => img.requiresReview));
+        
+        if (patientsWithImagesForReview.length > 0) {
+             const latestImagePatient = patientsWithImagesForReview[0];
+             const latestImage = latestImagePatient.uploadedImages?.find(img => img.requiresReview);
+             generatedNotifications.push({
+                icon: <Camera className="h-5 w-5 text-purple-500" />,
+                title: "New images for review",
+                description: (
+                    <span className="text-xs">
+                        From patient: <Link href={`/dashboard/patients/${latestImagePatient.patientId}`} className="hover:underline font-medium">{latestImagePatient.firstName} {latestImagePatient.lastName}</Link>
+                    </span>
+                ),
+                time: latestImage ? formatDistanceToNow(new Date(latestImage.uploadDate), { addSuffix: true }) : 'Recently',
+                isNew: true
+             });
+        }
+        
+        // Placeholder for future notifications
+        if (generatedNotifications.length === 0) {
+            return [{
+                icon: <Bell className="h-5 w-5" />,
+                title: "No new notifications",
+                description: "All patient statuses are normal.",
+                time: "Just now",
+                isNew: false,
+            }];
+        }
+
+        return generatedNotifications;
+    }, []);
+
   return (
     <Card>
       <CardHeader>
