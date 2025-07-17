@@ -2,7 +2,7 @@
 'use client';
 
 import { allPatientData } from '@/data/mock-data';
-import type { PatientData, PDEvent, Vital, LabResult } from '@/lib/types';
+import type { PatientData, PDEvent, Vital, LabResult, Medication } from '@/lib/types';
 import { db } from './firebase';
 import { doc, getDoc, writeBatch, collection, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore';
 
@@ -121,7 +121,7 @@ export async function updatePatientNotes(patientId: string, note: string) {
     try {
         const patientRef = doc(db, "patients", patientId);
         await updateDoc(patientRef, {
-            doctorNotes: note,
+            doctorNotes: note, // Or append to an array of notes
             lastUpdated: serverTimestamp()
         });
         console.log("Doctor's note saved to Firestore.");
@@ -158,6 +158,29 @@ export async function updatePatientLabs(patientId: string, newLabs: LabResult[])
         console.log("New lab results saved to Firestore.");
     } catch (error) {
         console.error("Failed to save lab results:", error);
+    }
+    */
+}
+
+
+/**
+ * Saves an updated list of medications for a patient.
+ * @param patientId The ID of the patient.
+ * @param medications The full, updated list of medications.
+ */
+export async function updatePatientMedications(patientId: string, medications: Medication[]) {
+    console.log(`Updating medications for patient ${patientId}:`, medications);
+     // This would update the entire medications array in the patient's document
+    /*
+    try {
+        const patientRef = doc(db, "patients", patientId);
+        await updateDoc(patientRef, {
+            medications: medications,
+            lastUpdated: serverTimestamp()
+        });
+        console.log("Medications saved to Firestore.");
+    } catch (error) {
+        console.error("Failed to save medications:", error);
     }
     */
 }

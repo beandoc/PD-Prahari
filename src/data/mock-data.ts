@@ -34,7 +34,7 @@ export const allPatientData: PatientData[] = [
     catheterDysfunction: false,
     esiCount: 0,
     additionalNotes: 'Patient is highly motivated and has good family support. Compliant with diet and fluid restrictions.',
-    doctorNotes: 'Patient seems to be responding well to the new medication. Continue monitoring BP at home.',
+    doctorNotes: 'Patient doing well, advised to continue same treatment.',
     pdExchangeType: 'Self',
     underlyingKidneyDisease: 'Diabetic Nephropathy',
     comorbidities: ['Hypertension', 'Type 2 Diabetes'],
@@ -137,8 +137,10 @@ export const allPatientData: PatientData[] = [
       { episodeId: 'PER-001', diagnosisDate: '2025-05-15', organismIsolated: 'Staphylococcus epidermidis', treatmentRegimen: 'Vancomycin IP', outcome: 'Resolved', resolutionDate: '2025-05-29', admissionId: 'ADM-002' },
     ],
     medications: [
-      { medicationId: 'MED-001', medicationName: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', startDate: '2024-01-20', prescribingDoctor: 'Dr. Sachin', status: 'ok' },
-      { medicationId: 'MED-002', medicationName: 'Sevelamer', dosage: '800mg', frequency: 'With meals', startDate: '2024-01-20', prescribingDoctor: 'Dr. Sachin', status: 'warning' },
+        { medicationId: 'MED-BP-1', medicationName: 'Amlodipine', dosage: '10mg', frequency: 'Once daily', startDate: '2024-01-20', prescribingDoctor: 'Dr. Sachin', status: 'ok' },
+        { medicationId: 'MED-PHOS-1', medicationName: 'Sevelamer Carbonate', dosage: '800mg', frequency: 'TID with meals', startDate: '2024-01-20', prescribingDoctor: 'Dr. Sachin', status: 'ok' },
+        { medicationId: 'MED-DIURETIC-1', medicationName: 'Furosemide', dosage: '40mg', frequency: 'BID', startDate: '2024-01-20', prescribingDoctor: 'Dr. Sachin', status: 'ok' },
+        { medicationId: 'MED-CALCIUM-1', medicationName: 'Calcitriol', dosage: '0.25mcg', frequency: 'Once daily', startDate: '2024-01-20', prescribingDoctor: 'Dr. Sachin', status: 'ok' },
     ],
     urineOutputLogs: [
       { logId: 'UO-001', logDate: '2025-07-28', volumeML: 250 },

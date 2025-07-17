@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageSquareQuote, PlusCircle } from 'lucide-react';
+import { MessageSquareQuote, PlusCircle, Pencil } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { updatePatientNotes } from '@/lib/data-sync';
@@ -43,6 +43,11 @@ export default function CareTeamNotesCard({ patient, className }: CareTeamNotesC
     setDoctorNote('');
     setIsDialogOpen(false);
   };
+  
+  const openDialogWithDefault = () => {
+    setDoctorNote("Patient doing well, advised to continue same treatment.");
+    setIsDialogOpen(true);
+  }
 
   const hasNotes = patient.nurseCounselingNotes || patient.additionalNotes || patient.doctorNotes;
 
@@ -58,22 +63,22 @@ export default function CareTeamNotesCard({ patient, className }: CareTeamNotesC
             </CardTitle>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Add Note</Button>
+                <Button variant="ghost" size="sm" onClick={openDialogWithDefault}><Pencil className="mr-2 h-4 w-4" /> Add Today's Note</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add Doctor's Note for {patient.firstName}</DialogTitle>
+                  <DialogTitle>Add Today's Consultation Note for {patient.firstName}</DialogTitle>
                   <DialogDescription>
-                    Enter your clinical notes or remarks. This will be visible to the care team.
+                    Enter your clinical notes for today's consultation. This will be visible to the care team.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-2">
-                  <Label htmlFor="doctor-note">Note</Label>
+                  <Label htmlFor="doctor-note">Today's Note</Label>
                   <Textarea 
                     id="doctor-note"
                     value={doctorNote}
                     onChange={(e) => setDoctorNote(e.target.value)}
-                    placeholder="e.g., Patient seems to be responding well to the new medication. Continue monitoring BP at home."
+                    placeholder="e.g., Patient doing well, advised to continue same treatment."
                     rows={5}
                   />
                 </div>

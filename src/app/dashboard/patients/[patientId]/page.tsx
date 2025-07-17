@@ -14,6 +14,7 @@ import LabResultsCard from '@/components/dashboard/lab-results-card';
 import PDExchangeCard from '@/components/dashboard/pd-exchange-card';
 import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import CareTeamNotesCard from '@/components/dashboard/CareTeamNotesCard';
+import ConsultationActionsCard from '@/components/dashboard/ConsultationActionsCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
@@ -76,7 +77,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
                 <PDExchangeCard pdEvents={patientData.pdEvents} />
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                 <MedicationsCard medications={patientData.medications} />
+                 <MedicationsCard patient={patientData} />
                  <InfectionHistoryCard 
                     episodes={patientData.peritonitisEpisodes} 
                     admissions={patientData.admissions || []}
@@ -86,6 +87,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
             </div>
         </div>
         <div className="lg:col-span-1 space-y-6">
+            <ConsultationActionsCard patientId={patientData.patientId} />
             <CareTeamNotesCard patient={patientData} />
             <ClinicVisitsCard data={patientData.clinicVisits} admissions={patientData.admissions || []} />
             <NutritionLifestyleCard data={patientData.nutritionLifestyle} />
