@@ -89,7 +89,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
         <div className="lg:col-span-1 space-y-6">
             <ConsultationActionsCard patientId={patientData.patientId} />
             <CareTeamNotesCard patient={patientData} />
-            <ClinicVisitsCard data={patientData.clinicVisits} admissions={patientData.admissions || []} />
+            <ClinicVisitsCard patient={patientData} />
             <NutritionLifestyleCard data={patientData.nutritionLifestyle} />
             <PatientEducationCard topics={patientData.patientEducation} />
         </div>

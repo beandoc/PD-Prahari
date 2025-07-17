@@ -1,25 +1,52 @@
+
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Clock, Hospital, Download } from 'lucide-react';
-import type { ClinicVisitData, Admission } from '@/lib/types';
-import { format, differenceInDays, parseISO } from 'date-fns';
+import { Building2, Clock, Hospital, Download, CalendarPlus } from 'lucide-react';
+import type { ClinicVisitData, Admission, PatientData } from '@/lib/types';
+import { format, differenceInDays, parseISO, addMonths, startOfMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useState } from 'react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { useToast } from '@/hooks/use-toast';
+import { updatePatientData } from '@/lib/data-sync';
 
 interface ClinicVisitsCardProps {
-  data: ClinicVisitData;
-  admissions: Admission[];
+  patient: PatientData;
   className?: string;
 }
 
-export default function ClinicVisitsCard({ data, admissions, className }: ClinicVisitsCardProps) {
-    const nextAppointmentDate = new Date(data.nextAppointment);
+const getFirstSaturdayOfNextMonth = () => {
+    const today = new Date();
+    const firstDayOfNextMonth = startOfMonth(addMonths(today, 1));
+    let dayOfWeek = firstDayOfNextMonth.getDay(); // Sunday is 0, Saturday is 6
+    let daysToAdd = (6 - dayOfWeek + 7) % 7;
+    return new Date(firstDayOfNextMonth.setDate(firstDayOfNextMonth.getDate() + daysToAdd));
+};
+
+export default function ClinicVisitsCard({ patient, className }: ClinicVisitsCardProps) {
+    const [nextAppointmentDate, setNextAppointmentDate] = useState(new Date(patient.clinicVisits.nextAppointment));
+    const { toast } = useToast();
+
     const daysUntilAppointment = differenceInDays(nextAppointmentDate, new Date());
     
     // Find the most recent admission
-    const latestAdmission = admissions && admissions.length > 0 
-        ? [...admissions].sort((a, b) => new Date(b.dischargeDate).getTime() - new Date(a.dischargeDate).getTime())[0]
+    const latestAdmission = patient.admissions && patient.admissions.length > 0 
+        ? [...patient.admissions].sort((a, b) => new Date(b.dischargeDate).getTime() - new Date(a.dischargeDate).getTime())[0]
         : null;
+
+    const handleDateSelect = (date?: Date) => {
+        if (!date) return;
+        setNextAppointmentDate(date);
+        updatePatientData(patient.patientId, { clinicVisits: { ...patient.clinicVisits, nextAppointment: date.toISOString() } });
+        toast({
+            title: "Appointment Scheduled",
+            description: `Next visit for ${patient.firstName} set to ${format(date, 'PPP')}.`
+        });
+    }
 
   return (
     <Card className={cn(className)}>
@@ -42,8 +69,36 @@ export default function ClinicVisitsCard({ data, admissions, className }: Clinic
         </div>
         <div className="p-1">
             <h4 className="font-semibold text-muted-foreground text-sm">Last Visit Summary</h4>
-            <p className="text-sm mt-1">{data.lastVisitSummary}</p>
+            <p className="text-sm mt-1">{patient.clinicVisits.lastVisitSummary}</p>
         </div>
+
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full">
+                    <CalendarPlus className="mr-2 h-4 w-4" />
+                    Schedule Next Visit
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+                <Calendar
+                    mode="single"
+                    selected={nextAppointmentDate}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                    defaultMonth={addMonths(new Date(), 1)} // Start view on next month
+                    modifiers={{
+                        default_saturday: { dayOfWeek: [6] }
+                    }}
+                    modifiersStyles={{
+                        default_saturday: { 
+                            backgroundColor: 'hsl(var(--primary) / 0.1)',
+                            color: 'hsl(var(--primary))',
+                            fontWeight: 600 
+                        }
+                    }}
+                />
+            </PopoverContent>
+        </Popover>
 
         {latestAdmission && (
           <div className="p-1 border-t pt-4">
