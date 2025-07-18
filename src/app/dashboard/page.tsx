@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -119,18 +120,22 @@ export default function DoctorDashboard() {
   useEffect(() => {
     const data = getLiveAllPatientData();
     setAllPatientData(data);
-
-    // Persist completed consultations in session storage
-    const storedCompleted = sessionStorage.getItem('completedConsultations');
-    if (storedCompleted) {
-        setCompletedConsultations(new Set(JSON.parse(storedCompleted)));
-    }
-
-    // Check if we need to mark a consultation as complete from another page
+    
+    // Check for a recently completed patient from session storage
     const completedId = sessionStorage.getItem('justCompletedPatient');
     if (completedId) {
-        setCompletedConsultations(prev => new Set(prev).add(completedId));
+        setCompletedConsultations(prev => {
+            const newSet = new Set(prev);
+            newSet.add(completedId);
+            sessionStorage.setItem('completedConsultations', JSON.stringify(Array.from(newSet)));
+            return newSet;
+        });
         sessionStorage.removeItem('justCompletedPatient');
+    } else {
+         const storedCompleted = sessionStorage.getItem('completedConsultations');
+        if (storedCompleted) {
+            setCompletedConsultations(new Set(JSON.parse(storedCompleted)));
+        }
     }
     
     setIsLoading(false);
@@ -301,7 +306,7 @@ export default function DoctorDashboard() {
                                         <div className="text-sm text-muted-foreground">{patient.nephroId}</div>
                                     </TableCell>
                                     <TableCell>
-                                        {patient.clinicVisits.nextAppointment ? format(new Date(patient.clinicVisits.nextAppointment), 'p') : 'N/A'}
+                                        {patient.clinicVisits?.nextAppointment ? format(new Date(patient.clinicVisits.nextAppointment), 'p') : 'N/A'}
                                     </TableCell>
                                     <TableCell>
                                         {isCompleted ? (

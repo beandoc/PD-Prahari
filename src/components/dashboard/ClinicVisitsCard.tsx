@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,10 +21,12 @@ interface ClinicVisitsCardProps {
 }
 
 export default function ClinicVisitsCard({ patient, className }: ClinicVisitsCardProps) {
-    const [nextAppointmentDate, setNextAppointmentDate] = useState(new Date(patient.clinicVisits.nextAppointment));
+    const [nextAppointmentDate, setNextAppointmentDate] = useState<Date | undefined>(
+      patient.clinicVisits?.nextAppointment ? parseISO(patient.clinicVisits.nextAppointment) : undefined
+    );
     const { toast } = useToast();
 
-    const daysUntilAppointment = differenceInDays(nextAppointmentDate, new Date());
+    const daysUntilAppointment = nextAppointmentDate ? differenceInDays(nextAppointmentDate, new Date()) : null;
     
     // Find the most recent admission
     const latestAdmission = patient.admissions && patient.admissions.length > 0 
@@ -31,7 +34,7 @@ export default function ClinicVisitsCard({ patient, className }: ClinicVisitsCar
         : null;
 
     const handleDateSelect = (date?: Date) => {
-        if (!date) return;
+        if (!date || !patient.clinicVisits) return;
         setNextAppointmentDate(date);
         updatePatientData(patient.patientId, { clinicVisits: { ...patient.clinicVisits, nextAppointment: date.toISOString() } });
         toast({
@@ -51,18 +54,29 @@ export default function ClinicVisitsCard({ patient, className }: ClinicVisitsCar
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="rounded-lg bg-yellow-50 border-l-4 border-yellow-400 p-4">
-            <p className="text-sm text-muted-foreground">Next Appointment</p>
-            <p className="text-xl font-bold">{format(nextAppointmentDate, "MMMM dd, yyyy")}</p>
-            <div className="flex items-center gap-1.5 text-sm text-red-600 mt-1 font-medium">
-                <Clock className="h-4 w-4" />
-                <span>In {daysUntilAppointment} days</span>
+        {nextAppointmentDate ? (
+            <div className="rounded-lg bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                <p className="text-sm text-muted-foreground">Next Appointment</p>
+                <p className="text-xl font-bold">{format(nextAppointmentDate, "MMMM dd, yyyy")}</p>
+                {daysUntilAppointment !== null && (
+                    <div className="flex items-center gap-1.5 text-sm text-red-600 mt-1 font-medium">
+                        <Clock className="h-4 w-4" />
+                        <span>In {daysUntilAppointment} days</span>
+                    </div>
+                )}
             </div>
-        </div>
-        <div className="p-1">
-            <h4 className="font-semibold text-muted-foreground text-sm">Last Visit Summary</h4>
-            <p className="text-sm mt-1">{patient.clinicVisits.lastVisitSummary}</p>
-        </div>
+        ) : (
+             <div className="rounded-lg bg-slate-50 border p-4 text-center text-muted-foreground">
+                No upcoming appointment scheduled.
+            </div>
+        )}
+
+        {patient.clinicVisits?.lastVisitSummary && (
+          <div className="p-1">
+              <h4 className="font-semibold text-muted-foreground text-sm">Last Visit Summary</h4>
+              <p className="text-sm mt-1">{patient.clinicVisits.lastVisitSummary}</p>
+          </div>
+        )}
 
         <Popover>
             <PopoverTrigger asChild>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -83,8 +84,13 @@ const formSchema = z.object({
   pdStartDate: z.date().optional(),
 }).superRefine((data, ctx) => {
     if (data.dateOfBirth) {
-        const age = new Date().getFullYear() - data.dateOfBirth.getFullYear();
-        if (age < 18 && !data.emergencyContactName) {
+        const today = new Date();
+        let calculatedAge = today.getFullYear() - data.dateOfBirth.getFullYear();
+        const m = today.getMonth() - data.dateOfBirth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < data.dateOfBirth.getDate())) {
+            calculatedAge--;
+        }
+        if (calculatedAge < 18 && !data.emergencyContactName) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: "Guardian details are mandatory for minors.",

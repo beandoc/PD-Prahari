@@ -1,4 +1,5 @@
 
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { PatientData } from '@/lib/types';
@@ -9,7 +10,7 @@ interface PDParametersCardProps {
     patient: PatientData;
 }
 
-const getPDVintage = (startDate: string) => {
+const getPDVintage = (startDate?: string) => {
     if (!startDate) return 'N/A';
     const start = parseISO(startDate);
     const now = new Date();
@@ -51,7 +52,7 @@ export default function PDParametersCard({ patient }: PDParametersCardProps) {
                         </div>
                          <div className="p-3 bg-slate-50 border rounded-lg">
                             <p className="font-medium text-muted-foreground">Exchange Type</p>
-                            <p className="font-semibold">{pdExchangeType}</p>
+                            <p className="font-semibold">{pdExchangeType || 'N/A'}</p>
                         </div>
                         <div className="p-3 bg-slate-50 border rounded-lg">
                             <p className="font-medium text-muted-foreground">PD Vintage</p>
@@ -60,7 +61,7 @@ export default function PDParametersCard({ patient }: PDParametersCardProps) {
                     </div>
                 </div>
 
-                {prescription.regimen && (
+                {prescription?.regimen ? (
                 <div>
                     <h4 className="font-semibold text-base mb-2">Prescribed Regimen</h4>
                     <div className="border rounded-lg overflow-hidden">
@@ -86,6 +87,10 @@ export default function PDParametersCard({ patient }: PDParametersCardProps) {
                         </Table>
                     </div>
                 </div>
+                ) : (
+                    <div className="text-center text-muted-foreground p-4 bg-slate-50 border rounded-lg">
+                        No active PD prescription regimen found for this patient.
+                    </div>
                 )}
             </CardContent>
         </Card>

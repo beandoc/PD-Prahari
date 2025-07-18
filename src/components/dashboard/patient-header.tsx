@@ -8,6 +8,7 @@ interface PatientHeaderProps {
 }
 
 const calculateAge = (birthDate: string) => {
+  if (!birthDate) return 'N/A';
   const today = new Date();
   const birth = new Date(birthDate);
   let age = today.getFullYear() - birth.getFullYear();
@@ -38,7 +39,7 @@ export default function PatientHeader({ patient }: PatientHeaderProps) {
               </div>
                <div>
                  <div className="text-xs text-muted-foreground">Gender</div>
-                 <div className="font-semibold">{patient.gender}</div>
+                 <div className="font-semibold">{patient.gender || 'N/A'}</div>
               </div>
               <div>
                  <div className="text-xs text-muted-foreground">Status</div>
@@ -46,7 +47,7 @@ export default function PatientHeader({ patient }: PatientHeaderProps) {
               </div>
                <div>
                  <div className="text-xs text-muted-foreground">Primary Nephrologist</div>
-                 <div className="font-semibold">{patient.physician}</div>
+                 <div className="font-semibold">{patient.physician || 'N/A'}</div>
               </div>
             </CardContent>
           </Card>
