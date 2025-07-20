@@ -6,7 +6,7 @@ import type { PatientData } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { subMonths, isAfter, format } from 'date-fns';
+import { subDays, isAfter, format, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
@@ -26,13 +26,12 @@ export default function InfectionHotspotCard({ patients }: InfectionHotspotCardP
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const flaggedPatients = useMemo(() => {
-        const sixMonthsAgo = subMonths(new Date(), 6);
+        const sixMonthsAgo = subDays(new Date(), 180);
         const results: FlaggedPatient[] = [];
 
         patients.forEach(patient => {
-            // Check for recent peritonitis episodes
             patient.peritonitisEpisodes.forEach(episode => {
-                const episodeDate = new Date(episode.diagnosisDate);
+                const episodeDate = parseISO(episode.diagnosisDate);
                 if (isAfter(episodeDate, sixMonthsAgo)) {
                     results.push({
                         patientId: patient.patientId,
@@ -44,9 +43,8 @@ export default function InfectionHotspotCard({ patients }: InfectionHotspotCardP
                 }
             });
 
-            // Check for recent exit site infections (ESI)
             if (patient.esiCount && patient.esiCount > 0 && patient.lastHomeVisitDate) {
-                 const esiDate = new Date(patient.lastHomeVisitDate); // Approximate date
+                 const esiDate = parseISO(patient.lastHomeVisitDate); // Approximate date
                  if (isAfter(esiDate, sixMonthsAgo)) {
                      results.push({
                         patientId: patient.patientId,
@@ -59,7 +57,6 @@ export default function InfectionHotspotCard({ patients }: InfectionHotspotCardP
             }
         });
 
-        // Sort by most recent event first
         return results.sort((a, b) => b.date.getTime() - a.date.getTime());
     }, [patients]);
     

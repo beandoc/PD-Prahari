@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { MessageSquareQuote, PlusCircle, Pencil } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { updatePatientNotes } from '@/lib/data-sync';
+import { updatePatientNotes } from '@/app/actions';
 
 
 interface CareTeamNotesCardProps {
@@ -23,7 +23,7 @@ export default function CareTeamNotesCard({ patient, className }: CareTeamNotesC
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleSaveNote = () => {
+  const handleSaveNote = async () => {
     if (!doctorNote.trim()) {
       toast({
         title: "Note is empty",
@@ -32,16 +32,13 @@ export default function CareTeamNotesCard({ patient, className }: CareTeamNotesC
       });
       return;
     }
-    // Use the sync service to update the note
-    updatePatientNotes(patient.patientId, doctorNote);
+    await updatePatientNotes(patient.patientId, doctorNote);
     toast({
       title: "Note Saved",
       description: "The doctor's note has been added to the patient's record.",
     });
     setDoctorNote('');
     setIsDialogOpen(false);
-    // In a real app with SWR/React Query, this would trigger a re-fetch/re-render.
-    // For our simulation, the parent component would need to re-fetch the data.
   };
   
   const openDialogWithDefault = () => {

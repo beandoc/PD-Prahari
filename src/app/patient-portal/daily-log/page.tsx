@@ -18,9 +18,9 @@ import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { savePatientLog } from '@/lib/data-sync';
+import { savePatientLog, getSyncedPatientData } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import type { Vital, PDEvent } from '@/lib/types';
+import type { PatientData, Vital, PDEvent } from '@/lib/types';
 import { triggerCloudyFluidAlert } from '@/app/actions';
 
 
@@ -46,6 +46,7 @@ interface VitalsLog {
 }
 
 export default function PatientDailyLogPage() {
+  const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [date, setDate] = useState<Date>(new Date());
   const [exchanges, setExchanges] = useState<ExchangeLog[]>([]);
   const [vitals, setVitals] = useState<VitalsLog>({
@@ -61,25 +62,27 @@ export default function PatientDailyLogPage() {
   const [totalUf, setTotalUf] = useState(0);
   const { toast } = useToast();
 
-  // For demonstration, we'll use the first patient's data
-  const patientData = allPatientData[0];
-  const { prescription } = patientData;
-
   useEffect(() => {
-    if (prescription.regimen) {
-        const initialExchanges = prescription.regimen.map((item, index) => ({
-            id: index,
-            name: item.name,
-            dialysateType: item.dialysateType,
-            fillVolume: String(item.fillVolumeML),
-            dwellTime: String(item.dwellTimeHours),
-            drainVolume: '',
-            notes: '',
-            isCloudy: false,
-        }));
-        setExchanges(initialExchanges);
-    }
-  }, [prescription.regimen]);
+    // For demonstration, we'll use the first patient's data
+    getSyncedPatientData('PAT-001').then(data => {
+      if (data) {
+        setPatientData(data);
+        if (data.prescription.regimen) {
+          const initialExchanges = data.prescription.regimen.map((item, index) => ({
+              id: index,
+              name: item.name,
+              dialysateType: item.dialysateType,
+              fillVolume: String(item.fillVolumeML),
+              dwellTime: String(item.dwellTimeHours),
+              drainVolume: '',
+              notes: '',
+              isCloudy: false,
+          }));
+          setExchanges(initialExchanges);
+        }
+      }
+    });
+  }, []);
 
   
   const handleExchangeChange = (id: number, field: keyof Omit<ExchangeLog, 'id' | 'name' | 'dialysateType' | 'fillVolume' | 'dwellTime'>, value: string | boolean) => {
@@ -125,7 +128,11 @@ export default function PatientDailyLogPage() {
   const handleConfirmSubmit = async () => {
     setShowUfModal(false);
 
-    // Create new Vitals and PDEvent objects
+    if (!patientData) {
+      toast({ title: "Error", description: "Patient data not loaded.", variant: "destructive" });
+      return;
+    }
+
     const logDateTime = date.toISOString();
     
     const vitalData: Partial<Vital> = {
@@ -139,15 +146,14 @@ export default function PatientDailyLogPage() {
         fluidStatusNotes: vitals.symptoms || undefined,
     };
 
-    // Filter out undefined values to prevent Firestore errors
     const newVital = Object.fromEntries(
         Object.entries(vitalData).filter(([, value]) => value !== undefined && value !== null && !isNaN(value as number))
     ) as Partial<Vital>;
 
 
-    let exchangeTime = setHours(new Date(date), 7); // Start at 7 AM for the first exchange
+    let exchangeTime = setHours(new Date(date), 7);
     const newEvents: PDEvent[] = completedExchanges.map((ex, index) => {
-        exchangeTime = new Date(exchangeTime.getTime() + index * 4 * 60 * 60 * 1000); // Increment by 4 hours
+        exchangeTime = new Date(exchangeTime.getTime() + index * 4 * 60 * 60 * 1000);
         const uf = calculateUF(ex.fillVolume, ex.drainVolume) || 0;
         return {
             exchangeId: `PD-${Date.now()}-${ex.id}`,
@@ -163,7 +169,6 @@ export default function PatientDailyLogPage() {
         };
     });
 
-    // Check for cloudy fluid and trigger email alert
     for (const event of newEvents) {
         if (event.isEffluentCloudy) {
             toast({
@@ -171,19 +176,11 @@ export default function PatientDailyLogPage() {
                 description: "Notifying your care team immediately...",
                 variant: "destructive",
             });
-            const result = await triggerCloudyFluidAlert(patientData, event);
-            if (!result.success) {
-                 toast({
-                    title: "Alert Notification Failed",
-                    description: "Could not automatically notify care team. Please contact them directly.",
-                    variant: "destructive",
-                });
-            }
+            await triggerCloudyFluidAlert(patientData, event);
         }
     }
 
-    // Save the new data using the sync service
-    savePatientLog(patientData.patientId, newEvents, newVital);
+    await savePatientLog(patientData.patientId, newEvents, newVital);
 
     toast({
         title: "Log Submitted!",
@@ -191,6 +188,10 @@ export default function PatientDailyLogPage() {
     });
 
   };
+  
+  if (!patientData) {
+    return <div>Loading...</div>; // Or a skeleton loader
+  }
   
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-8">
@@ -231,7 +232,7 @@ export default function PatientDailyLogPage() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {prescription.regimen ? (
+                    {patientData.prescription.regimen ? (
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
@@ -242,7 +243,7 @@ export default function PatientDailyLogPage() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {prescription.regimen.map(item => (
+                            {patientData.prescription.regimen.map(item => (
                               <TableRow key={item.name}>
                                 <TableCell className="font-medium whitespace-nowrap">{item.name}</TableCell>
                                 <TableCell>{item.dialysateType}</TableCell>

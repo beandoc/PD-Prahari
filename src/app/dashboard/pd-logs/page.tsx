@@ -12,7 +12,7 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Info, TrendingU
 import { cn } from '@/lib/utils';
 import type { PatientData, PDEvent, Prescription } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getLiveAllPatientData } from '@/lib/data-sync';
+import { getLiveAllPatientData } from '@/app/actions';
 
 const StatCard = ({ title, value, icon, footer, variant = 'default' }: { title: string; value: string; icon: React.ReactNode; footer?: string; variant?: 'default' | 'success' | 'warning' | 'danger' }) => {
     const colors = {
@@ -251,7 +251,7 @@ export default function PdLogsPage() {
                                 )}
                             </CardHeader>
                             <CardContent>
-                                {prescription && prescription.regimen && patientData.currentStatus === 'Active PD' ? (
+                                {prescription && prescription.regimen && prescription.regimen.length > 0 && patientData.currentStatus === 'Active PD' ? (
                                     <>
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                                             <div><p className="text-sm text-muted-foreground mb-1">Exchange</p><p className="font-medium">{prescription.exchange}</p></div>
@@ -382,5 +382,3 @@ export default function PdLogsPage() {
         </div>
     );
 }
-
-    

@@ -26,7 +26,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { updatePatientLabs } from '@/lib/data-sync';
+import { updatePatientLabs } from '@/app/actions';
 
 interface LabResultsCardProps {
   patient: PatientData;
@@ -52,7 +52,7 @@ const UpdateLabsModal = ({ patient, onUpdate }: { patient: PatientData, onUpdate
         setLabValues(prev => ({...prev, [testName]: value}));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const newLabResults: LabResult[] = Object.entries(labValues)
             .filter(([, value]) => value && !isNaN(parseFloat(value)))
             .map(([testName, value]) => {
@@ -73,8 +73,7 @@ const UpdateLabsModal = ({ patient, onUpdate }: { patient: PatientData, onUpdate
             return;
         }
         
-        // Use the sync service to update the labs
-        updatePatientLabs(patient.patientId, newLabResults);
+        await updatePatientLabs(patient.patientId, newLabResults);
         onUpdate(newLabResults);
         toast({ title: "Lab results updated successfully." });
     };
@@ -175,7 +174,6 @@ export default function LabResultsCard({ patient }: LabResultsCardProps) {
   const [labResults, setLabResults] = useState(patient.labResults);
 
   const handleUpdate = (newLabs: LabResult[]) => {
-      // In a real app, you would refetch data. Here we'll just update state.
       setLabResults(prev => [...newLabs, ...prev].sort((a,b) => new Date(b.resultDateTime).getTime() - new Date(a.resultDateTime).getTime()));
   };
 

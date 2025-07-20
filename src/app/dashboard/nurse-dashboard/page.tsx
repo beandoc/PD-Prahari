@@ -12,7 +12,7 @@ import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getLiveAllPatientData } from '@/lib/data-sync';
+import { getLiveAllPatientData } from '@/app/actions';
 
 type FilterType = 'awaiting_insertion' | 'in_training' | 'peritonitis_tx' | 'todays_appointments' | 'all';
 
@@ -346,7 +346,7 @@ export default function NurseDashboardPage() {
                                                 {p.firstName} {p.lastName}
                                             </Link>
                                         </TableCell>
-                                        <TableCell>{format(p.nextVisitDue, 'PPP')}</TableCell>
+                                        <TableCell>{p.nextVisitDue ? format(p.nextVisitDue, 'PPP') : 'N/A'}</TableCell>
                                         <TableCell>{p.contactPhone}</TableCell>
                                     </TableRow>
                                 )) : (
@@ -383,7 +383,7 @@ export default function NurseDashboardPage() {
                                                 {p.firstName} {p.lastName}
                                             </Link>
                                         </TableCell>
-                                        <TableCell>{format(p.petTestDueDate, 'PPP')}</TableCell>
+                                        <TableCell>{p.petTestDueDate ? format(p.petTestDueDate, 'PPP') : 'N/A'}</TableCell>
                                         <TableCell>
                                             <Button asChild variant="outline" size="sm">
                                                 <Link href={`/dashboard/pet-test?patientId=${p.patientId}`}>

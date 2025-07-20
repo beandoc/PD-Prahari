@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart } from 'recharts';
 import { Droplets, History, TrendingUp } from 'lucide-react';
-import { getSyncedPatientData } from '@/lib/data-sync';
+import { getSyncedPatientData } from '@/app/actions';
 import type { PatientData, PDEvent } from '@/lib/types';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -144,5 +144,3 @@ export default function LogHistoryPage() {
     </div>
   );
 }
-
-    

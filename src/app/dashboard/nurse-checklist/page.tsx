@@ -15,7 +15,7 @@ import type { PatientData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { MessageSquarePlus } from 'lucide-react';
-import { getSyncedPatientData, updatePatientData } from '@/lib/data-sync';
+import { getSyncedPatientData, updatePatientData } from '@/app/actions';
 
 const ChecklistItem = ({ id, label }: { id: string, label: string }) => (
     <div className="flex items-center space-x-3 py-2">
@@ -101,7 +101,7 @@ const ChecklistContent = () => {
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
                        <MetricItem label="Patient Name" value={`${patient.firstName} ${patient.lastName}`} />
-                       <MetricItem label="Date of Birth" value={format(parseISO(patient.dateOfBirth), 'PPP')} />
+                       <MetricItem label="Date of Birth" value={patient.dateOfBirth ? format(parseISO(patient.dateOfBirth), 'PPP') : 'N/A'} />
                        <MetricItem label="Patient Number" value={patient.nephroId} />
                        <MetricItem label="Telephone" value={patient.contactPhone} />
                        <MetricItem label="Address" value={fullAddress} />
@@ -393,5 +393,3 @@ export default function NurseChecklistPage() {
         </div>
     );
 }
-
-    

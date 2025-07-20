@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Bell, AlertTriangle, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { allPatientData } from '@/data/mock-data';
+import { getLiveAllPatientData } from '@/app/actions';
 import { generatePatientAlerts } from '@/lib/alerts';
 import type { PatientData } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -21,7 +21,25 @@ interface Notification {
 }
 
 export default function NotificationsCard() {
+    const [allPatientData, setAllPatientData] = useState<PatientData[]>([]);
+
+    useEffect(() => {
+        const data = getLiveAllPatientData();
+        setAllPatientData(data);
+    }, []);
+
     const notifications: Notification[] = useMemo(() => {
+        if (!allPatientData.length) {
+            return [{
+                id: 'loading',
+                icon: <Bell className="h-5 w-5" />,
+                title: "Loading notifications...",
+                description: "Please wait.",
+                time: "Just now",
+                isNew: false,
+            }];
+        }
+        
         const generatedNotifications: Notification[] = [];
 
         const patientsWithCriticalAlerts = allPatientData.filter(p => 
@@ -68,7 +86,6 @@ export default function NotificationsCard() {
              });
         }
         
-        // Placeholder for future notifications
         if (generatedNotifications.length === 0) {
             return [{
                 id: 'no-notifications',
@@ -81,7 +98,7 @@ export default function NotificationsCard() {
         }
 
         return generatedNotifications;
-    }, []);
+    }, [allPatientData]);
 
   return (
     <Card>

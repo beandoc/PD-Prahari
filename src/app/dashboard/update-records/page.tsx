@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,32 +32,25 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { indianStates } from '@/data/locations';
 import type { PatientData } from '@/lib/types';
-import { getLiveAllPatientData, updatePatientData } from '@/lib/data-sync';
+import { getLiveAllPatientData, updatePatientData } from '@/app/actions';
 
 const formSchema = z.object({
-  // Demographics
   firstName: z.string(),
   lastName: z.string(),
   nephroId: z.string(),
   dateOfBirth: z.date(),
   gender: z.string().optional(),
   educationLevel: z.string().optional(),
-  
-  // Contact
   contactPhone: z.string().optional(),
   addressLine1: z.string().optional(),
   state: z.string().optional(),
   city: z.string().optional(),
   postalCode: z.string().optional(),
-  
-  // Clinical
   nephrologist: z.string(),
   underlyingKidneyDisease: z.string().optional(),
   pdStartDate: z.date().optional(),
   distanceFromPDCenterKM: z.coerce.number().optional(),
   pdExchangeType: z.enum(['Assisted', 'Self']).optional(),
-  
-  // New nurse-specific fields
   pdTrainingEndDate: z.date().optional(),
   lastHomeVisitDate: z.date().optional(),
   membraneTransportType: z.enum(['High', 'High-Average', 'Low-Average', 'Low']).optional(),
@@ -139,13 +131,13 @@ export default function UpdateRecordsPage() {
     form.setValue('city', '');
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const dataToSave = {
         ...values,
-        physician: values.nephrologist, // Align with main data structure
+        physician: values.nephrologist,
         stateProvince: values.state
     }
-    updatePatientData(selectedPatientId, dataToSave);
+    await updatePatientData(selectedPatientId, dataToSave);
     toast({
       title: "Patient Record Updated",
       description: `Data for ${values.firstName} ${values.lastName} has been saved.`,

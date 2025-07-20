@@ -2,7 +2,7 @@
 'use client';
 
 import type { PatientData } from '@/lib/types';
-import { getSyncedPatientData } from '@/lib/data-sync';
+import { getSyncedPatientData } from '@/app/actions';
 import PatientHeader from '@/components/dashboard/patient-header';
 import InfectionHistoryCard from '@/components/dashboard/PeritonitisTrackingCard';
 import MedicationsCard from '@/components/dashboard/medications-card';
@@ -18,16 +18,12 @@ import ConsultationActionsCard from '@/components/dashboard/ConsultationActionsC
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 
-// This is the dedicated Client Component that handles state and data fetching.
-// It receives a simple string `patientId` as a prop.
 function PatientDetailView({ patientId }: { patientId: string }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This function runs only on the client, after the component mounts.
     async function fetchData() {
-      // Ensure we have a patientId before fetching.
       if (!patientId) {
         setLoading(false);
         return;
@@ -39,13 +35,13 @@ function PatientDetailView({ patientId }: { patientId: string }) {
         setPatientData(data);
       } catch (error) {
         console.error("Failed to fetch patient data:", error);
-        setPatientData(null); // Reset on error
+        setPatientData(null);
       } finally {
         setLoading(false);
       }
     }
     fetchData();
-  }, [patientId]); // The effect re-runs if patientId changes.
+  }, [patientId]);
   
   if (loading || !patientData) {
     return (
@@ -98,9 +94,6 @@ function PatientDetailView({ patientId }: { patientId: string }) {
   );
 }
 
-
-// This is the default export for the page. It's a Server Component.
-// It correctly accesses `params.patientId` and passes it as a string prop.
-export default async function PatientDetailPage({ params }: { params: { patientId: string } }) {
+export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
   return <PatientDetailView patientId={params.patientId} />;
 }

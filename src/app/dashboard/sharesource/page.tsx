@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { getLiveAllPatientData } from '@/lib/data-sync';
-import type { Patient, PatientData, PDEvent } from '@/lib/types';
+import { getLiveAllPatientData, getPeritonitisRate, getClinicKpis } from '@/app/actions';
+import type { PatientData, PDEvent } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Badge } from '@/components/ui/badge';
@@ -11,11 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { generatePatientAlerts } from '@/lib/alerts';
 import Link from 'next/link';
 import { AlertTriangle, Droplets, TrendingUp, Users, CalendarX, CalendarCheck, UserPlus, ShieldAlert, TrendingDown, ListTodo, BarChart3, ChevronLeft, ChevronRight, Repeat } from 'lucide-react';
-import { format, subDays, isWithinInterval, startOfWeek, endOfWeek, subMonths, startOfMonth, subYears, isAfter, startOfDay, parseISO, differenceInMonths, differenceInWeeks, differenceInDays } from 'date-fns';
+import { format, subDays, isAfter, startOfDay, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getPeritonitisRate, getClinicKpis } from '@/app/actions';
-
 
 interface FlaggedPatient {
     patientId: string;
@@ -33,31 +31,23 @@ interface FlaggedUfPatient {
     recentUf: number;
 }
 
-// --- ML Model Simulation ---
-// In a real application, this would be an API call to a proper ML model.
-// For this prototype, we simulate the model's output.
 const calculatePeritonitisRisk = (patient: PatientData): number => {
     let score = 0;
-    // Recent peritonitis is a major factor
-    if (patient.peritonitisEpisodes.some(ep => isAfter(parseISO(ep.diagnosisDate), subMonths(new Date(), 6)))) {
+    if (patient.peritonitisEpisodes.some(ep => isAfter(parseISO(ep.diagnosisDate), subDays(new Date(), 180)))) {
         score += 50;
     }
-    // ESI is a known risk factor
     if (patient.esiCount && patient.esiCount > 0) {
         score += 25;
     }
-    // Lower albumin can indicate higher risk
     const latestAlbumin = patient.labResults.find(lr => lr.testName === 'Albumin');
     if (latestAlbumin && latestAlbumin.resultValue < 3.5) {
         score += 15;
     }
-    // Assisted PD can sometimes be a risk factor
     if (patient.pdExchangeType === 'Assisted') {
         score += 10;
     }
-    return Math.min(100, score + Math.random() * 5); // Add some noise
+    return Math.min(100, score + Math.random() * 5);
 };
-// --- End of ML Simulation ---
 
 const getDailyUf = (events: PDEvent[]): Record<string, number> => {
     const dailyUfMap: Record<string, number> = {};
@@ -126,7 +116,7 @@ export default function AnalyticsPage() {
     });
 
     const flaggedInfections: FlaggedPatient[] = [];
-    const sixMonthsAgo = subMonths(new Date(), 6);
+    const sixMonthsAgo = subDays(new Date(), 180);
     allPatientData.forEach(patient => {
         patient.peritonitisEpisodes.forEach(episode => {
             const episodeDate = parseISO(episode.diagnosisDate);
@@ -135,7 +125,7 @@ export default function AnalyticsPage() {
             }
         });
         if (patient.esiCount && patient.esiCount > 0 && patient.lastHomeVisitDate) {
-             const esiDate = parseISO(patient.lastHomeVisitDate); // Approximate date
+             const esiDate = parseISO(patient.lastHomeVisitDate);
              if (isAfter(esiDate, sixMonthsAgo)) {
                  flaggedInfections.push({ patientId: patient.patientId, firstName: patient.firstName, lastName: patient.lastName, type: 'Exit Site Infection', date: esiDate });
              }

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, History, User, ArrowRight } from 'lucide-react';
-import { getSyncedPatientData } from '@/lib/data-sync';
+import { getSyncedPatientData } from '@/app/actions';
 import type { PatientData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -97,5 +97,3 @@ export default function PatientPortalDashboard() {
     </div>
   );
 }
-
-    

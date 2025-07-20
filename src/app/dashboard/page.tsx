@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -18,7 +17,7 @@ import {
   Send,
   CheckCircle,
 } from 'lucide-react';
-import { getLiveAllPatientData } from '@/lib/data-sync';
+import { getLiveAllPatientData } from '@/app/actions';
 import type { PatientData } from '@/lib/types';
 import { generatePatientAlerts } from '@/lib/alerts';
 import type { Alert } from '@/lib/alerts';

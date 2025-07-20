@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { updatePatientMedications } from '@/lib/data-sync';
+import { updatePatientMedications } from '@/app/actions';
 
 interface MedicationsCardProps {
   patient: PatientData;
@@ -48,9 +48,9 @@ const EditMedicationDialog = ({ patient, onUpdate }: { patient: PatientData, onU
         setMeds(meds.filter((_, i) => i !== index));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const validMeds = meds.filter(m => m.medicationName.trim() && m.dosage.trim() && m.frequency.trim());
-        updatePatientMedications(patient.patientId, validMeds);
+        await updatePatientMedications(patient.patientId, validMeds);
         onUpdate(validMeds);
         toast({
             title: "Medications Updated",

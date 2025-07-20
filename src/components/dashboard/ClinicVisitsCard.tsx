@@ -1,11 +1,10 @@
 
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, Clock, Hospital, Download, CalendarPlus } from 'lucide-react';
 import type { PatientData } from '@/lib/types';
-import { format, differenceInDays, parseISO, addMonths, startOfMonth } from 'date-fns';
+import { format, differenceInDays, parseISO, addMonths } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -13,7 +12,7 @@ import { useState } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
-import { updatePatientData } from '@/lib/data-sync';
+import { updatePatientData } from '@/app/actions';
 
 interface ClinicVisitsCardProps {
   patient: PatientData;
@@ -28,15 +27,14 @@ export default function ClinicVisitsCard({ patient, className }: ClinicVisitsCar
 
     const daysUntilAppointment = nextAppointmentDate ? differenceInDays(nextAppointmentDate, new Date()) : null;
     
-    // Find the most recent admission
     const latestAdmission = patient.admissions && patient.admissions.length > 0 
         ? [...patient.admissions].sort((a, b) => new Date(b.dischargeDate).getTime() - new Date(a.dischargeDate).getTime())[0]
         : null;
 
-    const handleDateSelect = (date?: Date) => {
+    const handleDateSelect = async (date?: Date) => {
         if (!date || !patient.clinicVisits) return;
         setNextAppointmentDate(date);
-        updatePatientData(patient.patientId, { clinicVisits: { ...patient.clinicVisits, nextAppointment: date.toISOString() } });
+        await updatePatientData(patient.patientId, { clinicVisits: { ...patient.clinicVisits, nextAppointment: date.toISOString() } });
         toast({
             title: "Appointment Scheduled",
             description: `Next visit for ${patient.firstName} set to ${format(date, 'PPP')}.`
@@ -91,7 +89,7 @@ export default function ClinicVisitsCard({ patient, className }: ClinicVisitsCar
                     selected={nextAppointmentDate}
                     onSelect={handleDateSelect}
                     initialFocus
-                    defaultMonth={addMonths(new Date(), 1)} // Start view on next month
+                    defaultMonth={addMonths(new Date(), 1)}
                     modifiers={{
                         default_saturday: { dayOfWeek: [6] }
                     }}

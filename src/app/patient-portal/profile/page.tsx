@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { User, Phone, Pill, Inbox, Video, ShieldAlert, SlidersHorizontal, Activity, CalendarClock, Heart, Droplet, Users2 } from 'lucide-react';
-import { getSyncedPatientData } from '@/lib/data-sync';
+import { getSyncedPatientData } from '@/app/actions';
 import Link from 'next/link';
 import { format, parseISO, addMonths, differenceInMonths, differenceInYears } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -214,8 +214,8 @@ export default function PatientProfilePage() {
             </CardHeader>
             <CardContent className="space-y-3">
                 <div className="p-3 bg-slate-50 border rounded-lg text-sm"><p className="font-medium">Transporter Status</p><p className="text-muted-foreground">{patient.membraneTransportType || 'N/A'}</p></div>
-                <div className="p-3 bg-slate-50 border rounded-lg text-sm"><p className="font-medium">Last Transfer Set Change</p><p className="text-muted-foreground">{format(lastTransferSetChangeDate, 'PPP')}</p></div>
-                <div className="p-3 bg-slate-50 border rounded-lg text-sm"><p className="font-medium">Next Change Due</p><p className="text-muted-foreground">{format(nextTransferSetChangeDueDate, 'PPP')}</p></div>
+                <div className="p-3 bg-slate-50 border rounded-lg text-sm"><p className="font-medium">Last Transfer Set Change</p><p className="text-muted-foreground">{patient.pdStartDate ? format(lastTransferSetChangeDate, 'PPP') : 'N/A'}</p></div>
+                <div className="p-3 bg-slate-50 border rounded-lg text-sm"><p className="font-medium">Next Change Due</p><p className="text-muted-foreground">{patient.pdStartDate ? format(nextTransferSetChangeDueDate, 'PPP') : 'N/A'}</p></div>
             </CardContent>
           </Card>
 

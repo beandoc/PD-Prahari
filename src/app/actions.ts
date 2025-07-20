@@ -3,9 +3,129 @@
 
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
-import type { PatientData, PDEvent } from '@/lib/types';
-import { getLiveAllPatientData } from '@/lib/data-sync';
+import type { PatientData, PDEvent, Vital, LabResult, Medication } from '@/lib/types';
+import { allPatientData as initialData } from '@/data/mock-data';
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
+
+// --- In-Memory Data Store (Server-Side) ---
+
+// This is our in-memory "database" for the duration of the session.
+// It starts with the mock data and gets updated by actions. Since this is a
+// server module, this state is maintained on the server. In a real-world
+// scenario, this would be replaced with a database like Firestore or PostgreSQL.
+let livePatientData: PatientData[] = JSON.parse(JSON.stringify(initialData));
+
+/**
+ * Retrieves the current state of a single patient's data from the in-memory store.
+ * @param patientId The ID of the patient.
+ * @returns A promise that resolves to the patient data.
+ */
+export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
+  const patient = livePatientData.find(p => p.patientId === patientId);
+  if (patient) {
+    // Return a deep copy to prevent direct state mutation outside of update functions
+    return JSON.parse(JSON.stringify(patient));
+  }
+  return null;
+}
+
+/**
+ * Retrieves the current state of all patient data from the in-memory store.
+ * @returns An array of all patient data.
+ */
+export function getLiveAllPatientData(): PatientData[] {
+    // Return a deep copy to prevent direct state mutation
+    return JSON.parse(JSON.stringify(livePatientData));
+}
+
+/**
+ * Saves new patient log data (PD events and vitals) to the in-memory store.
+ * @param patientId The ID of the patient.
+ * @param newEvents An array of new PDEvent objects.
+ * @param newVital A new Vital object.
+ */
+export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
+  livePatientData = livePatientData.map(patient => {
+    if (patient.patientId === patientId) {
+      const updatedPatient = { ...patient };
+      const existingEventIds = new Set(updatedPatient.pdEvents.map(e => e.exchangeId));
+      const filteredNewEvents = newEvents.filter(e => !existingEventIds.has(e.exchangeId));
+      updatedPatient.pdEvents = [...filteredNewEvents, ...updatedPatient.pdEvents];
+      
+      if (newVital.vitalId && !updatedPatient.vitals.some(v => v.vitalId === newVital.vitalId)) {
+        updatedPatient.vitals = [newVital as Vital, ...updatedPatient.vitals];
+      }
+      
+      updatedPatient.lastUpdated = new Date().toISOString();
+      return updatedPatient;
+    }
+    return patient;
+  });
+  console.log(`[SYNC] Patient log saved for ${patientId}.`);
+  return { success: true };
+}
+
+/**
+ * Updates a patient's data in the in-memory store.
+ * @param patientId The ID of the patient.
+ * @param updatedData An object containing the fields to update.
+ */
+export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
+    livePatientData = livePatientData.map(patient => {
+        if (patient.patientId === patientId) {
+            return { ...patient, ...updatedData, lastUpdated: new Date().toISOString() };
+        }
+        return patient;
+    });
+    console.log(`[SYNC] Patient data updated for ${patientId}.`, updatedData);
+    return { success: true };
+}
+
+/**
+ * Saves a new doctor's note for a patient.
+ * @param patientId The ID of the patient.
+ * @param note The note to save.
+ */
+export async function updatePatientNotes(patientId: string, note: string) {
+    await updatePatientData(patientId, { doctorNotes: note });
+    console.log(`[SYNC] Doctor's note saved for ${patientId}.`);
+    return { success: true };
+}
+
+/**
+ * Saves new lab results for a patient.
+ * @param patientId The ID of the patient.
+ * @param newLabs An array of new LabResult objects.
+ */
+export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
+    livePatientData = livePatientData.map(patient => {
+        if (patient.patientId === patientId) {
+            const updatedPatient = { ...patient };
+            const existingLabIds = new Set(updatedPatient.labResults.map(l => l.labResultId));
+            const filteredNewLabs = newLabs.filter(l => !existingLabIds.has(l.labResultId));
+            updatedPatient.labResults = [...filteredNewLabs, ...updatedPatient.labResults];
+            updatedPatient.lastUpdated = new Date().toISOString();
+            return updatedPatient;
+        }
+        return patient;
+    });
+    console.log(`[SYNC] Lab results updated for ${patientId}.`);
+    return { success: true };
+}
+
+/**
+ * Saves an updated list of medications for a patient.
+ * @param patientId The ID of the patient.
+ * @param medications The full, updated list of medications.
+ */
+export async function updatePatientMedications(patientId: string, medications: Medication[]) {
+    await updatePatientData(patientId, { medications });
+    console.log(`[SYNC] Medications updated for ${patientId}.`);
+    return { success: true };
+}
+
+
+// --- AI and Business Logic Actions ---
 
 function formatDataForAI(patientData: PatientData) {
   return {
@@ -149,7 +269,6 @@ export async function getPeritonitisRate(): Promise<number | null> {
 
     const totalPatientYears = totalPatientMonths / 12;
     
-    // Handle edge case where totalPatientYears is 0 to avoid division by zero
     if (totalPatientYears === 0) {
         return totalEpisodes > 0 ? Infinity : 0.0;
     }

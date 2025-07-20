@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getLiveAllPatientData } from '@/lib/data-sync';
+import { getLiveAllPatientData } from '@/app/actions';
 import type { PatientData } from '@/lib/types';
 import { format, parseISO, differenceInYears } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -155,7 +155,7 @@ export default function PetTestPage() {
                         <div><p className="font-medium">Patient Name</p><p className="text-muted-foreground">{patient.firstName} {patient.lastName}</p></div>
                         <div><p className="font-medium">ID Number</p><p className="text-muted-foreground">{patient.nephroId}</p></div>
                         <div><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
-                        <div><p className="font-medium">Age</p><p className="text-muted-foreground">{calculateAge(patient.dateOfBirth)} years</p></div>
+                        <div><p className="font-medium">Age</p><p className="text-muted-foreground">{patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A'} years</p></div>
                         <div><p className="font-medium">Catheter Date</p><p className="text-muted-foreground">{patient.pdStartDate ? format(parseISO(patient.pdStartDate), 'PPP') : 'N/A'}</p></div>
                     </CardContent>
                 </Card>
@@ -291,5 +291,3 @@ export default function PetTestPage() {
         </div>
     );
 }
-
-    
