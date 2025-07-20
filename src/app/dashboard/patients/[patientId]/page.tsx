@@ -49,8 +49,8 @@ function PatientDetailView({ patientId }: { patientId: string }) {
   
   if (loading || !patientData) {
     return (
-      <div className="p-8 space-y-4">
-        <Skeleton className="h-16 w-1/2" />
+      <div className="p-4 md:p-8 space-y-6">
+        <Skeleton className="h-16 w-full md:w-1/2" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
                  <Skeleton className="h-96 w-full" />
@@ -68,7 +68,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <PatientHeader patient={patientData} />
-      <main className="flex-1 p-4 sm:p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <main className="flex-1 p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
             <VitalsCard vitals={patientData.vitals} pdEvents={patientData.pdEvents} patient={patientData} />
             <PDParametersCard patient={patientData} />

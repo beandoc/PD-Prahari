@@ -79,7 +79,7 @@ export default function PatientProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><User className="text-primary" /> Personal &amp; Clinical Information</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div className="space-y-1"><p className="font-medium">Name</p><p className="text-muted-foreground">{patient.firstName} {patient.lastName}</p></div>
                 <div className="space-y-1"><p className="font-medium">Nephro ID</p><p className="text-muted-foreground">{patient.nephroId}</p></div>
                 <div className="space-y-1"><p className="font-medium">Date of Birth</p><p className="text-muted-foreground">{patient.dateOfBirth ? format(parseISO(patient.dateOfBirth), 'PPP') : 'N/A'}</p></div>

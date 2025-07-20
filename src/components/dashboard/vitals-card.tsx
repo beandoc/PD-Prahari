@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -18,9 +19,7 @@ import {
 import { Area, AreaChart, Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import {
   HeartPulse,
-  Thermometer,
   Weight,
-  Activity,
   Gauge,
   Droplets,
   Sparkles,
@@ -76,25 +75,19 @@ export default function VitalsCard({ vitals, pdEvents, patient }: VitalsCardProp
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
-  if (!vitals || vitals.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Gauge className="h-6 w-6" />
-            Vital Signs
-          </CardTitle>
-          <CardDescription>No vital signs data available.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex h-[350px] items-center justify-center rounded-lg bg-secondary/50 p-4 text-muted-foreground">
-            No vitals recorded for this patient yet.
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const latestVitals = vitals && vitals.length > 0 ? vitals[0] : null;
 
+  useEffect(() => {
+    if (latestVitals?.measurementDateTime) {
+      setLastUpdated(
+        format(
+          new Date(latestVitals.measurementDateTime),
+          'MMMM d, yyyy HH:mm'
+        )
+      );
+    }
+  }, [latestVitals?.measurementDateTime]);
+  
   const handleGetSuggestions = async () => {
     setIsGenerating(true);
     setSuggestions([]);
@@ -111,18 +104,6 @@ export default function VitalsCard({ vitals, pdEvents, patient }: VitalsCardProp
     setIsGenerating(false);
   };
 
-  const latestVitals = vitals[0];
-
-  useEffect(() => {
-    if (latestVitals?.measurementDateTime) {
-      setLastUpdated(
-        format(
-          new Date(latestVitals.measurementDateTime),
-          'MMMM d, yyyy HH:mm'
-        )
-      );
-    }
-  }, [latestVitals?.measurementDateTime]);
 
   const { avgUfLast2Weeks, weight2WeeksAgo } = useMemo(() => {
     const twoWeeksAgoDate = subDays(new Date(), 14);
@@ -173,6 +154,26 @@ export default function VitalsCard({ vitals, pdEvents, patient }: VitalsCardProp
   const ufChartData = filterDataByTimeRange(fullUfChartData.map(d => ({date: d.date, uf: d.uf, displayDate: d.displayDate})), ufTimeRange)
     .map(d => ({ date: d.displayDate, uf: d.uf }));
 
+    
+  if (!latestVitals) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gauge className="h-6 w-6" />
+            Vital Signs
+          </CardTitle>
+          <CardDescription>No vital signs data available.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex h-[350px] items-center justify-center rounded-lg bg-secondary/50 p-4 text-muted-foreground">
+            No vitals recorded for this patient yet.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -185,7 +186,7 @@ export default function VitalsCard({ vitals, pdEvents, patient }: VitalsCardProp
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="flex flex-col items-center justify-center rounded-lg bg-secondary/50 p-4">
             <HeartPulse className="h-6 w-6 text-destructive" />
             <div className="mt-2 text-2xl font-bold">
@@ -209,7 +210,7 @@ export default function VitalsCard({ vitals, pdEvents, patient }: VitalsCardProp
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-lg bg-blue-50 p-3 border border-blue-200">
                 <p className="text-sm font-medium text-blue-800">Avg UF (14d)</p>
                 <p className="text-xl font-bold text-blue-600">{avgUfLast2Weeks !== null ? `${avgUfLast2Weeks.toFixed(0)} mL/day` : 'N/A'}</p>

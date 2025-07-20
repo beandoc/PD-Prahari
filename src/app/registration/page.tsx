@@ -126,6 +126,7 @@ export default function ClinicianPatientRegistrationPage() {
       underlyingKidneyDisease: '',
       physician: '',
       educationLevel: '',
+      gender: '',
     },
   });
 
@@ -193,7 +194,7 @@ export default function ClinicianPatientRegistrationPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl py-8">
+    <div className="container mx-auto max-w-5xl py-8 px-4">
        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
@@ -211,7 +212,7 @@ export default function ClinicianPatientRegistrationPage() {
                 <>
                   <section>
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Patient Demographics</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="firstName" render={({ field }) => (
                             <FormItem><FormLabel>First Name <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="Enter first name" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
@@ -266,7 +267,7 @@ export default function ClinicianPatientRegistrationPage() {
                   </section>
                   <section>
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Contact Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="contactPhone" render={({ field }) => (
                             <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
@@ -290,7 +291,7 @@ export default function ClinicianPatientRegistrationPage() {
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="postalCode" render={({ field }) => (
-                            <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+                            <FormItem className="md:col-span-2"><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                   </section>
@@ -335,7 +336,7 @@ export default function ClinicianPatientRegistrationPage() {
                 <>
                   <section>
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Clinical Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="physician" render={({ field }) => (
                             <FormItem><FormLabel>Attending Nephrologist <span className="text-destructive">*</span></FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>

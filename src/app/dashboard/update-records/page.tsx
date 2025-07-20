@@ -1,11 +1,12 @@
 
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { CalendarIcon, UserCog, UserPlus, AlertTriangle } from 'lucide-react';
+import { CalendarIcon, UserCog } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,6 @@ import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -153,7 +153,7 @@ export default function UpdateRecordsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl py-4 sm:py-8">
+    <div className="container mx-auto max-w-5xl py-4 sm:py-8 px-4">
        <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -183,7 +183,7 @@ export default function UpdateRecordsPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <section>
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Patient Demographics</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={form.control} name="firstName" render={({ field }) => (
                         <FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -198,7 +198,7 @@ export default function UpdateRecordsPage() {
                     )} />
                     <FormField control={form.control} name="gender" render={({ field }) => (
                         <FormItem><FormLabel>Gender</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value || ''}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl>
                                 <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
                             </Select><FormMessage />
@@ -206,7 +206,7 @@ export default function UpdateRecordsPage() {
                     )} />
                     <FormField control={form.control} name="educationLevel" render={({ field }) => (
                         <FormItem><FormLabel>Educational Qualification</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value || ''}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select education level" /></SelectTrigger></FormControl>
                                 <SelectContent>
                                     <SelectItem value="No formal education">No formal education</SelectItem>
@@ -223,7 +223,7 @@ export default function UpdateRecordsPage() {
               </section>
               <section>
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Contact Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={form.control} name="contactPhone" render={({ field }) => (
                         <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter phone number" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -247,13 +247,13 @@ export default function UpdateRecordsPage() {
                         </FormItem>
                     )} />
                     <FormField control={form.control} name="postalCode" render={({ field }) => (
-                        <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
+                        <FormItem className="md:col-span-2"><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="Enter postal code" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
               </section>
               <section>
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Clinical & PD Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={form.control} name="nephrologist" render={({ field }) => (
                         <FormItem><FormLabel>Attending Nephrologist</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem>
                     )} />

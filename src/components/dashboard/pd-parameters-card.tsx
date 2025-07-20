@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { PatientData } from '@/lib/types';
-import { SlidersHorizontal, BookOpen, Route, Users2, CalendarClock } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import { parseISO, differenceInMonths, differenceInYears } from 'date-fns';
 
 interface PDParametersCardProps {
@@ -45,7 +45,7 @@ export default function PDParametersCard({ patient }: PDParametersCardProps) {
             <CardContent className="space-y-6">
                 <div>
                     <h4 className="font-semibold text-base mb-2">Patient Parameters</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                         <div className="p-3 bg-slate-50 border rounded-lg">
                             <p className="font-medium text-muted-foreground">Transporter Status</p>
                             <p className="font-semibold">{membraneTransportType || 'N/A'}</p>
@@ -64,7 +64,7 @@ export default function PDParametersCard({ patient }: PDParametersCardProps) {
                 {prescription?.regimen ? (
                 <div>
                     <h4 className="font-semibold text-base mb-2">Prescribed Regimen</h4>
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="border rounded-lg overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow>
