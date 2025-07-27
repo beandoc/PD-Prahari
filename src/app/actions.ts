@@ -15,35 +15,35 @@ const PATIENTS_COLLECTION = 'patients';
 
 /**
  * Creates a new patient document in Firestore from the registration form data.
- * @param patient The patient data to save, coming from the registration form.
+ * @param patientFormData The patient data to save, coming directly from the registration form.
  * @returns The ID of the newly created patient.
  */
-export async function registerNewPatient(patientForDb: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'>) {
+export async function registerNewPatient(patientFormData: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'> & { pdStartDate?: string }) {
     try {
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
 
         const newPatientData: PatientData = {
             // Directly from form
-            firstName: patientForDb.firstName,
-            lastName: patientForDb.lastName,
-            nephroId: patientForDb.nephroId,
-            dateOfBirth: patientForDb.dateOfBirth,
-            gender: patientForDb.gender,
-            contactPhone: patientForDb.contactPhone,
-            addressLine1: patientForDb.addressLine1,
-            city: patientForDb.city,
-            stateProvince: patientForDb.stateProvince,
-            postalCode: patientForDb.postalCode,
-            physician: patientForDb.physician,
-            pdStartDate: patientForDb.pdStartDate,
-            underlyingKidneyDisease: patientForDb.underlyingKidneyDisease,
-            educationLevel: patientForDb.educationLevel,
-            pdExchangeType: patientForDb.pdExchangeType,
+            firstName: patientFormData.firstName,
+            lastName: patientFormData.lastName,
+            nephroId: patientFormData.nephroId,
+            dateOfBirth: patientFormData.dateOfBirth,
+            gender: patientFormData.gender,
+            contactPhone: patientFormData.contactPhone,
+            addressLine1: patientFormData.addressLine1,
+            city: patientFormData.city,
+            stateProvince: patientFormData.stateProvince,
+            postalCode: patientFormData.postalCode,
+            physician: patientFormData.physician,
+            pdStartDate: patientFormData.pdStartDate || '',
+            underlyingKidneyDisease: patientFormData.underlyingKidneyDisease,
+            educationLevel: patientFormData.educationLevel,
+            pdExchangeType: patientFormData.pdExchangeType,
             
             // Generated/Default values
             patientId: newPatientId,
-            currentStatus: patientForDb.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
+            currentStatus: patientFormData.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
             
             // Default nested objects
@@ -458,7 +458,3 @@ export async function getClinicKpis() {
         missedVisits,
     };
 }
-
-    
-
-    

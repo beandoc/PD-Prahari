@@ -556,5 +556,3 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
-
-    
