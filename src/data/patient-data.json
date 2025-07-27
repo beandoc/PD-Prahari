@@ -118,8 +118,7 @@
       { "id": "edu1", "title": "PD Technique Videos", "description": "Step-by-step exchange process", "icon": "Video" },
       { "id": "edu2", "title": "Infection Prevention", "description": "Keep your catheter site safe", "icon": "ShieldCheck" },
       { "id": "edu3", "title": "Nutrition Guidelines", "description": "Meal planning for PD patients", "icon": "Apple" }
-    ],
-    "mechanicalComplications": { "outflowProblems": 2, "inflowProblems": 1, "ufFailure": 0 }
+    ]
   },
   {
     "patientId": "PAT-002",

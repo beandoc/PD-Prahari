@@ -120,6 +120,14 @@ export interface PeritonitisEpisode {
   outcome: 'Resolved' | 'Catheter Removal' | 'Transferred to HD' | 'Deceased' | 'In Treatment';
   resolutionDate?: string;
   wasHospitalized?: boolean; // NEW: Flag for hospitalization
+  admissionId?: string;
+}
+
+export interface Admission {
+  admissionId: string;
+  admissionDate: string;
+  dischargeDate: string;
+  reason: string;
 }
 
 export interface UrineOutputLog {
@@ -200,6 +208,7 @@ export interface PatientData extends Patient {
   pdAdequacy: PDAdequacy[];
   patientReportedOutcomes: PROSurvey[];
   uploadedImages?: UploadedImage[];
+  admissions?: Admission[];
   
   // NEW: Structural Info
   insuranceInfo?: InsuranceInfo;
