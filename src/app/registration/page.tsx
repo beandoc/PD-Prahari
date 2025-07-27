@@ -83,6 +83,7 @@ const formSchema = z.object({
   physician: z.string().min(1, { message: 'Attending nephrologist is required.' }),
   underlyingKidneyDisease: z.string().optional(),
   pdStartDate: z.date().optional(),
+  pdExchangeType: z.enum(['Assisted', 'Self']),
 }).superRefine((data, ctx) => {
     if (data.dateOfBirth) {
         const today = new Date();
@@ -127,6 +128,7 @@ export default function ClinicianPatientRegistrationPage() {
       underlyingKidneyDisease: '',
       physician: '',
       educationLevel: '',
+      pdExchangeType: 'Self',
     },
   });
 
@@ -163,7 +165,7 @@ export default function ClinicianPatientRegistrationPage() {
   const nextStep = async () => {
     let fieldsToValidate: (keyof z.infer<typeof formSchema>)[];
     if (step === 1) {
-        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth', 'emergencyContactName'];
+        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth', 'gender', 'emergencyContactName'];
     } else {
         return;
     }
@@ -332,7 +334,7 @@ export default function ClinicianPatientRegistrationPage() {
                             </FormItem>
                         )} />
                          <FormField control={form.control} name="emergencyContactEmail" render={({ field }) => (
-                            <FormItem><FormLabel>Contact Email (Optional)</FormLabel><FormControl><Input placeholder="Enter guardian/contact email" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Contact Email (Optional)</FormLabel><FormControl><Input placeholder="Enter guardian/contact email" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
                          <FormField control={form.control} name="emergencyContactWhatsapp" render={({ field }) => (
                             <FormItem><FormLabel>WhatsApp Number (Optional)</FormLabel><FormControl><Input placeholder="Enter WhatsApp number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
@@ -374,6 +376,17 @@ export default function ClinicianPatientRegistrationPage() {
                             </PopoverTrigger><PopoverContent className="w-auto p-0" align="start">
                                 <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear()} />
                             </PopoverContent></Popover><FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
+                            <FormItem><FormLabel>PD Exchange Type <span className="text-destructive">*</span></FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select exchange type" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Self">Self-Performed</SelectItem>
+                                        <SelectItem value="Assisted">Assisted by Helper</SelectItem>
+                                    </SelectContent>
+                                </Select><FormMessage />
                             </FormItem>
                         )} />
                     </div>

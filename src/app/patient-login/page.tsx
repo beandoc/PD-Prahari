@@ -11,18 +11,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Lock, User, HeartPulse, Loader2 } from 'lucide-react';
 import { getPatientByNephroId } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 export default function PatientLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [nephroId, setNephroId] = useState('');
-  const [password, setPassword] = useState(''); // Using password as a stand-in for DOB
+  const [dob, setDob] = useState(''); // Date of Birth as YYYY-MM-DD
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    if (!nephroId || !password) {
+    if (!nephroId || !dob) {
       setError('Please enter both your Patient ID and your Date of Birth.');
       return;
     }
@@ -34,12 +34,12 @@ export default function PatientLoginPage() {
       const patient = await getPatientByNephroId(nephroId);
 
       // In a real app, you'd use a secure password. Here, we're checking against DOB.
-      // The password input should ideally be a date picker.
       if (patient && patient.dateOfBirth) {
         // This is an insecure comparison and only for demonstration.
         // A real app must use a proper authentication system.
-        const formattedDob = format(new Date(patient.dateOfBirth), 'yyyy-MM-dd');
-        if (password === formattedDob) {
+        const formattedStoredDob = format(new Date(patient.dateOfBirth), 'yyyy-MM-dd');
+        
+        if (dob === formattedStoredDob) {
            toast({
             title: "Login Successful",
             description: `Welcome back, ${patient.firstName}!`,
@@ -97,9 +97,9 @@ export default function PatientLoginPage() {
               <Input 
                 id="dob" 
                 type="date"
-                placeholder="Date of Birth (YYYY-MM-DD)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Date of Birth"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
                 required 
                 className="pl-10" 
               />

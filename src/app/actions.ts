@@ -100,7 +100,11 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             // Assuming nephroId is unique, return the first match
-            return querySnapshot.docs[0].data() as PatientData;
+            const patientDoc = querySnapshot.docs[0];
+            return {
+                ...patientDoc.data(),
+                patientId: patientDoc.id, // Ensure patientId is included
+            } as PatientData;
         }
         return null;
     } catch (error) {
