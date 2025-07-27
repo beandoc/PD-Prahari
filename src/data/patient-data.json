@@ -34,6 +34,13 @@
     "currentStatus": "Active PD",
     "physician": "Dr. Sachin",
     "lastUpdated": "2025-07-29T10:00:00Z",
+    "catheterInfo": {
+      "catheterId": "CATH-001",
+      "catheterType": "Coiled",
+      "insertionMethod": "Mini laparotomy",
+      "brand": "Baxter",
+      "insertionDate": "2024-01-15"
+    },
     "prescription": {
       "exchange": "4x Daily",
       "pdStrength": "Mixed Dextrose",

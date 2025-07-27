@@ -39,6 +39,7 @@ export interface InsuranceInfo {
 export interface CatheterInfo {
     catheterId: string;
     catheterType: 'Straight' | 'Coiled' | 'Swan-Neck';
+    insertionMethod?: 'Percutaneous' | 'Mini laparotomy';
     brand?: string;
     insertionDate: string;
     removalDate?: string;
