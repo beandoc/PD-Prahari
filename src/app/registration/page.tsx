@@ -114,10 +114,14 @@ const DateOfBirthInput = ({ field, form }: { field: any, form: any }) => {
     const value = e.target.value;
     setManualDate(value);
     // Try to parse the date and update the form
-    if (value.length === 10) { // dd-MM-yyyy
-      const parsedDate = parse(value, 'dd-MM-yyyy', new Date());
-      if (!isNaN(parsedDate.getTime())) {
-        form.setValue('dateOfBirth', parsedDate, { shouldValidate: true });
+    if (value.length >= 8) { // dd-MM-yy or dd-MM-yyyy
+      try {
+        const parsedDate = parse(value, 'dd-MM-yyyy', new Date());
+        if (!isNaN(parsedDate.getTime())) {
+          form.setValue('dateOfBirth', parsedDate, { shouldValidate: true });
+        }
+      } catch (error) {
+        // Ignore parse errors, validation will catch it
       }
     }
   };
@@ -239,7 +243,7 @@ export default function ClinicianPatientRegistrationPage() {
     const patientToSave = {
       ...values,
       dateOfBirth: values.dateOfBirth.toISOString(),
-      pdStartDate: values.pdStartDate?.toISOString(),
+      pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
     };
     
     const result = await registerNewPatient(patientToSave);
