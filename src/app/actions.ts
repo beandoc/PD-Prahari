@@ -7,46 +7,11 @@ import type { PatientData, PDEvent, Vital, LabResult, Medication } from '@/lib/t
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { db } from '@/lib/firebase';
 import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
-import { cache } from 'react';
-import { promises as fs } from 'fs';
-import path from 'path';
 
 
 // --- Firestore Data Store (Server-Side) ---
 
 const PATIENTS_COLLECTION = 'patients';
-
-/**
- * Checks if the 'patients' collection is empty and seeds it from a local JSON file if needed.
- * This is a one-time operation to ensure the app has data on first run.
- */
-async function seedInitialData() {
-    const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
-    const snapshot = await getDocs(patientsCollectionRef);
-    if (snapshot.empty) {
-        console.log('[FIRESTORE] No patients found. Seeding initial data from patient-data.json...');
-        try {
-            // Read the local JSON file
-            const jsonPath = path.join(process.cwd(), 'src', 'data', 'patient-data.json');
-            const fileContents = await fs.readFile(jsonPath, 'utf8');
-            const patients: PatientData[] = JSON.parse(fileContents);
-            
-            // Write each patient to Firestore
-            const batch = writeBatch(db);
-            patients.forEach((patient) => {
-                const patientDocRef = doc(db, PATIENTS_COLLECTION, patient.patientId);
-                batch.set(patientDocRef, patient);
-            });
-            await batch.commit();
-            console.log('[FIRESTORE] Successfully seeded initial patient data.');
-        } catch (error) {
-            console.error('[FIRESTORE] Error seeding data:', error);
-        }
-    } else {
-        console.log('[FIRESTORE] Patient data already exists. Skipping seed.');
-    }
-}
-
 
 /**
  * Retrieves the current state of a single patient's data from Firestore.
@@ -60,13 +25,6 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
         const patientSnap = await getDoc(patientDocRef);
         if (patientSnap.exists()) {
             return patientSnap.data() as PatientData;
-        } else {
-            // If one patient doesn't exist, the DB might be empty. Try seeding.
-            await seedInitialData();
-            const patientSnapAfterSeed = await getDoc(patientDocRef);
-             if (patientSnapAfterSeed.exists()) {
-                return patientSnapAfterSeed.data() as PatientData;
-            }
         }
         return null;
     } catch (error) {
@@ -86,11 +44,8 @@ export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
         const querySnapshot = await getDocs(patientsCollectionRef);
 
         if (querySnapshot.empty) {
-            console.log('[FIRESTORE] Collection is empty, attempting to seed data...');
-            await seedInitialData();
-            // Re-fetch after seeding
-            const afterSeedSnapshot = await getDocs(patientsCollectionRef);
-            return afterSeedSnapshot.docs.map(doc => doc.data() as PatientData);
+            console.warn('[FIRESTORE] The "patients" collection is empty. Run `npm run seed` locally to populate it with sample data.');
+            return [];
         }
 
         return querySnapshot.docs.map(doc => doc.data() as PatientData);
