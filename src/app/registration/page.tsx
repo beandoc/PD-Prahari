@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -102,6 +101,62 @@ const formSchema = z.object({
     }
 });
 
+const DateOfBirthInput = ({ field, form }: { field: any, form: any }) => {
+  const [manualDate, setManualDate] = useState<string>('');
+
+  useEffect(() => {
+    if (field.value) {
+      setManualDate(format(field.value, 'dd-MM-yyyy'));
+    }
+  }, [field.value]);
+
+  const handleManualDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setManualDate(value);
+    // Try to parse the date and update the form
+    if (value.length === 10) { // dd-MM-yyyy
+      const parsedDate = parse(value, 'dd-MM-yyyy', new Date());
+      if (!isNaN(parsedDate.getTime())) {
+        form.setValue('dateOfBirth', parsedDate, { shouldValidate: true });
+      }
+    }
+  };
+
+  return (
+     <div className="relative">
+       <Input 
+        placeholder="dd-MM-yyyy"
+        value={manualDate}
+        onChange={handleManualDateChange}
+       />
+        <Popover>
+          <PopoverTrigger asChild>
+             <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                <CalendarIcon className="h-4 w-4 opacity-70" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={field.value}
+              onSelect={(date) => {
+                field.onChange(date);
+                if (date) {
+                  setManualDate(format(date, 'dd-MM-yyyy'));
+                }
+              }}
+              disabled={(date) => date > new Date() || date < subYears(new Date(), 90) }
+              initialFocus
+              captionLayout="dropdown-buttons"
+              fromDate={subYears(new Date(), 90)}
+              toDate={new Date()}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+  )
+}
+
 export default function ClinicianPatientRegistrationPage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -181,11 +236,10 @@ export default function ClinicianPatientRegistrationPage() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Convert dates to ISO strings for serialization
     const patientToSave = {
       ...values,
       dateOfBirth: values.dateOfBirth.toISOString(),
-      pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
+      pdStartDate: values.pdStartDate?.toISOString(),
     };
     
     const result = await registerNewPatient(patientToSave);
@@ -240,37 +294,9 @@ export default function ClinicianPatientRegistrationPage() {
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
                               <FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                          "w-full pl-3 text-left font-normal",
-                                          !field.value && "text-muted-foreground"
-                                        )}
-                                      >
-                                        {field.value ? (
-                                          format(field.value, "PPP")
-                                        ) : (
-                                          <span>Pick a date</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={field.value}
-                                      onSelect={field.onChange}
-                                      fromDate={subYears(new Date(), 90)}
-                                      disabled={(date) => date > new Date() || date < subYears(new Date(), 90) }
-                                      initialFocus
-                                      captionLayout="dropdown-buttons"
-                                    />
-                                  </PopoverContent>
-                                </Popover>
+                               <FormControl>
+                                  <DateOfBirthInput field={field} form={form} />
+                               </FormControl>
                                 {age !== null && age < 18 && (
                                     <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor (Age: {age}). Guardian details are mandatory.</FormDescription>
                                 )}

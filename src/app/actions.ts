@@ -29,7 +29,7 @@ export async function registerNewPatient(patient: Omit<PatientData, 'patientId' 
             
             // Generated/Default values
             patientId: newPatientId,
-            currentStatus: 'Awaiting Catheter',
+            currentStatus: patient.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
             
             // Default nested objects
@@ -444,5 +444,3 @@ export async function getClinicKpis() {
         missedVisits,
     };
 }
-
-    
