@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
-import { format, subYears } from 'date-fns';
+import { format, subYears, parse } from 'date-fns';
 import { CalendarIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { useState, useEffect }from 'react';
 import { useRouter } from 'next/navigation';
@@ -62,7 +62,7 @@ const formSchema = z.object({
     }
     return age <= 90;
   }, { message: "Patient cannot be more than 90 years old." }),
-  gender: z.enum(['Male', 'Female', 'Other']),
+  gender: z.enum(['Male', 'Female']),
   educationLevel: z.string().optional(),
   
   // Contact
@@ -187,7 +187,7 @@ export default function ClinicianPatientRegistrationPage() {
         pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
     };
     
-    const result = await registerNewPatient(patientToSave as any);
+    const result = await registerNewPatient(patientToSave);
     
     if (result.success && result.patientId) {
         toast({
@@ -233,29 +233,66 @@ export default function ClinicianPatientRegistrationPage() {
                         <FormField control={form.control} name="nephroId" render={({ field }) => (
                             <FormItem><FormLabel>Nephro ID / UHID <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                        <FormField control={form.control} name="dateOfBirth" render={({ field }) => (
-                            <FormItem className="flex flex-col"><FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
-                            <Popover><PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                </FormControl>
-                            </PopoverTrigger><PopoverContent className="w-auto p-0" align="start">
-                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} toDate={subYears(new Date(), 12)} fromDate={subYears(new Date(), 90)} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus captionLayout="dropdown-buttons" fromYear={new Date().getFullYear() - 90} toYear={new Date().getFullYear() - 12} />
-                            </PopoverContent></Popover>
-                            {age !== null && age < 18 && (
-                                <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor (Age: {age}). Guardian details are mandatory.</FormDescription>
-                            )}
-                            <FormMessage />
+                       <FormField
+                          control={form.control}
+                          name="dateOfBirth"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <div className="relative">
+                                          <Input
+                                            placeholder="DD-MM-YYYY"
+                                            value={field.value ? format(field.value, 'dd-MM-yyyy') : ''}
+                                            onChange={(e) => {
+                                                const date = parse(e.target.value, 'dd-MM-yyyy', new Date());
+                                                if (!isNaN(date.getTime())) {
+                                                    field.onChange(date);
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                 const date = parse(e.target.value, 'dd-MM-yyyy', new Date());
+                                                 if (isNaN(date.getTime())) {
+                                                     field.onChange(undefined);
+                                                 }
+                                            }}
+                                          />
+                                          <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50" />
+                                      </div>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                      mode="single"
+                                      selected={field.value}
+                                      onSelect={field.onChange}
+                                      toDate={subYears(new Date(), 12)}
+                                      fromDate={subYears(new Date(), 90)}
+                                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                      initialFocus
+                                      captionLayout="dropdown-buttons"
+                                      fromYear={new Date().getFullYear() - 90}
+                                      toYear={new Date().getFullYear() - 12}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                {age !== null && age < 18 && (
+                                    <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor (Age: {age}). Guardian details are mandatory.</FormDescription>
+                                )}
+                                <FormMessage />
                             </FormItem>
-                        )} />
+                          )}
+                        />
                         <FormField control={form.control} name="gender" render={({ field }) => (
                             <FormItem><FormLabel>Gender</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl>
-                                    <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
+                                    <SelectContent>
+                                        <SelectItem value="Male">Male</SelectItem>
+                                        <SelectItem value="Female">Female</SelectItem>
+                                    </SelectContent>
                                 </Select><FormMessage />
                             </FormItem>
                         )} />
@@ -364,17 +401,45 @@ export default function ClinicianPatientRegistrationPage() {
                             <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="pdStartDate" render={({ field }) => (
-                            <FormItem className="flex flex-col"><FormLabel>PD Start Date</FormLabel>
-                            <Popover><PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                </FormControl>
-                            </PopoverTrigger><PopoverContent className="w-auto p-0" align="start">
-                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear()} />
-                            </PopoverContent></Popover><FormMessage />
+                             <FormItem className="flex flex-col">
+                              <FormLabel>PD Start Date</FormLabel>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <div className="relative">
+                                          <Input
+                                            placeholder="DD-MM-YYYY"
+                                            value={field.value ? format(field.value, 'dd-MM-yyyy') : ''}
+                                            onChange={(e) => {
+                                                const date = parse(e.target.value, 'dd-MM-yyyy', new Date());
+                                                if (!isNaN(date.getTime())) {
+                                                    field.onChange(date);
+                                                }
+                                            }}
+                                             onBlur={(e) => {
+                                                 const date = parse(e.target.value, 'dd-MM-yyyy', new Date());
+                                                 if (isNaN(date.getTime())) {
+                                                     field.onChange(undefined);
+                                                 }
+                                            }}
+                                          />
+                                          <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50" />
+                                      </div>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                      mode="single"
+                                      selected={field.value}
+                                      onSelect={field.onChange}
+                                      initialFocus
+                                      captionLayout="dropdown-buttons"
+                                      fromYear={2020}
+                                      toYear={new Date().getFullYear()}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
