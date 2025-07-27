@@ -89,7 +89,7 @@ const formSchema = z.object({
         const today = new Date();
         let calculatedAge = today.getFullYear() - data.dateOfBirth.getFullYear();
         const m = today.getMonth() - data.dateOfBirth.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+        if (m < 0 || (m === 0 && today.getDate() < data.dateOfBirth.getDate())) {
             calculatedAge--;
         }
         if (calculatedAge < 18 && !data.emergencyContactName) {
@@ -140,7 +140,7 @@ export default function ClinicianPatientRegistrationPage() {
       const today = new Date();
       let calculatedAge = today.getFullYear() - dob.getFullYear();
       const m = today.getMonth() - dob.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
         calculatedAge--;
       }
       setAge(calculatedAge);
@@ -188,7 +188,6 @@ export default function ClinicianPatientRegistrationPage() {
       pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
     };
     
-    // @ts-ignore - The server action is designed to handle this shape
     const result = await registerNewPatient(patientToSave);
     
     if (result.success && result.patientId) {
@@ -266,8 +265,7 @@ export default function ClinicianPatientRegistrationPage() {
                                       selected={field.value}
                                       onSelect={field.onChange}
                                       fromDate={subYears(new Date(), 90)}
-                                      toDate={subYears(new Date(), 12)}
-                                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                      disabled={(date) => date > new Date() || date < subYears(new Date(), 90) }
                                       initialFocus
                                       captionLayout="dropdown-buttons"
                                     />
@@ -424,8 +422,8 @@ export default function ClinicianPatientRegistrationPage() {
                                       onSelect={field.onChange}
                                       initialFocus
                                       captionLayout="dropdown-buttons"
-                                      fromYear={2020}
-                                      toYear={new Date().getFullYear()}
+                                      fromDate={subYears(new Date(), 90)}
+                                      toDate={new Date()}
                                     />
                                   </PopoverContent>
                                 </Popover>
@@ -471,5 +469,3 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
-
-    
