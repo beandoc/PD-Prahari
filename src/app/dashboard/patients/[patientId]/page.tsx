@@ -16,7 +16,7 @@ import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import CareTeamNotesCard from '@/components/dashboard/CareTeamNotesCard';
 import ConsultationActionsCard from '@/components/dashboard/ConsultationActionsCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import { addDataUpdateListener } from '@/lib/broadcast';
 
 function PatientDetailView({ patientId }: { patientId: string }) {
@@ -105,7 +105,7 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 }
 
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
-  return <PatientDetailView patientId={params.patientId} />;
+  // The 'use' hook is the new recommended way to access params in Next.js App Router.
+  const resolvedParams = use(Promise.resolve(params));
+  return <PatientDetailView patientId={resolvedParams.patientId} />;
 }
-
-    
