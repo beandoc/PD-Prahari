@@ -7,6 +7,7 @@ import type { PatientData, PDEvent, Vital, LabResult, Medication } from '@/lib/t
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { db } from '@/lib/firebase';
 import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion } from 'firebase/firestore';
+import { cache } from 'react';
 
 
 // --- Firestore Data Store (Server-Side) ---
@@ -15,6 +16,7 @@ const PATIENTS_COLLECTION = 'patients';
 
 /**
  * Retrieves the current state of a single patient's data from Firestore.
+ * This function is NOT cached as it should always fetch the latest data for a specific patient.
  * @param patientId The ID of the patient document.
  * @returns A promise that resolves to the patient data.
  */
@@ -34,10 +36,12 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
 
 /**
  * Retrieves the current state of all patient data from Firestore.
+ * This function is cached to prevent multiple database queries for the same data during a single request.
  * @returns An array of all patient data.
  */
-export async function getLiveAllPatientData(): Promise<PatientData[]> {
+export const getLiveAllPatientData = cache(async (): Promise<PatientData[]> => {
     try {
+        console.log('[CACHE] Fetching all patient data from Firestore...');
         const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
         const querySnapshot = await getDocs(patientsCollectionRef);
         return querySnapshot.docs.map(doc => doc.data() as PatientData);
@@ -45,7 +49,7 @@ export async function getLiveAllPatientData(): Promise<PatientData[]> {
         console.error("Error reading all patient data from Firestore:", error);
         return [];
     }
-}
+});
 
 /**
  * Saves new patient log data (PD events and vitals) to Firestore.
