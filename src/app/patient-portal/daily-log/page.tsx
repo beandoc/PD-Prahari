@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { savePatientLog, getSyncedPatientData, triggerCloudyFluidAlert } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { PatientData, Vital, PDEvent } from '@/lib/types';
+import { postDataUpdate } from '@/lib/broadcast';
 
 
 interface ExchangeLog {
@@ -179,6 +180,9 @@ export default function PatientDailyLogPage() {
     }
 
     await savePatientLog(patientData.patientId, newEvents, newVital);
+    
+    // Broadcast the update
+    postDataUpdate();
 
     toast({
         title: "Log Submitted!",
@@ -429,3 +433,5 @@ export default function PatientDailyLogPage() {
     </div>
   );
 }
+
+    

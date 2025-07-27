@@ -16,32 +16,42 @@ import PDParametersCard from '@/components/dashboard/pd-parameters-card';
 import CareTeamNotesCard from '@/components/dashboard/CareTeamNotesCard';
 import ConsultationActionsCard from '@/components/dashboard/ConsultationActionsCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { addDataUpdateListener } from '@/lib/broadcast';
 
 function PatientDetailView({ patientId }: { patientId: string }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!patientId) {
-        setLoading(false);
-        return;
-      };
-
-      try {
-        setLoading(true);
-        const data = await getSyncedPatientData(patientId);
-        setPatientData(data);
-      } catch (error) {
-        console.error("Failed to fetch patient data:", error);
-        setPatientData(null);
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = useCallback(async () => {
+    if (!patientId) {
+      setLoading(false);
+      return;
     }
-    fetchData();
+    try {
+      setLoading(true);
+      const data = await getSyncedPatientData(patientId);
+      setPatientData(data);
+    } catch (error) {
+      console.error("Failed to fetch patient data:", error);
+      setPatientData(null);
+    } finally {
+      setLoading(false);
+    }
   }, [patientId]);
+
+  useEffect(() => {
+    fetchData();
+
+    // Set up broadcast channel listener
+    const cleanup = addDataUpdateListener(() => {
+      console.log('Patient detail page received data update broadcast. Refetching...');
+      fetchData();
+    });
+
+    // Cleanup listener on component unmount
+    return cleanup;
+  }, [fetchData]);
   
   if (loading || !patientData) {
     return (
@@ -97,3 +107,5 @@ function PatientDetailView({ patientId }: { patientId: string }) {
 export default function PatientDetailPage({ params }: { params: { patientId: string } }) {
   return <PatientDetailView patientId={params.patientId} />;
 }
+
+    
