@@ -2,10 +2,10 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
-import { format, subYears, parse } from 'date-fns';
+import { format, subYears, parse, isValid } from 'date-fns';
 import { CalendarIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { useState, useEffect }from 'react';
 import { useRouter } from 'next/navigation';
@@ -101,28 +101,42 @@ const formSchema = z.object({
     }
 });
 
-const DateOfBirthInput = ({ field, form }: { field: any, form: any }) => {
+const DateInput = ({
+  value,
+  onChange,
+  disabled,
+  from,
+  to
+}: {
+  value?: Date;
+  onChange: (date?: Date) => void;
+  disabled: (date: Date) => boolean;
+  from?: Date;
+  to?: Date;
+}) => {
   const [manualDate, setManualDate] = useState<string>('');
 
   useEffect(() => {
-    if (field.value) {
-      setManualDate(format(field.value, 'dd-MM-yyyy'));
+    if (value && isValid(value)) {
+      setManualDate(format(value, 'dd-MM-yyyy'));
+    } else {
+      setManualDate('');
     }
-  }, [field.value]);
+  }, [value]);
 
   const handleManualDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setManualDate(value);
-    // Try to parse the date and update the form
-    if (value.length >= 8) { // dd-MM-yy or dd-MM-yyyy
-      try {
-        const parsedDate = parse(value, 'dd-MM-yyyy', new Date());
-        if (!isNaN(parsedDate.getTime())) {
-          form.setValue('dateOfBirth', parsedDate, { shouldValidate: true });
-        }
-      } catch (error) {
-        // Ignore parse errors, validation will catch it
+    
+    if (value.length === 10) {
+      const parsedDate = parse(value, 'dd-MM-yyyy', new Date());
+      if (isValid(parsedDate)) {
+        onChange(parsedDate);
+      } else {
+        onChange(undefined);
       }
+    } else {
+      onChange(undefined);
     }
   };
 
@@ -142,18 +156,18 @@ const DateOfBirthInput = ({ field, form }: { field: any, form: any }) => {
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
               mode="single"
-              selected={field.value}
+              selected={value}
               onSelect={(date) => {
-                field.onChange(date);
-                if (date) {
+                onChange(date);
+                if (date && isValid(date)) {
                   setManualDate(format(date, 'dd-MM-yyyy'));
                 }
               }}
-              disabled={(date) => date > new Date() || date < subYears(new Date(), 90) }
+              disabled={disabled}
               initialFocus
               captionLayout="dropdown-buttons"
-              fromDate={subYears(new Date(), 90)}
-              toDate={new Date()}
+              fromDate={from}
+              toDate={to}
             />
           </PopoverContent>
         </Popover>
@@ -195,7 +209,7 @@ export default function ClinicianPatientRegistrationPage() {
   const selectedState = form.watch('stateProvince');
 
   useEffect(() => {
-    if (dob) {
+    if (dob && isValid(dob)) {
       const today = new Date();
       let calculatedAge = today.getFullYear() - dob.getFullYear();
       const m = today.getMonth() - dob.getMonth();
@@ -203,6 +217,8 @@ export default function ClinicianPatientRegistrationPage() {
         calculatedAge--;
       }
       setAge(calculatedAge);
+    } else {
+      setAge(null);
     }
   }, [dob]);
 
@@ -299,7 +315,13 @@ export default function ClinicianPatientRegistrationPage() {
                             <FormItem className="flex flex-col">
                               <FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
                                <FormControl>
-                                  <DateOfBirthInput field={field} form={form} />
+                                  <DateInput
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    disabled={(date) => date > new Date() || date < subYears(new Date(), 90) }
+                                    from={subYears(new Date(), 90)}
+                                    to={new Date()}
+                                  />
                                </FormControl>
                                 {age !== null && age < 18 && (
                                     <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor (Age: {age}). Guardian details are mandatory.</FormDescription>
@@ -370,7 +392,7 @@ export default function ClinicianPatientRegistrationPage() {
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Emergency Contact / Guardian</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="emergencyContactName" render={({ field }) => (
-                            <FormItem><FormLabel>Contact Name {age !== null && age < 18 && (<span className="text-destructive">*</span>)}</FormLabel><FormControl><Input placeholder="Enter guardian/contact name" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Contact Name {age !== null && age < 18 && (<span className="text-destructive">*</span>)}</FormLabel><FormControl><Input placeholder="Enter guardian/contact name" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="emergencyContactPhone" render={({ field }) => (
                             <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter guardian/contact phone" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
@@ -421,42 +443,19 @@ export default function ClinicianPatientRegistrationPage() {
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="underlyingKidneyDisease" render={({ field }) => (
-                            <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="pdStartDate" render={({ field }) => (
                              <FormItem className="flex flex-col">
                               <FormLabel>PD Start Date</FormLabel>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                          "w-full pl-3 text-left font-normal",
-                                          !field.value && "text-muted-foreground"
-                                        )}
-                                      >
-                                        {field.value ? (
-                                          format(field.value, "PPP")
-                                        ) : (
-                                          <span>Pick a date</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={field.value}
-                                      onSelect={field.onChange}
-                                      initialFocus
-                                      captionLayout="dropdown-buttons"
-                                      fromDate={subYears(new Date(), 90)}
-                                      toDate={new Date()}
-                                    />
-                                  </PopoverContent>
-                                </Popover>
+                                <FormControl>
+                                  <DateInput
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    disabled={(date) => date > new Date()}
+                                    to={new Date()}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -499,3 +498,5 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
+
+    
