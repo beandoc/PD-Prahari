@@ -18,32 +18,32 @@ const PATIENTS_COLLECTION = 'patients';
  * @param patient The patient data to save, coming from the registration form.
  * @returns The ID of the newly created patient.
  */
-export async function registerNewPatient(patient: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'>) {
+export async function registerNewPatient(patientForDb: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'>) {
     try {
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
 
         const newPatientData: PatientData = {
             // Directly from form
-            firstName: patient.firstName,
-            lastName: patient.lastName,
-            nephroId: patient.nephroId,
-            dateOfBirth: patient.dateOfBirth,
-            gender: patient.gender,
-            contactPhone: patient.contactPhone,
-            addressLine1: patient.addressLine1,
-            city: patient.city,
-            stateProvince: patient.stateProvince,
-            postalCode: patient.postalCode,
-            physician: patient.physician,
-            pdStartDate: patient.pdStartDate,
-            underlyingKidneyDisease: patient.underlyingKidneyDisease,
-            educationLevel: patient.educationLevel,
-            pdExchangeType: patient.pdExchangeType,
+            firstName: patientForDb.firstName,
+            lastName: patientForDb.lastName,
+            nephroId: patientForDb.nephroId,
+            dateOfBirth: patientForDb.dateOfBirth,
+            gender: patientForDb.gender,
+            contactPhone: patientForDb.contactPhone,
+            addressLine1: patientForDb.addressLine1,
+            city: patientForDb.city,
+            stateProvince: patientForDb.stateProvince,
+            postalCode: patientForDb.postalCode,
+            physician: patientForDb.physician,
+            pdStartDate: patientForDb.pdStartDate,
+            underlyingKidneyDisease: patientForDb.underlyingKidneyDisease,
+            educationLevel: patientForDb.educationLevel,
+            pdExchangeType: patientForDb.pdExchangeType,
             
             // Generated/Default values
             patientId: newPatientId,
-            currentStatus: patient.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
+            currentStatus: patientForDb.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
             
             // Default nested objects
@@ -458,5 +458,7 @@ export async function getClinicKpis() {
         missedVisits,
     };
 }
+
+    
 
     

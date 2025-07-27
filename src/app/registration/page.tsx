@@ -108,7 +108,7 @@ const DateOfBirthInput = ({
   value?: Date;
   onChange: (date?: Date) => void;
 }) => {
-  const [manualDate, setManualDate] = useState<string>(value ? format(value, 'dd-MM-yyyy') : '');
+  const [manualDate, setManualDate] = useState<string>('');
 
   useEffect(() => {
     if (value && isValid(value)) {
@@ -176,11 +176,11 @@ const OptionalDateInput = ({
   value?: Date;
   onChange: (date?: Date) => void;
 }) => {
-  const [manualDate, setManualDate] = useState<string>(value ? format(value, 'dd-MM-yyyy') : '');
+  const [manualDate, setManualDate] = useState<string>('');
 
   useEffect(() => {
     if (value && isValid(value)) {
-      setManualDate(format(value, 'dd-MM-yyyy'));
+        setManualDate(format(value, 'dd-MM-yyyy'));
     } else if (!value) {
         setManualDate('');
     }
@@ -317,7 +317,15 @@ export default function ClinicianPatientRegistrationPage() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const result = await registerNewPatient(values);
+    
+    // Convert dates to ISO strings for the server action
+    const dataForAction = {
+        ...values,
+        dateOfBirth: values.dateOfBirth.toISOString(),
+        pdStartDate: values.pdStartDate?.toISOString(),
+    };
+
+    const result = await registerNewPatient(dataForAction);
     
     if (result.success && result.patientId) {
         toast({
@@ -548,3 +556,5 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
+
+    
