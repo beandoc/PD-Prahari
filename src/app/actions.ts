@@ -14,20 +14,25 @@ import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, se
 const PATIENTS_COLLECTION = 'patients';
 
 /**
- * Creates a new patient document in Firestore.
- * @param patient The patient data to save.
+ * Creates a new patient document in Firestore from the registration form data.
+ * @param patient The patient data to save, coming from the registration form.
  * @returns The ID of the newly created patient.
  */
-export async function registerNewPatient(patient: Omit<PatientData, 'patientId' | 'currentStatus' | 'lastUpdated' | 'prescription' | 'vitals' | 'labResults' | 'pdEvents' | 'medications' | 'peritonitisEpisodes' | 'urineOutputLogs' | 'pdAdequacy' | 'patientReportedOutcomes' | 'uploadedImages' | 'admissions' | 'nutritionLifestyle' | 'patientEducation'>) {
+export async function registerNewPatient(patient: Omit<PatientData, 'patientId' | 'currentStatus' | 'lastUpdated' | 'prescription' | 'vitals' | 'labResults' | 'pdEvents' | 'medications' | 'peritonitisEpisodes' | 'urineOutputLogs' | 'pdAdequacy' | 'patientReportedOutcomes' | 'uploadedImages' | 'admissions' | 'nutritionLifestyle' | 'patientEducation' | 'contactInfo'> & { emergencyContactWhatsapp?: string, emergencyContactRelation?: string }) {
     try {
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
 
         const newPatientData: PatientData = {
+            // Directly from form
             ...patient,
+            
+            // Generated/Default values
             patientId: newPatientId,
             currentStatus: 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
+            
+            // Default nested objects
             prescription: {
                 exchange: 'CAPD',
                 pdStrength: '',
@@ -36,6 +41,29 @@ export async function registerNewPatient(patient: Omit<PatientData, 'patientId' 
                 exchangeTimeMinutes: 30,
                 regimen: [],
             },
+            contactInfo: {
+                clinicName: 'PD Prahari Clinic',
+                clinicPhone: '9876543210',
+                coordinatorName: 'Mr. Kamlesh',
+                coordinatorPhone: '9876543211',
+            },
+            nutritionLifestyle: {
+                dailyProtein: { current: 0, target: 80 },
+                fluidRestriction: { current: 0, limit: 1.5 },
+                caloriesToday: { current: 0, target: 2200 },
+                dailyActivity: { current: 0, target: 5000 },
+            },
+            clinicVisits: {
+                nextAppointment: '',
+                lastVisitSummary: 'Patient newly registered.',
+            },
+            patientEducation: [
+                { id: '1', title: 'Intro to Peritoneal Dialysis', description: 'Learn the basics of PD therapy.', icon: 'Video' },
+                { id: '2', title: 'Aseptic Technique Guide', description: 'How to prevent infections.', icon: 'ShieldCheck' },
+                { id: '3', title: 'Renal Diet Essentials', description: 'Managing your diet on dialysis.', icon: 'Apple' },
+            ],
+
+            // Empty arrays for clinical data
             vitals: [],
             labResults: [],
             pdEvents: [],
@@ -46,17 +74,6 @@ export async function registerNewPatient(patient: Omit<PatientData, 'patientId' 
             patientReportedOutcomes: [],
             uploadedImages: [],
             admissions: [],
-            nutritionLifestyle: {
-                dailyProtein: { current: 60, target: 80 },
-                fluidRestriction: { current: 1.2, limit: 1.5 },
-                caloriesToday: { current: 1800, target: 2200 },
-                dailyActivity: { current: 3000, target: 5000 },
-            },
-            patientEducation: [
-                { id: '1', title: 'Intro to Peritoneal Dialysis', description: 'Learn the basics of PD therapy.', icon: 'Video' },
-                { id: '2', title: 'Aseptic Technique Guide', description: 'How to prevent infections.', icon: 'ShieldCheck' },
-                { id: '3', title: 'Renal Diet Essentials', description: 'Managing your diet on dialysis.', icon: 'Apple' },
-            ],
         };
 
         await setDoc(patientDocRef, newPatientData);
@@ -427,3 +444,5 @@ export async function getClinicKpis() {
         missedVisits,
     };
 }
+
+    

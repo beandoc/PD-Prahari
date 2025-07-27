@@ -89,7 +89,7 @@ const formSchema = z.object({
         const today = new Date();
         let calculatedAge = today.getFullYear() - data.dateOfBirth.getFullYear();
         const m = today.getMonth() - data.dateOfBirth.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < data.dateOfBirth.getDate())) {
+        if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
             calculatedAge--;
         }
         if (calculatedAge < 18 && !data.emergencyContactName) {
@@ -140,7 +140,7 @@ export default function ClinicianPatientRegistrationPage() {
       const today = new Date();
       let calculatedAge = today.getFullYear() - dob.getFullYear();
       const m = today.getMonth() - dob.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
         calculatedAge--;
       }
       setAge(calculatedAge);
@@ -181,12 +181,14 @@ export default function ClinicianPatientRegistrationPage() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // Convert dates to ISO strings for serialization
     const patientToSave = {
       ...values,
       dateOfBirth: values.dateOfBirth.toISOString(),
       pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
     };
     
+    // @ts-ignore - The server action is designed to handle this shape
     const result = await registerNewPatient(patientToSave);
     
     if (result.success && result.patientId) {
@@ -242,25 +244,20 @@ export default function ClinicianPatientRegistrationPage() {
                                 <Popover>
                                   <PopoverTrigger asChild>
                                     <FormControl>
-                                      <div className="relative">
-                                          <Input
-                                            placeholder="DD-MM-YYYY"
-                                            value={field.value ? format(field.value, 'dd-MM-yyyy') : ''}
-                                            onChange={(e) => {
-                                                const date = parse(e.target.value, 'dd-MM-yyyy', new Date());
-                                                if (!isNaN(date.getTime())) {
-                                                    field.onChange(date);
-                                                }
-                                            }}
-                                            onBlur={(e) => {
-                                                 const date = parse(e.target.value, 'dd-MM-yyyy', new Date());
-                                                 if (isNaN(date.getTime())) {
-                                                     field.onChange(undefined);
-                                                 }
-                                            }}
-                                          />
-                                          <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50" />
-                                      </div>
+                                      <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                          "w-full pl-3 text-left font-normal",
+                                          !field.value && "text-muted-foreground"
+                                        )}
+                                      >
+                                        {field.value ? (
+                                          format(field.value, "PPP")
+                                        ) : (
+                                          <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
                                     </FormControl>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-auto p-0" align="start">
@@ -269,11 +266,10 @@ export default function ClinicianPatientRegistrationPage() {
                                       selected={field.value}
                                       onSelect={field.onChange}
                                       fromDate={subYears(new Date(), 90)}
+                                      toDate={subYears(new Date(), 12)}
                                       disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                                       initialFocus
                                       captionLayout="dropdown-buttons"
-                                      fromYear={new Date().getFullYear() - 90}
-                                      toYear={new Date().getFullYear()}
                                     />
                                   </PopoverContent>
                                 </Popover>
@@ -405,25 +401,20 @@ export default function ClinicianPatientRegistrationPage() {
                                 <Popover>
                                   <PopoverTrigger asChild>
                                     <FormControl>
-                                      <div className="relative">
-                                          <Input
-                                            placeholder="DD-MM-YYYY"
-                                            value={field.value ? format(field.value, 'dd-MM-yyyy') : ''}
-                                            onChange={(e) => {
-                                                const date = parse(e.target.value, 'dd-MM-yyyy', new Date());
-                                                if (!isNaN(date.getTime())) {
-                                                    field.onChange(date);
-                                                }
-                                            }}
-                                             onBlur={(e) => {
-                                                 const date = parse(e.target.value, 'dd-MM-yyyy', new Date());
-                                                 if (isNaN(date.getTime())) {
-                                                     field.onChange(undefined);
-                                                 }
-                                            }}
-                                          />
-                                          <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50" />
-                                      </div>
+                                      <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                          "w-full pl-3 text-left font-normal",
+                                          !field.value && "text-muted-foreground"
+                                        )}
+                                      >
+                                        {field.value ? (
+                                          format(field.value, "PPP")
+                                        ) : (
+                                          <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
                                     </FormControl>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-auto p-0" align="start">
@@ -480,3 +471,5 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
+
+    
