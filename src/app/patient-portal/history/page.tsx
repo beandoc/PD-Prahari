@@ -2,26 +2,36 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart } from 'recharts';
-import { Droplets, History, TrendingUp } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart as BarChartIcon } from 'recharts';
+import { Droplets, History, TrendingUp, Loader2 } from 'lucide-react';
 import { getSyncedPatientData } from '@/app/actions';
 import type { PatientData, PDEvent } from '@/lib/types';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LogHistoryPage() {
+    const router = useRouter();
+    const { toast } = useToast();
     const [patientData, setPatientData] = useState<PatientData | null>(null);
     const [dailyUfData, setDailyUfData] = useState<{ date: string; uf: number; }[]>([]);
     const [allEvents, setAllEvents] = useState<PDEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Using a fixed patient for demonstration
-        getSyncedPatientData('PAT-001').then(data => {
+        const patientId = sessionStorage.getItem('loggedInPatientId');
+        if (!patientId) {
+            toast({ title: "Not logged in", description: "Redirecting to login.", variant: "destructive" });
+            router.push('/patient-login');
+            return;
+        }
+
+        getSyncedPatientData(patientId).then(data => {
             if (data) {
                 setPatientData(data);
                 const events = [...data.pdEvents].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
@@ -45,7 +55,34 @@ export default function LogHistoryPage() {
             }
             setIsLoading(false);
         });
-    }, []);
+    }, [router, toast]);
+
+  if (isLoading) {
+    return (
+        <div className="space-y-6">
+            <Skeleton className="h-12 w-1/3" />
+            <Skeleton className="h-8 w-2/3" />
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-8 w-1/2" />
+                    <Skeleton className="h-4 w-3/4" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-[300px] w-full" />
+                </CardContent>
+            </Card>
+            <Card>
+                 <CardHeader>
+                    <Skeleton className="h-8 w-1/2" />
+                    <Skeleton className="h-4 w-3/4" />
+                </CardHeader>
+                <CardContent>
+                     <Skeleton className="h-[400px] w-full" />
+                </CardContent>
+            </Card>
+        </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -65,11 +102,7 @@ export default function LogHistoryPage() {
            </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center h-[300px]">
-                <Skeleton className="h-[250px] w-full" />
-            </div>
-          ) : dailyUfData.length > 0 ? (
+          {dailyUfData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={dailyUfData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -82,7 +115,7 @@ export default function LogHistoryPage() {
             </ResponsiveContainer>
           ) : (
             <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-slate-50 rounded-lg border border-dashed">
-              <BarChart className="h-12 w-12 mb-4" />
+              <BarChartIcon className="h-12 w-12 mb-4" />
               <p className="font-semibold">Not enough data to display a trend.</p>
               <p className="text-sm mt-1">Start logging your exchanges to see your progress here.</p>
             </div>
@@ -114,15 +147,7 @@ export default function LogHistoryPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {isLoading ? (
-                             Array.from({ length: 10 }).map((_, index) => (
-                                <TableRow key={index}>
-                                    <TableCell colSpan={6}>
-                                        <Skeleton className="h-8 w-full my-1" />
-                                    </TableCell>
-                                </TableRow>
-                             ))
-                        ) : allEvents.length > 0 ? allEvents.map(event => (
+                        {allEvents.length > 0 ? allEvents.map(event => (
                             <TableRow key={event.exchangeId}>
                                 <TableCell className="py-3">{format(new Date(event.exchangeDateTime), 'yyyy-MM-dd HH:mm')}</TableCell>
                                 <TableCell className="py-3">{event.dialysateType}</TableCell>

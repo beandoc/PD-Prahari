@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   CircleUser,
   FileText,
@@ -11,7 +11,6 @@ import {
   User,
   Menu,
   LayoutDashboard,
-  Users,
   LogOut,
   MessageSquare,
 } from 'lucide-react';
@@ -27,9 +26,10 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
-import { getLiveAllPatientData } from '../actions';
+import { getSyncedPatientData } from '../actions';
 import { PatientData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 const patientNavLinks = [
   { href: '/patient-portal', label: 'Dashboard', icon: LayoutDashboard },
@@ -45,19 +45,36 @@ export default function PatientPortalLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // In a real app, you would get the current logged-in user's ID
-    // For this demo, we'll fetch all and use the first one.
-    getLiveAllPatientData().then(allPatients => {
-      if (allPatients.length > 0) {
-        setPatient(allPatients[0]);
+    const patientId = sessionStorage.getItem('loggedInPatientId');
+    if (!patientId) {
+      toast({ title: "Not logged in", description: "Redirecting to login page.", variant: "destructive" });
+      router.push('/patient-login');
+      return;
+    }
+    
+    getSyncedPatientData(patientId).then(data => {
+      if (data) {
+        setPatient(data);
+      } else {
+         toast({ title: "Error", description: "Could not load patient data.", variant: "destructive" });
+         sessionStorage.removeItem('loggedInPatientId');
+         router.push('/patient-login');
       }
       setIsLoading(false);
     });
-  }, []);
+  }, [router, toast]);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('loggedInPatientId');
+    toast({ title: "Logged out successfully." });
+    router.push('/patient-login');
+  }
 
   if (isLoading || !patient) {
     return (
@@ -112,11 +129,9 @@ export default function PatientPortalLayout({
             </nav>
           </div>
           <div className="mt-auto p-4 border-t">
-             <Button asChild variant="outline" className="w-full">
-                <Link href="/">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                </Link>
+             <Button onClick={handleLogout} variant="outline" className="w-full">
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
               </Button>
            </div>
         </div>
@@ -160,11 +175,9 @@ export default function PatientPortalLayout({
                 ))}
               </nav>
                <div className="mt-auto">
-                 <Button asChild variant="outline" className="w-full">
-                    <Link href="/">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Logout
-                    </Link>
+                 <Button onClick={handleLogout} variant="outline" className="w-full">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
                 </Button>
               </div>
             </SheetContent>
@@ -187,8 +200,8 @@ export default function PatientPortalLayout({
               <DropdownMenuItem asChild><Link href="/patient-portal/profile">My Profile</Link></DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/">Logout</Link>
+              <DropdownMenuItem onClick={handleLogout}>
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

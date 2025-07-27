@@ -3,15 +3,71 @@
 
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
-import type { PatientData, PDEvent, Vital, LabResult, Medication } from '@/lib/types';
+import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, setDoc, query, where } from 'firebase/firestore';
 
 
 // --- Firestore Data Store (Server-Side) ---
 
 const PATIENTS_COLLECTION = 'patients';
+
+/**
+ * Creates a new patient document in Firestore.
+ * @param patient The patient data to save.
+ * @returns The ID of the newly created patient.
+ */
+export async function registerNewPatient(patient: Omit<Patient, 'patientId' | 'currentStatus'>) {
+    try {
+        const newPatientId = `PAT-${Date.now()}`;
+        const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
+
+        const newPatientData: PatientData = {
+            ...patient,
+            patientId: newPatientId,
+            currentStatus: 'Awaiting Catheter',
+            lastUpdated: new Date().toISOString(),
+            prescription: {
+                exchange: 'CAPD',
+                pdStrength: '',
+                dwellTimeHours: 4,
+                dwellVolumeML: 2000,
+                exchangeTimeMinutes: 30,
+                regimen: [],
+            },
+            vitals: [],
+            labResults: [],
+            pdEvents: [],
+            medications: [],
+            peritonitisEpisodes: [],
+            urineOutputLogs: [],
+            pdAdequacy: [],
+            patientReportedOutcomes: [],
+            uploadedImages: [],
+            admissions: [],
+            nutritionLifestyle: {
+                dailyProtein: { current: 60, target: 80 },
+                fluidRestriction: { current: 1.2, limit: 1.5 },
+                caloriesToday: { current: 1800, target: 2200 },
+                dailyActivity: { current: 3000, target: 5000 },
+            },
+            patientEducation: [
+                { id: '1', title: 'Intro to Peritoneal Dialysis', description: 'Learn the basics of PD therapy.', icon: 'Video' },
+                { id: '2', title: 'Aseptic Technique Guide', description: 'How to prevent infections.', icon: 'ShieldCheck' },
+                { id: '3', title: 'Renal Diet Essentials', description: 'Managing your diet on dialysis.', icon: 'Apple' },
+            ],
+        };
+
+        await setDoc(patientDocRef, newPatientData);
+        console.log(`[FIRESTORE] New patient registered with ID: ${newPatientId}`);
+        return { success: true, patientId: newPatientId };
+    } catch (error) {
+        console.error("Error registering new patient:", error);
+        return { success: false, error: 'Failed to register new patient.' };
+    }
+}
+
 
 /**
  * Retrieves the current state of a single patient's data from Firestore.
@@ -32,6 +88,27 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
         return null;
     }
 }
+
+/**
+ * Retrieves a patient by their Nephro ID for login purposes.
+ * @param nephroId The Nephro ID of the patient.
+ * @returns A promise that resolves to the patient data or null if not found.
+ */
+export async function getPatientByNephroId(nephroId: string): Promise<PatientData | null> {
+    try {
+        const q = query(collection(db, PATIENTS_COLLECTION), where("nephroId", "==", nephroId));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            // Assuming nephroId is unique, return the first match
+            return querySnapshot.docs[0].data() as PatientData;
+        }
+        return null;
+    } catch (error) {
+        console.error(`Error fetching patient by Nephro ID ${nephroId}:`, error);
+        return null;
+    }
+}
+
 
 /**
  * Retrieves the current state of all patient data from Firestore.
@@ -346,7 +423,3 @@ export async function getClinicKpis() {
         missedVisits,
     };
 }
-
-    
-
-    

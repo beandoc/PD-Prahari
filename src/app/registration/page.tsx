@@ -35,6 +35,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { indianStates } from '@/data/locations';
+import { registerNewPatient } from '@/app/actions';
 
 const formSchema = z.object({
   // Demographics
@@ -61,7 +62,7 @@ const formSchema = z.object({
     }
     return age <= 90;
   }, { message: "Patient cannot be more than 90 years old." }),
-  gender: z.string().optional(),
+  gender: z.enum(['Male', 'Female', 'Other']),
   educationLevel: z.string().optional(),
   
   // Contact
@@ -126,7 +127,6 @@ export default function ClinicianPatientRegistrationPage() {
       underlyingKidneyDisease: '',
       physician: '',
       educationLevel: '',
-      gender: '',
     },
   });
 
@@ -163,7 +163,7 @@ export default function ClinicianPatientRegistrationPage() {
   const nextStep = async () => {
     let fieldsToValidate: (keyof z.infer<typeof formSchema>)[];
     if (step === 1) {
-        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth'];
+        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth', 'emergencyContactName'];
     } else {
         return;
     }
@@ -178,19 +178,29 @@ export default function ClinicianPatientRegistrationPage() {
     setStep(step - 1);
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const patientToSave = {
+        ...values,
+        dateOfBirth: values.dateOfBirth.toISOString(),
+        pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : '',
+        stateProvince: values.state,
+    };
     
-    // In a real app, you would get a patient ID from the backend.
-    // For this demo, we'll create a new ID and redirect.
-    const newPatientId = 'PAT-001'; // Redirecting to the first patient for demo purposes.
-
-    toast({
-      title: "Patient Registered Successfully",
-      description: `Patient ${values.firstName} ${values.lastName} has been added. Redirecting to their profile...`,
-    });
+    const result = await registerNewPatient(patientToSave);
     
-    router.push(`/dashboard/patients/${newPatientId}`);
+    if (result.success && result.patientId) {
+        toast({
+            title: "Patient Registered Successfully",
+            description: `Patient ${values.firstName} ${values.lastName} has been added. Redirecting...`,
+        });
+        router.push(`/dashboard/patients/${result.patientId}`);
+    } else {
+         toast({
+            title: "Registration Failed",
+            description: result.error || "An unknown error occurred.",
+            variant: "destructive",
+        });
+    }
   }
 
   return (
@@ -244,7 +254,7 @@ export default function ClinicianPatientRegistrationPage() {
                             <FormItem><FormLabel>Gender</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl>
-                                    <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                                    <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
                                 </Select><FormMessage />
                             </FormItem>
                         )} />

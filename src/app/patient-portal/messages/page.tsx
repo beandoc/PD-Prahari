@@ -2,17 +2,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Send, MessageSquare } from 'lucide-react';
+import { Search, Send, MessageSquare, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getLiveAllPatientData } from '@/app/actions';
+import { getSyncedPatientData } from '@/app/actions';
 import type { PatientData } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PatientMessagesPage() {
+    const router = useRouter();
+    const { toast } = useToast();
     const [patient, setPatient] = useState<PatientData | null>(null);
     const [selectedConversation, setSelectedConversation] = useState<any>(null);
     const [conversations, setConversations] = useState<any[]>([]);
@@ -20,10 +24,21 @@ export default function PatientMessagesPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        const patientId = sessionStorage.getItem('loggedInPatientId');
+        if (!patientId) {
+            toast({ title: "Not logged in", description: "Redirecting to login.", variant: "destructive" });
+            router.push('/patient-login');
+            return;
+        }
+
         const fetchPatient = async () => {
-            // In a real app, you'd get the logged-in patient's ID
-            const allPatients = await getLiveAllPatientData();
-            const currentPatient = allPatients[0]; // Using first patient for demo
+            const currentPatient = await getSyncedPatientData(patientId);
+            if (!currentPatient) {
+                toast({ title: "Error", description: "Could not load patient data.", variant: "destructive" });
+                router.push('/patient-login');
+                return;
+            }
+
             setPatient(currentPatient);
 
             const convos = [
@@ -35,11 +50,11 @@ export default function PatientMessagesPage() {
             setIsLoading(false);
         };
         fetchPatient();
-    }, []);
+    }, [router, toast]);
 
     const messages = {
         '1': [
-            { from: 'other', text: 'Hi Rohan, your latest lab results are in. Everything looks stable.', time: '10:40 AM' },
+            { from: 'other', text: `Hi ${patient?.firstName || ''}, your latest lab results are in. Everything looks stable.`, time: '10:40 AM' },
             { from: 'me', text: 'That\'s great news!', time: '10:41 AM' },
             { from: 'other', text: 'Keep up the good work with your logs.', time: '10:41 AM' },
         ],
@@ -56,7 +71,11 @@ export default function PatientMessagesPage() {
     };
 
     if (isLoading || !selectedConversation) {
-        return <div>Loading messages...</div>;
+        return (
+            <div className="h-[calc(100vh-100px)] flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        )
     }
 
     return (
@@ -115,7 +134,7 @@ export default function PatientMessagesPage() {
                     </div>
                     <ScrollArea className="flex-1 bg-slate-50 p-4">
                         <div className="space-y-4">
-                            {messages[selectedConversation.id].map((msg, index) => (
+                            {(messages[selectedConversation.id] || []).map((msg, index) => (
                                 <div key={index} className={cn(
                                     "flex items-end gap-2",
                                     msg.from === 'me' ? 'justify-end' : 'justify-start'

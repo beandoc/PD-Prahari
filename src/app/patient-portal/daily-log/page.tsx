@@ -2,17 +2,18 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Camera, Droplets, HeartPulse, Weight, Thermometer, FlaskConical, Clock, Zap, CalendarIcon, AlertTriangle, BriefcaseMedical } from 'lucide-react';
+import { Camera, Droplets, HeartPulse, Weight, Thermometer, FlaskConical, BriefcaseMedical, CalendarIcon, Loader2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { format, subDays, parseISO, setHours, setMinutes } from 'date-fns';
+import { format, setHours } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,6 +22,7 @@ import { savePatientLog, getSyncedPatientData, triggerCloudyFluidAlert } from '@
 import { useToast } from '@/hooks/use-toast';
 import type { PatientData, Vital, PDEvent } from '@/lib/types';
 import { postDataUpdate } from '@/lib/broadcast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 interface ExchangeLog {
@@ -45,7 +47,9 @@ interface VitalsLog {
 }
 
 export default function PatientDailyLogPage() {
+  const router = useRouter();
   const [patientData, setPatientData] = useState<PatientData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [date, setDate] = useState<Date>(new Date());
   const [exchanges, setExchanges] = useState<ExchangeLog[]>([]);
   const [vitals, setVitals] = useState<VitalsLog>({
@@ -62,11 +66,17 @@ export default function PatientDailyLogPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // For demonstration, we'll use the first patient's data
-    getSyncedPatientData('PAT-001').then(data => {
+    const patientId = sessionStorage.getItem('loggedInPatientId');
+    if (!patientId) {
+        toast({ title: "Not logged in", description: "Redirecting to login.", variant: "destructive" });
+        router.push('/patient-login');
+        return;
+    }
+
+    getSyncedPatientData(patientId).then(data => {
       if (data) {
         setPatientData(data);
-        if (data.prescription.regimen) {
+        if (data.prescription?.regimen?.length) {
           const initialExchanges = data.prescription.regimen.map((item, index) => ({
               id: index,
               name: item.name,
@@ -80,8 +90,9 @@ export default function PatientDailyLogPage() {
           setExchanges(initialExchanges);
         }
       }
+      setIsLoading(false);
     });
-  }, []);
+  }, [router, toast]);
 
   
   const handleExchangeChange = (id: number, field: keyof Omit<ExchangeLog, 'id' | 'name' | 'dialysateType' | 'fillVolume' | 'dwellTime'>, value: string | boolean) => {
@@ -191,8 +202,23 @@ export default function PatientDailyLogPage() {
 
   };
   
-  if (!patientData) {
-    return <div>Loading...</div>; // Or a skeleton loader
+  if (isLoading || !patientData) {
+    return (
+        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-8">
+            <div className="max-w-4xl mx-auto space-y-8">
+                <Skeleton className="h-12 w-1/2" />
+                <Skeleton className="h-8 w-1/3" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Skeleton className="h-24 w-full md:col-span-1" />
+                    <Skeleton className="h-48 w-full md:col-span-2" />
+                </div>
+                <Skeleton className="h-64 w-full" />
+                 <div className="flex justify-end pt-4">
+                     <Skeleton className="h-12 w-48" />
+                 </div>
+            </div>
+        </div>
+    )
   }
   
   return (
@@ -234,7 +260,7 @@ export default function PatientDailyLogPage() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {patientData.prescription.regimen ? (
+                    {patientData.prescription.regimen && patientData.prescription.regimen.length > 0 ? (
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
@@ -433,5 +459,3 @@ export default function PatientDailyLogPage() {
     </div>
   );
 }
-
-    

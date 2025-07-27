@@ -2,25 +2,41 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, History, User, ArrowRight } from 'lucide-react';
+import { FileText, History, User, ArrowRight, Loader2 } from 'lucide-react';
 import { getSyncedPatientData } from '@/app/actions';
 import type { PatientData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PatientPortalDashboard() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-      // Using fixed patient for demonstration
-      getSyncedPatientData('PAT-001').then(data => {
-          setPatient(data);
+      const patientId = sessionStorage.getItem('loggedInPatientId');
+      if (!patientId) {
+          toast({ title: "Not logged in", description: "Redirecting to login.", variant: "destructive" });
+          router.push('/patient-login');
+          return;
+      }
+      
+      getSyncedPatientData(patientId).then(data => {
+          if (data) {
+              setPatient(data);
+          } else {
+              toast({ title: "Error", description: "Could not load patient data.", variant: "destructive" });
+              sessionStorage.removeItem('loggedInPatientId');
+              router.push('/patient-login');
+          }
           setIsLoading(false);
       });
-  }, []);
+  }, [router, toast]);
 
   if (isLoading || !patient) {
       return (
