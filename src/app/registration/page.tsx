@@ -184,7 +184,7 @@ export default function ClinicianPatientRegistrationPage() {
     const patientToSave = {
         ...values,
         dateOfBirth: values.dateOfBirth.toISOString(),
-        pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
+        pdStartDate: values.pdStartDate?.toISOString(), // Correctly convert Date to string
         stateProvince: values.state,
     };
     
