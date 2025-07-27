@@ -29,7 +29,7 @@ const messages = {
 
 
 export default function MessagesPage() {
-    const [allPatientData, setAllPatientData] = useState<PatientData[]>([]);
+    const [patientList, setPatientList] = useState<PatientData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [conversations, setConversations] = useState<any[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<any>(null);
@@ -39,7 +39,7 @@ export default function MessagesPage() {
         const fetchData = async () => {
             setIsLoading(true);
             const data = await getLiveAllPatientData();
-            setAllPatientData(data);
+            setPatientList(data);
             
             if (data.length > 0) {
                 const generatedConversations = [
