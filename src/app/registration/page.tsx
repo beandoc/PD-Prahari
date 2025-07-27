@@ -113,7 +113,7 @@ const DateOfBirthInput = ({
   useEffect(() => {
     if (value && isValid(value)) {
       setManualDate(format(value, 'dd-MM-yyyy'));
-    } else if (!value) {
+    } else {
       setManualDate('');
     }
   }, [value]);
@@ -181,7 +181,7 @@ const OptionalDateInput = ({
   useEffect(() => {
     if (value && isValid(value)) {
         setManualDate(format(value, 'dd-MM-yyyy'));
-    } else if (!value) {
+    } else {
         setManualDate('');
     }
   }, [value]);
@@ -371,10 +371,10 @@ export default function ClinicianPatientRegistrationPage() {
                         <FormField control={form.control} name="nephroId" render={({ field }) => (
                             <FormItem><FormLabel>Nephro ID / UHID <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                        <FormField
+                        <Controller
                             control={form.control}
                             name="dateOfBirth"
-                            render={({ field }) => (
+                            render={({ field, fieldState }) => (
                                 <FormItem className="flex flex-col">
                                 <FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
                                 <FormControl>
@@ -386,7 +386,7 @@ export default function ClinicianPatientRegistrationPage() {
                                 {age !== null && age < 18 && (
                                     <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor (Age: {age}). Guardian details are mandatory.</FormDescription>
                                 )}
-                                <FormMessage />
+                                <FormMessage>{fieldState.error?.message}</FormMessage>
                                 </FormItem>
                             )}
                         />
@@ -505,18 +505,22 @@ export default function ClinicianPatientRegistrationPage() {
                         <FormField control={form.control} name="underlyingKidneyDisease" render={({ field }) => (
                             <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem>
                         )} />
-                        <FormField control={form.control} name="pdStartDate" render={({ field }) => (
-                             <FormItem className="flex flex-col">
-                              <FormLabel>PD Start Date</FormLabel>
-                                <FormControl>
-                                  <OptionalDateInput
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
+                        <Controller
+                            control={form.control}
+                            name="pdStartDate"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                <FormLabel>PD Start Date</FormLabel>
+                                    <FormControl>
+                                    <OptionalDateInput
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
                             <FormItem><FormLabel>PD Exchange Type <span className="text-destructive">*</span></FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>

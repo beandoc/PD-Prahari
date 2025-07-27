@@ -18,7 +18,7 @@ const PATIENTS_COLLECTION = 'patients';
  * @param patientFormData The patient data to save, coming directly from the registration form.
  * @returns The ID of the newly created patient.
  */
-export async function registerNewPatient(patientFormData: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'> & { pdStartDate?: string }) {
+export async function registerNewPatient(patientFormData: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'>) {
     try {
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
