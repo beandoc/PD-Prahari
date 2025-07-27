@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     async function fetchData() {
         setIsLoading(true);
-        const data = getLiveAllPatientData();
+        const data = await getLiveAllPatientData();
         setAllPatientData(data);
         const rate = await getPeritonitisRate();
         setPeritonitisRate(rate);

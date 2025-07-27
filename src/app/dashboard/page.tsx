@@ -117,27 +117,28 @@ export default function DoctorDashboard() {
   const [completedConsultations, setCompletedConsultations] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    const data = getLiveAllPatientData();
-    setAllPatientData(data);
-    
-    // Check for a recently completed patient from session storage
-    const completedId = sessionStorage.getItem('justCompletedPatient');
-    if (completedId) {
-        setCompletedConsultations(prev => {
-            const newSet = new Set(prev);
-            newSet.add(completedId);
-            sessionStorage.setItem('completedConsultations', JSON.stringify(Array.from(newSet)));
-            return newSet;
-        });
-        sessionStorage.removeItem('justCompletedPatient');
-    } else {
-         const storedCompleted = sessionStorage.getItem('completedConsultations');
-        if (storedCompleted) {
-            setCompletedConsultations(new Set(JSON.parse(storedCompleted)));
+    getLiveAllPatientData().then(data => {
+        setAllPatientData(data);
+        
+        // Check for a recently completed patient from session storage
+        const completedId = sessionStorage.getItem('justCompletedPatient');
+        if (completedId) {
+            setCompletedConsultations(prev => {
+                const newSet = new Set(prev);
+                newSet.add(completedId);
+                sessionStorage.setItem('completedConsultations', JSON.stringify(Array.from(newSet)));
+                return newSet;
+            });
+            sessionStorage.removeItem('justCompletedPatient');
+        } else {
+             const storedCompleted = sessionStorage.getItem('completedConsultations');
+            if (storedCompleted) {
+                setCompletedConsultations(new Set(JSON.parse(storedCompleted)));
+            }
         }
-    }
-    
-    setIsLoading(false);
+        
+        setIsLoading(false);
+    });
   }, []);
 
   const {

@@ -22,14 +22,17 @@ interface Notification {
 
 export default function NotificationsCard() {
     const [allPatientData, setAllPatientData] = useState<PatientData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const data = getLiveAllPatientData();
-        setAllPatientData(data);
+        getLiveAllPatientData().then(data => {
+            setAllPatientData(data);
+            setIsLoading(false);
+        });
     }, []);
 
     const notifications: Notification[] = useMemo(() => {
-        if (!allPatientData.length) {
+        if (isLoading) {
             return [{
                 id: 'loading',
                 icon: <Bell className="h-5 w-5" />,
@@ -98,7 +101,7 @@ export default function NotificationsCard() {
         }
 
         return generatedNotifications;
-    }, [allPatientData]);
+    }, [allPatientData, isLoading]);
 
   return (
     <Card>

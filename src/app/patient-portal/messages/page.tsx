@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,28 +9,44 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, Send, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { allPatientData } from '@/data/mock-data';
-
-const conversations = [
-    { id: 1, name: `Dr. ${allPatientData[0].physician}`, role: 'Nephrologist', lastMessage: 'Keep up the good work with your logs.', time: '10:41 AM', unread: 0, avatar: '/doctor-avatar.png' },
-    { id: 2, name: 'PD Nurse Team', role: 'Nurse', lastMessage: 'Your next home visit is scheduled for tomorrow.', time: 'Yesterday', unread: 1, avatar: '/nurse-avatar.png' },
-];
-
-const messages = {
-    '1': [
-        { from: 'other', text: 'Hi Rohan, your latest lab results are in. Everything looks stable.', time: '10:40 AM' },
-        { from: 'me', text: 'That\'s great news!', time: '10:41 AM' },
-        { from: 'other', text: 'Keep up the good work with your logs.', time: '10:41 AM' },
-    ],
-    '2': [
-        { from: 'other', text: 'Your next home visit is scheduled for tomorrow.', time: 'Yesterday' },
-    ]
-};
-
+import { getLiveAllPatientData } from '@/app/actions';
+import type { PatientData } from '@/lib/types';
 
 export default function PatientMessagesPage() {
-    const [selectedConversation, setSelectedConversation] = useState(conversations[0]);
+    const [patient, setPatient] = useState<PatientData | null>(null);
+    const [selectedConversation, setSelectedConversation] = useState<any>(null);
+    const [conversations, setConversations] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPatient = async () => {
+            // In a real app, you'd get the logged-in patient's ID
+            const allPatients = await getLiveAllPatientData();
+            const currentPatient = allPatients[0]; // Using first patient for demo
+            setPatient(currentPatient);
+
+            const convos = [
+                { id: 1, name: `Dr. ${currentPatient.physician}`, role: 'Nephrologist', lastMessage: 'Keep up the good work with your logs.', time: '10:41 AM', unread: 0, avatar: '/doctor-avatar.png' },
+                { id: 2, name: 'PD Nurse Team', role: 'Nurse', lastMessage: 'Your next home visit is scheduled for tomorrow.', time: 'Yesterday', unread: 1, avatar: '/nurse-avatar.png' },
+            ];
+            setConversations(convos);
+            setSelectedConversation(convos[0]);
+            setIsLoading(false);
+        };
+        fetchPatient();
+    }, []);
+
+    const messages = {
+        '1': [
+            { from: 'other', text: 'Hi Rohan, your latest lab results are in. Everything looks stable.', time: '10:40 AM' },
+            { from: 'me', text: 'That\'s great news!', time: '10:41 AM' },
+            { from: 'other', text: 'Keep up the good work with your logs.', time: '10:41 AM' },
+        ],
+        '2': [
+            { from: 'other', text: 'Your next home visit is scheduled for tomorrow.', time: 'Yesterday' },
+        ]
+    };
     
     const handleSendMessage = () => {
         if (newMessage.trim()) {
@@ -38,6 +54,10 @@ export default function PatientMessagesPage() {
             setNewMessage('');
         }
     };
+
+    if (isLoading || !selectedConversation) {
+        return <div>Loading messages...</div>;
+    }
 
     return (
         <div className="h-[calc(100vh-100px)]">

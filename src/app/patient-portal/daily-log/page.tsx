@@ -12,16 +12,14 @@ import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { allPatientData } from '@/data/mock-data';
 import { format, subDays, parseISO, setHours, setMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { savePatientLog, getSyncedPatientData } from '@/app/actions';
+import { savePatientLog, getSyncedPatientData, triggerCloudyFluidAlert } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { PatientData, Vital, PDEvent } from '@/lib/types';
-import { triggerCloudyFluidAlert } from '@/app/actions';
 
 
 interface ExchangeLog {

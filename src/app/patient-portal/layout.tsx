@@ -26,7 +26,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { allPatientData } from '@/data/mock-data';
+import { useEffect, useState } from 'react';
+import { getLiveAllPatientData } from '../actions';
+import { PatientData } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const patientNavLinks = [
   { href: '/patient-portal', label: 'Dashboard', icon: LayoutDashboard },
@@ -42,7 +45,42 @@ export default function PatientPortalLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const patient = allPatientData[0]; // Using first patient for demonstration
+  const [patient, setPatient] = useState<PatientData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // In a real app, you would get the current logged-in user's ID
+    // For this demo, we'll fetch all and use the first one.
+    getLiveAllPatientData().then(allPatients => {
+      if (allPatients.length > 0) {
+        setPatient(allPatients[0]);
+      }
+      setIsLoading(false);
+    });
+  }, []);
+
+  if (isLoading || !patient) {
+    return (
+      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+        <div className="hidden border-r bg-card md:block p-4 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+        <div className="flex flex-col">
+          <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
+            <Skeleton className="h-8 w-8 rounded-full md:hidden" />
+            <div className="flex-1" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </header>
+          <main className="flex-1 p-6">
+            <Skeleton className="h-[50vh] w-full" />
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">

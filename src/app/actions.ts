@@ -4,48 +4,61 @@
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication } from '@/lib/types';
-import { allPatientData as initialData } from '@/data/mock-data';
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
+import fs from 'fs/promises';
+import path from 'path';
 
-// --- In-Memory Data Store (Server-Side) ---
+// --- File-Based Data Store (Server-Side) ---
 
-// This is our in-memory "database" for the duration of the session.
-// It starts with the mock data and gets updated by actions. Since this is a
-// server module, this state is maintained on the server. In a real-world
-// scenario, this would be replaced with a database like Firestore or PostgreSQL.
-let livePatientData: PatientData[] = JSON.parse(JSON.stringify(initialData));
+const dataFilePath = path.join(process.cwd(), 'src', 'data', 'patient-data.json');
+
+async function readData(): Promise<PatientData[]> {
+    try {
+        const fileContent = await fs.readFile(dataFilePath, 'utf-8');
+        return JSON.parse(fileContent) as PatientData[];
+    } catch (error) {
+        console.error("Error reading data file:", error);
+        return []; // Return empty array if file doesn't exist or is unreadable
+    }
+}
+
+async function writeData(data: PatientData[]): Promise<void> {
+    try {
+        await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
+    } catch (error) {
+        console.error("Error writing data file:", error);
+    }
+}
+
 
 /**
- * Retrieves the current state of a single patient's data from the in-memory store.
+ * Retrieves the current state of a single patient's data from the JSON file.
  * @param patientId The ID of the patient.
  * @returns A promise that resolves to the patient data.
  */
 export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
-  const patient = livePatientData.find(p => p.patientId === patientId);
-  if (patient) {
-    // Return a deep copy to prevent direct state mutation outside of update functions
-    return JSON.parse(JSON.stringify(patient));
-  }
-  return null;
+  const patients = await readData();
+  const patient = patients.find(p => p.patientId === patientId);
+  return patient || null;
 }
 
 /**
- * Retrieves the current state of all patient data from the in-memory store.
+ * Retrieves the current state of all patient data from the JSON file.
  * @returns An array of all patient data.
  */
-export function getLiveAllPatientData(): PatientData[] {
-    // Return a deep copy to prevent direct state mutation
-    return JSON.parse(JSON.stringify(livePatientData));
+export async function getLiveAllPatientData(): Promise<PatientData[]> {
+    return await readData();
 }
 
 /**
- * Saves new patient log data (PD events and vitals) to the in-memory store.
+ * Saves new patient log data (PD events and vitals) to the JSON file.
  * @param patientId The ID of the patient.
  * @param newEvents An array of new PDEvent objects.
  * @param newVital A new Vital object.
  */
 export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
-  livePatientData = livePatientData.map(patient => {
+  let patients = await readData();
+  patients = patients.map(patient => {
     if (patient.patientId === patientId) {
       const updatedPatient = { ...patient };
       const existingEventIds = new Set(updatedPatient.pdEvents.map(e => e.exchangeId));
@@ -61,22 +74,25 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
     }
     return patient;
   });
+  await writeData(patients);
   console.log(`[SYNC] Patient log saved for ${patientId}.`);
   return { success: true };
 }
 
 /**
- * Updates a patient's data in the in-memory store.
+ * Updates a patient's data in the JSON file.
  * @param patientId The ID of the patient.
  * @param updatedData An object containing the fields to update.
  */
 export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
-    livePatientData = livePatientData.map(patient => {
+    let patients = await readData();
+    patients = patients.map(patient => {
         if (patient.patientId === patientId) {
             return { ...patient, ...updatedData, lastUpdated: new Date().toISOString() };
         }
         return patient;
     });
+    await writeData(patients);
     console.log(`[SYNC] Patient data updated for ${patientId}.`, updatedData);
     return { success: true };
 }
@@ -98,7 +114,8 @@ export async function updatePatientNotes(patientId: string, note: string) {
  * @param newLabs An array of new LabResult objects.
  */
 export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
-    livePatientData = livePatientData.map(patient => {
+    let patients = await readData();
+    patients = patients.map(patient => {
         if (patient.patientId === patientId) {
             const updatedPatient = { ...patient };
             const existingLabIds = new Set(updatedPatient.labResults.map(l => l.labResultId));
@@ -109,6 +126,7 @@ export async function updatePatientLabs(patientId: string, newLabs: LabResult[])
         }
         return patient;
     });
+    await writeData(patients);
     console.log(`[SYNC] Lab results updated for ${patientId}.`);
     return { success: true };
 }
@@ -233,7 +251,7 @@ export async function triggerCloudyFluidAlert(patientData: PatientData, event: P
 }
 
 export async function getPeritonitisRate(): Promise<number | null> {
-    const patients = getLiveAllPatientData();
+    const patients = await getLiveAllPatientData();
     let totalPatientMonths = 0;
     let totalEpisodes = 0;
     const today = new Date();
@@ -277,7 +295,7 @@ export async function getPeritonitisRate(): Promise<number | null> {
 }
 
 export async function getClinicKpis() {
-    const allPatientData = getLiveAllPatientData();
+    const allPatientData = await getLiveAllPatientData();
     const today = startOfDay(new Date());
 
     const isToday = (date: Date) => {

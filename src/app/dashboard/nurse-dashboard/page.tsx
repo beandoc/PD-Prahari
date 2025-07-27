@@ -63,24 +63,27 @@ export default function NurseDashboardPage() {
     const [activeFilter, setActiveFilter] = useState<FilterType>('all');
     
     useEffect(() => {
-        const data = getLiveAllPatientData();
-        setAllPatientData(data);
+        getLiveAllPatientData().then(data => {
+            setAllPatientData(data);
 
-        const alerts: AlertItem[] = [];
-        data.forEach(p => {
-            // @ts-ignore - This is a temporary property for demonstration
-            if (p.newCloudyAlert) {
-                // @ts-ignore
-                alerts.push({ patient: p, type: 'cloudy', details: p.newCloudyAlert.details, date: p.newCloudyAlert.date });
+            const alerts: AlertItem[] = [];
+            data.forEach(p => {
+                // @ts-ignore - This is a temporary property for demonstration
+                if (p.newCloudyAlert) {
+                    // @ts-ignore
+                    alerts.push({ patient: p, type: 'cloudy', details: p.newCloudyAlert.details, date: p.newCloudyAlert.date });
+                }
+            });
+            
+            if (data.length > 2) {
+                alerts.push({ patient: data[2], type: 'doctor_note', details: 'Dr. Parikshit: Please schedule a follow-up PET test for Priya D.', date: new Date() });
+                alerts.push({ patient: data[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) });
+                alerts.push({ patient: data[1], type: 'symptom', details: 'Patient reports mild ankle edema.', date: addDays(new Date(), -1) });
             }
-        });
-        
-        alerts.push({ patient: data[2], type: 'doctor_note', details: 'Dr. Parikshit: Please schedule a follow-up PET test for Priya D.', date: new Date() });
-        alerts.push({ patient: data[0], type: 'exit_site', details: 'Patient reports redness and pain at exit site.', date: addDays(new Date(), -1) });
-        alerts.push({ patient: data[1], type: 'symptom', details: 'Patient reports mild ankle edema.', date: addDays(new Date(), -1) });
 
-        setUrgentAlerts(alerts.sort((a, b) => b.date.getTime() - a.date.getTime()));
-        setIsLoading(false);
+            setUrgentAlerts(alerts.sort((a, b) => b.date.getTime() - a.date.getTime()));
+            setIsLoading(false);
+        });
     }, []);
 
     const {
