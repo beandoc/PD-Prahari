@@ -18,6 +18,7 @@ export interface Patient {
   emergencyContactName?: string;
   emergencyContactPhone?: string;
   physician: string;
+  pdNurseId?: string; // NEW: Link to primary PD nurse
   pdStartDate: string;
   underlyingKidneyDisease?: string;
   comorbidities?: string[];
@@ -26,6 +27,25 @@ export interface Patient {
   distanceFromPDCenterKM?: number;
   educationLevel?: string;
   pdExchangeType: 'Assisted' | 'Self';
+}
+
+export interface InsuranceInfo {
+  provider: string;
+  policyNumber: string;
+  groupNumber?: string;
+  isPreAuthorized?: boolean;
+}
+
+export interface CatheterInfo {
+    catheterId: string;
+    catheterType: 'Straight' | 'Coiled' | 'Swan-Neck';
+    brand?: string;
+    insertionDate: string;
+    removalDate?: string;
+    revisionHistory?: Array<{
+        revisionDate: string;
+        reason: string;
+    }>;
 }
 
 export interface Prescription {
@@ -88,6 +108,7 @@ export interface Medication {
   startDate: string;
   endDate?: string | null;
   prescribingDoctor?: string;
+  reason?: string; // NEW: Reason for prescription
   status: 'ok' | 'warning';
 }
 
@@ -98,7 +119,7 @@ export interface PeritonitisEpisode {
   treatmentRegimen: string;
   outcome: 'Resolved' | 'Catheter Removal' | 'Transferred to HD' | 'Deceased' | 'In Treatment';
   resolutionDate?: string;
-  admissionId?: string;
+  wasHospitalized?: boolean; // NEW: Flag for hospitalization
 }
 
 export interface UrineOutputLog {
@@ -167,20 +188,6 @@ export interface ContactInfo {
   coordinatorPhone: string;
 }
 
-export interface Admission {
-  admissionId: string;
-  admissionDate: string;
-  dischargeDate: string;
-  reason: string;
-}
-
-export interface MechanicalComplications {
-    outflowProblems: number;
-    inflowProblems: number;
-    ufFailure: number;
-}
-
-
 export interface PatientData extends Patient {
   // Clinical Data Arrays
   prescription: Prescription;
@@ -193,6 +200,11 @@ export interface PatientData extends Patient {
   pdAdequacy: PDAdequacy[];
   patientReportedOutcomes: PROSurvey[];
   uploadedImages?: UploadedImage[];
+  
+  // NEW: Structural Info
+  insuranceInfo?: InsuranceInfo;
+  catheterInfo?: CatheterInfo;
+  contactInfo?: ContactInfo;
 
   // Data for UI components
   nutritionLifestyle: NutritionLifestyleData;
@@ -210,12 +222,6 @@ export interface PatientData extends Patient {
   additionalNotes?: string;
   nurseCounselingNotes?: string;
   doctorNotes?: string;
-  trainingDay?: number; // Added for training progress tracking
-
-  // New fields for profile page
-  contactInfo?: ContactInfo;
-  admissions?: Admission[];
-  mechanicalComplications?: MechanicalComplications;
+  trainingDay?: number;
 }
-
     
