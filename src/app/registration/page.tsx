@@ -184,11 +184,11 @@ export default function ClinicianPatientRegistrationPage() {
     const patientToSave = {
         ...values,
         dateOfBirth: values.dateOfBirth.toISOString(),
-        pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : '',
+        pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
         stateProvince: values.state,
     };
     
-    const result = await registerNewPatient(patientToSave);
+    const result = await registerNewPatient(patientToSave as any);
     
     if (result.success && result.patientId) {
         toast({
