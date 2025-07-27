@@ -5,97 +5,95 @@ import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjust
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication } from '@/lib/types';
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
-import fs from 'fs/promises';
-import path from 'path';
+import { db } from '@/lib/firebase';
+import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion } from 'firebase/firestore';
 
-// --- File-Based Data Store (Server-Side) ---
 
-const dataFilePath = path.join(process.cwd(), 'src', 'data', 'patient-data.json');
+// --- Firestore Data Store (Server-Side) ---
 
-async function readData(): Promise<PatientData[]> {
-    try {
-        const fileContent = await fs.readFile(dataFilePath, 'utf-8');
-        return JSON.parse(fileContent) as PatientData[];
-    } catch (error) {
-        console.error("Error reading data file:", error);
-        return []; // Return empty array if file doesn't exist or is unreadable
-    }
-}
-
-async function writeData(data: PatientData[]): Promise<void> {
-    try {
-        await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
-    } catch (error) {
-        console.error("Error writing data file:", error);
-    }
-}
-
+const PATIENTS_COLLECTION = 'patients';
 
 /**
- * Retrieves the current state of a single patient's data from the JSON file.
- * @param patientId The ID of the patient.
+ * Retrieves the current state of a single patient's data from Firestore.
+ * @param patientId The ID of the patient document.
  * @returns A promise that resolves to the patient data.
  */
 export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
-  const patients = await readData();
-  const patient = patients.find(p => p.patientId === patientId);
-  return patient || null;
+    try {
+        const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
+        const patientSnap = await getDoc(patientDocRef);
+        if (patientSnap.exists()) {
+            return patientSnap.data() as PatientData;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error reading patient data from Firestore:", error);
+        return null;
+    }
 }
 
 /**
- * Retrieves the current state of all patient data from the JSON file.
+ * Retrieves the current state of all patient data from Firestore.
  * @returns An array of all patient data.
  */
 export async function getLiveAllPatientData(): Promise<PatientData[]> {
-    return await readData();
+    try {
+        const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
+        const querySnapshot = await getDocs(patientsCollectionRef);
+        return querySnapshot.docs.map(doc => doc.data() as PatientData);
+    } catch (error) {
+        console.error("Error reading all patient data from Firestore:", error);
+        return [];
+    }
 }
 
 /**
- * Saves new patient log data (PD events and vitals) to the JSON file.
- * @param patientId The ID of the patient.
+ * Saves new patient log data (PD events and vitals) to Firestore.
+ * @param patientId The ID of the patient document.
  * @param newEvents An array of new PDEvent objects.
  * @param newVital A new Vital object.
  */
 export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
-  let patients = await readData();
-  patients = patients.map(patient => {
-    if (patient.patientId === patientId) {
-      const updatedPatient = { ...patient };
-      const existingEventIds = new Set(updatedPatient.pdEvents.map(e => e.exchangeId));
-      const filteredNewEvents = newEvents.filter(e => !existingEventIds.has(e.exchangeId));
-      updatedPatient.pdEvents = [...filteredNewEvents, ...updatedPatient.pdEvents];
+  try {
+      const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
+      const updatePayload: any = {
+        lastUpdated: new Date().toISOString()
+      };
       
-      if (newVital.vitalId && !updatedPatient.vitals.some(v => v.vitalId === newVital.vitalId)) {
-        updatedPatient.vitals = [newVital as Vital, ...updatedPatient.vitals];
+      if (newEvents.length > 0) {
+        updatePayload.pdEvents = arrayUnion(...newEvents);
       }
-      
-      updatedPatient.lastUpdated = new Date().toISOString();
-      return updatedPatient;
-    }
-    return patient;
-  });
-  await writeData(patients);
-  console.log(`[SYNC] Patient log saved for ${patientId}.`);
-  return { success: true };
+      if (newVital && Object.keys(newVital).length > 1) { // check for more than just vitalId
+        updatePayload.vitals = arrayUnion(newVital as Vital);
+      }
+
+      await updateDoc(patientDocRef, updatePayload);
+
+      console.log(`[FIRESTORE] Patient log saved for ${patientId}.`);
+      return { success: true };
+  } catch (error) {
+      console.error("Error writing patient log to Firestore:", error);
+      return { success: false, error: 'Failed to save patient log.' };
+  }
 }
 
 /**
- * Updates a patient's data in the JSON file.
- * @param patientId The ID of the patient.
+ * Updates a patient's data in Firestore.
+ * @param patientId The ID of the patient document.
  * @param updatedData An object containing the fields to update.
  */
 export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
-    let patients = await readData();
-    patients = patients.map(patient => {
-        if (patient.patientId === patientId) {
-            return { ...patient, ...updatedData, lastUpdated: new Date().toISOString() };
-        }
-        return patient;
-    });
-    await writeData(patients);
-    console.log(`[SYNC] Patient data updated for ${patientId}.`, updatedData);
-    return { success: true };
+    try {
+        const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
+        await updateDoc(patientDocRef, { ...updatedData, lastUpdated: new Date().toISOString() });
+        console.log(`[FIRESTORE] Patient data updated for ${patientId}.`, updatedData);
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating patient data in Firestore:", error);
+        return { success: false, error: 'Failed to update patient data.' };
+    }
 }
+
 
 /**
  * Saves a new doctor's note for a patient.
@@ -104,7 +102,7 @@ export async function updatePatientData(patientId: string, updatedData: Partial<
  */
 export async function updatePatientNotes(patientId: string, note: string) {
     await updatePatientData(patientId, { doctorNotes: note });
-    console.log(`[SYNC] Doctor's note saved for ${patientId}.`);
+    console.log(`[FIRESTORE] Doctor's note saved for ${patientId}.`);
     return { success: true };
 }
 
@@ -114,21 +112,18 @@ export async function updatePatientNotes(patientId: string, note: string) {
  * @param newLabs An array of new LabResult objects.
  */
 export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
-    let patients = await readData();
-    patients = patients.map(patient => {
-        if (patient.patientId === patientId) {
-            const updatedPatient = { ...patient };
-            const existingLabIds = new Set(updatedPatient.labResults.map(l => l.labResultId));
-            const filteredNewLabs = newLabs.filter(l => !existingLabIds.has(l.labResultId));
-            updatedPatient.labResults = [...filteredNewLabs, ...updatedPatient.labResults];
-            updatedPatient.lastUpdated = new Date().toISOString();
-            return updatedPatient;
-        }
-        return patient;
-    });
-    await writeData(patients);
-    console.log(`[SYNC] Lab results updated for ${patientId}.`);
-    return { success: true };
+    try {
+        const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
+        await updateDoc(patientDocRef, {
+            labResults: arrayUnion(...newLabs),
+            lastUpdated: new Date().toISOString()
+        });
+        console.log(`[FIRESTORE] Lab results updated for ${patientId}.`);
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating labs in Firestore:", error);
+        return { success: false, error: 'Failed to update lab results.' };
+    }
 }
 
 /**
@@ -138,7 +133,7 @@ export async function updatePatientLabs(patientId: string, newLabs: LabResult[])
  */
 export async function updatePatientMedications(patientId: string, medications: Medication[]) {
     await updatePatientData(patientId, { medications });
-    console.log(`[SYNC] Medications updated for ${patientId}.`);
+    console.log(`[FIRESTORE] Medications updated for ${patientId}.`);
     return { success: true };
 }
 
