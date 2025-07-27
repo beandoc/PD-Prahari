@@ -18,25 +18,32 @@ const PATIENTS_COLLECTION = 'patients';
  * @param patient The patient data to save, coming from the registration form.
  * @returns The ID of the newly created patient.
  */
-export async function registerNewPatient(patient: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'> & { pdStartDate?: Date, dateOfBirth: Date, emergencyContactWhatsapp?: string, emergencyContactRelation?: string }) {
+export async function registerNewPatient(patient: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'>) {
     try {
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
 
-        // Convert Date objects to ISO strings before saving
-        const patientForDb = {
-            ...patient,
-            dateOfBirth: patient.dateOfBirth.toISOString(),
-            pdStartDate: patient.pdStartDate ? patient.pdStartDate.toISOString() : undefined,
-        };
-
         const newPatientData: PatientData = {
             // Directly from form
-            ...patientForDb,
+            firstName: patient.firstName,
+            lastName: patient.lastName,
+            nephroId: patient.nephroId,
+            dateOfBirth: patient.dateOfBirth,
+            gender: patient.gender,
+            contactPhone: patient.contactPhone,
+            addressLine1: patient.addressLine1,
+            city: patient.city,
+            stateProvince: patient.stateProvince,
+            postalCode: patient.postalCode,
+            physician: patient.physician,
+            pdStartDate: patient.pdStartDate,
+            underlyingKidneyDisease: patient.underlyingKidneyDisease,
+            educationLevel: patient.educationLevel,
+            pdExchangeType: patient.pdExchangeType,
             
             // Generated/Default values
             patientId: newPatientId,
-            currentStatus: patientForDb.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
+            currentStatus: patient.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
             
             // Default nested objects
@@ -451,3 +458,5 @@ export async function getClinicKpis() {
         missedVisits,
     };
 }
+
+    

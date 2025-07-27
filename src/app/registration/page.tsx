@@ -128,7 +128,7 @@ const DateInput = ({
     const inputValue = e.target.value;
     setManualDate(inputValue);
     
-    if (inputValue.length === 10) {
+    if (inputValue.length >= 8) { // Basic check for length
       const parsedDate = parse(inputValue, 'dd-MM-yyyy', new Date());
       if (isValid(parsedDate)) {
         onChange(startOfDay(parsedDate));
@@ -257,7 +257,15 @@ export default function ClinicianPatientRegistrationPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     
-    const result = await registerNewPatient(values);
+    // Convert dates to ISO strings before sending to the server
+    const dataToSubmit = {
+        ...values,
+        dateOfBirth: values.dateOfBirth.toISOString(),
+        pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
+    };
+
+    // @ts-ignore
+    const result = await registerNewPatient(dataToSubmit);
     
     if (result.success && result.patientId) {
         toast({
@@ -493,3 +501,5 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
+
+    
