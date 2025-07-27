@@ -6,13 +6,47 @@ import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication } from '@/lib/types';
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
 import { cache } from 'react';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 
 // --- Firestore Data Store (Server-Side) ---
 
 const PATIENTS_COLLECTION = 'patients';
+
+/**
+ * Checks if the 'patients' collection is empty and seeds it from a local JSON file if needed.
+ * This is a one-time operation to ensure the app has data on first run.
+ */
+async function seedInitialData() {
+    const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
+    const snapshot = await getDocs(patientsCollectionRef);
+    if (snapshot.empty) {
+        console.log('[FIRESTORE] No patients found. Seeding initial data from patient-data.json...');
+        try {
+            // Read the local JSON file
+            const jsonPath = path.join(process.cwd(), 'src', 'data', 'patient-data.json');
+            const fileContents = await fs.readFile(jsonPath, 'utf8');
+            const patients: PatientData[] = JSON.parse(fileContents);
+            
+            // Write each patient to Firestore
+            const batch = writeBatch(db);
+            patients.forEach((patient) => {
+                const patientDocRef = doc(db, PATIENTS_COLLECTION, patient.patientId);
+                batch.set(patientDocRef, patient);
+            });
+            await batch.commit();
+            console.log('[FIRESTORE] Successfully seeded initial patient data.');
+        } catch (error) {
+            console.error('[FIRESTORE] Error seeding data:', error);
+        }
+    } else {
+        console.log('[FIRESTORE] Patient data already exists. Skipping seed.');
+    }
+}
+
 
 /**
  * Retrieves the current state of a single patient's data from Firestore.
@@ -22,6 +56,7 @@ const PATIENTS_COLLECTION = 'patients';
  */
 export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
     try {
+        await seedInitialData(); // Ensure data exists before trying to fetch
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
         const patientSnap = await getDoc(patientDocRef);
         if (patientSnap.exists()) {
@@ -39,9 +74,10 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
  * This function is cached to prevent multiple database queries for the same data during a single request.
  * @returns An array of all patient data.
  */
-export const getLiveAllPatientData = cache(async (): Promise<PatientData[]> => {
+export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
     try {
-        console.log('[CACHE] Fetching all patient data from Firestore...');
+        await seedInitialData(); // Ensure data exists before trying to fetch
+        console.log('[FIRESTORE] Fetching all patient data from Firestore...');
         const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
         const querySnapshot = await getDocs(patientsCollectionRef);
         return querySnapshot.docs.map(doc => doc.data() as PatientData);
@@ -49,7 +85,7 @@ export const getLiveAllPatientData = cache(async (): Promise<PatientData[]> => {
         console.error("Error reading all patient data from Firestore:", error);
         return [];
     }
-});
+};
 
 /**
  * Saves new patient log data (PD events and vitals) to Firestore.
@@ -342,3 +378,5 @@ export async function getClinicKpis() {
         missedVisits,
     };
 }
+
+    
