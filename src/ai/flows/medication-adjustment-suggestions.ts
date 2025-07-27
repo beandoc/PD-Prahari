@@ -60,6 +60,7 @@ const MedicationAdjustmentInputSchema = z.object({
       StartDate: z.string().describe('Date the medication was started'),
       EndDate: z.string().nullable().describe('Date the medication was stopped (nullable if ongoing)'),
       PrescribingDoctor: z.string().optional().describe('The name of the prescribing doctor.'),
+      Reason: z.string().optional().describe('The clinical reason for the prescription (e.g., Blood Pressure Control).')
     })
   ).describe('A list of the patient medications.'),
   peritonitisEpisodes: z.array(
@@ -148,7 +149,7 @@ Peritonitis History:
 
 Medications:
 {{#each medications}}
-  - MedicationName: {{{MedicationName}}}, Dosage: {{{Dosage}}}, Frequency: {{{Frequency}}}, StartDate: {{{StartDate}}}, EndDate: {{{EndDate}}}, Prescribed by: {{{PrescribingDoctor}}}
+  - MedicationName: {{{MedicationName}}}, Dosage: {{{Dosage}}}, Frequency: {{{Frequency}}}, StartDate: {{{StartDate}}}, EndDate: {{{EndDate}}}, Prescribed by: {{{PrescribingDoctor}}}, Reason: {{{Reason}}}
 {{/each}}
 
 Urine Output (Recent):

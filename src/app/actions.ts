@@ -188,6 +188,7 @@ function formatDataForAI(patientData: PatientData) {
       StartDate: m.startDate,
       EndDate: m.endDate || null,
       PrescribingDoctor: m.prescribingDoctor,
+      Reason: m.reason,
     })),
     peritonitisEpisodes: patientData.peritonitisEpisodes.map(p => ({
         DiagnosisDate: p.diagnosisDate,

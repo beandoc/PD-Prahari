@@ -94,10 +94,10 @@
       { "episodeId": "PER-001", "diagnosisDate": "2025-05-15", "organismIsolated": "Staphylococcus epidermidis", "treatmentRegimen": "Vancomycin IP", "outcome": "Resolved", "resolutionDate": "2025-05-29", "admissionId": "ADM-002" }
     ],
     "medications": [
-      { "medicationId": "MED-BP-1", "medicationName": "Amlodipine", "dosage": "10mg", "frequency": "Once daily", "startDate": "2024-01-20", "prescribingDoctor": "Dr. Sachin", "status": "ok" },
-      { "medicationId": "MED-PHOS-1", "medicationName": "Sevelamer Carbonate", "dosage": "800mg", "frequency": "TID with meals", "startDate": "2024-01-20", "prescribingDoctor": "Dr. Sachin", "status": "ok" },
-      { "medicationId": "MED-DIURETIC-1", "medicationName": "Furosemide", "dosage": "40mg", "frequency": "BID", "startDate": "2024-01-20", "prescribingDoctor": "Dr. Sachin", "status": "ok" },
-      { "medicationId": "MED-CALCIUM-1", "medicationName": "Calcitriol", "dosage": "0.25mcg", "frequency": "Once daily", "startDate": "2024-01-20", "prescribingDoctor": "Dr. Sachin", "status": "ok" }
+      { "medicationId": "MED-BP-1", "medicationName": "Amlodipine", "dosage": "10mg", "frequency": "Once daily", "startDate": "2024-01-20", "prescribingDoctor": "Dr. Sachin", "status": "ok", "reason": "Blood Pressure Control" },
+      { "medicationId": "MED-PHOS-1", "medicationName": "Sevelamer Carbonate", "dosage": "800mg", "frequency": "TID with meals", "startDate": "2024-01-20", "prescribingDoctor": "Dr. Sachin", "status": "ok", "reason": "Phosphate Binder" },
+      { "medicationId": "MED-DIURETIC-1", "medicationName": "Furosemide", "dosage": "40mg", "frequency": "BID", "startDate": "2024-01-20", "prescribingDoctor": "Dr. Sachin", "status": "ok", "reason": "Fluid Management" },
+      { "medicationId": "MED-CALCIUM-1", "medicationName": "Calcitriol", "dosage": "0.25mcg", "frequency": "Once daily", "startDate": "2024-01-20", "prescribingDoctor": "Dr. Sachin", "status": "ok", "reason": "Bone-Mineral Disease" }
     ],
     "urineOutputLogs": [
       { "logId": "UO-001", "logDate": "2025-07-28", "volumeML": 250 },
