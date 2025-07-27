@@ -1,21 +1,16 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Send, MessageSquare } from 'lucide-react';
+import { Search, Send, MessageSquare, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { allPatientData } from '@/data/mock-data';
-
-const conversations = [
-    { id: 1, name: `${allPatientData[0].firstName} ${allPatientData[0].lastName}`, role: 'Patient', lastMessage: 'Okay, thank you, doctor.', time: '10:42 AM', unread: 0, avatar: '/patient-avatar-1.png' },
-    { id: 2, name: 'PD Nurse Team', role: 'Nurse', lastMessage: 'Please check the latest checklist for Priya D.', time: '9:15 AM', unread: 2, avatar: '/nurse-avatar.png' },
-    { id: 3, name: `${allPatientData[2].firstName} ${allPatientData[2].lastName}`, role: 'Patient', lastMessage: 'The fluid bag looks cloudy, what should I do?', time: 'Yesterday', unread: 1, avatar: '/patient-avatar-2.png' },
-];
+import { getLiveAllPatientData } from '@/app/actions';
+import type { PatientData } from '@/lib/types';
 
 const messages = {
     '1': [
@@ -34,16 +29,59 @@ const messages = {
 
 
 export default function MessagesPage() {
-    const [selectedConversation, setSelectedConversation] = useState(conversations[0]);
+    const [allPatientData, setAllPatientData] = useState<PatientData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [conversations, setConversations] = useState<any[]>([]);
+    const [selectedConversation, setSelectedConversation] = useState<any>(null);
     const [newMessage, setNewMessage] = useState('');
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const data = await getLiveAllPatientData();
+            setAllPatientData(data);
+            
+            if (data.length > 0) {
+                const generatedConversations = [
+                    { id: 1, name: `${data[0].firstName} ${data[0].lastName}`, role: 'Patient', lastMessage: 'Okay, thank you, doctor.', time: '10:42 AM', unread: 0, avatar: '/patient-avatar-1.png' },
+                    { id: 2, name: 'PD Nurse Team', role: 'Nurse', lastMessage: 'Please check the latest checklist for Priya D.', time: '9:15 AM', unread: 2, avatar: '/nurse-avatar.png' },
+                ];
+                if (data.length > 2) {
+                    generatedConversations.push(
+                        { id: 3, name: `${data[2].firstName} ${data[2].lastName}`, role: 'Patient', lastMessage: 'The fluid bag looks cloudy, what should I do?', time: 'Yesterday', unread: 1, avatar: '/patient-avatar-2.png' }
+                    );
+                }
+                setConversations(generatedConversations);
+                setSelectedConversation(generatedConversations[0]);
+            }
+            setIsLoading(false);
+        }
+        fetchData();
+    }, []);
     
     const handleSendMessage = () => {
-        if (newMessage.trim()) {
+        if (newMessage.trim() && selectedConversation) {
             // In a real app, this would send the message to a backend
             console.log(`Sending message to ${selectedConversation.name}: ${newMessage}`);
             setNewMessage('');
         }
     };
+
+    if (isLoading) {
+        return (
+             <Card className="h-full flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+             </Card>
+        )
+    }
+
+    if (!selectedConversation) {
+         return (
+             <Card className="h-full flex items-center justify-center">
+                <p className="text-muted-foreground">No conversations to display.</p>
+             </Card>
+        )
+    }
 
     return (
         <div className="h-[calc(100vh-100px)]">
@@ -101,7 +139,7 @@ export default function MessagesPage() {
                     </div>
                     <ScrollArea className="flex-1 bg-slate-50 p-4">
                         <div className="space-y-4">
-                            {messages[selectedConversation.id].map((msg, index) => (
+                            {(messages[selectedConversation.id] || []).map((msg, index) => (
                                 <div key={index} className={cn(
                                     "flex items-end gap-2",
                                     msg.from === 'me' ? 'justify-end' : 'justify-start'
@@ -133,6 +171,7 @@ export default function MessagesPage() {
                                 size="icon" 
                                 className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-10"
                                 onClick={handleSendMessage}
+                                disabled={!newMessage.trim()}
                             >
                                 <Send className="h-4 w-4" />
                             </Button>
