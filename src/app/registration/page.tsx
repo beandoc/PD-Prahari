@@ -68,7 +68,7 @@ const formSchema = z.object({
   // Contact
   contactPhone: z.string().optional(),
   addressLine1: z.string().optional(),
-  state: z.string().optional(),
+  stateProvince: z.string().optional(),
   city: z.string().optional(),
   postalCode: z.string().optional(),
   
@@ -117,7 +117,7 @@ export default function ClinicianPatientRegistrationPage() {
       nephroId: '',
       contactPhone: '',
       addressLine1: '',
-      state: 'Maharashtra',
+      stateProvince: 'Maharashtra',
       city: 'Pune',
       postalCode: '',
       emergencyContactName: '',
@@ -133,7 +133,7 @@ export default function ClinicianPatientRegistrationPage() {
   });
 
   const dob = form.watch('dateOfBirth');
-  const selectedState = form.watch('state');
+  const selectedState = form.watch('stateProvince');
 
   useEffect(() => {
     if (dob) {
@@ -150,13 +150,13 @@ export default function ClinicianPatientRegistrationPage() {
   useEffect(() => {
     const stateData = indianStates.find(s => s.name === selectedState);
     setCities(stateData ? stateData.cities.map(c => c.name) : []);
-    if (selectedState !== form.getValues('state')) {
+    if (selectedState !== form.getValues('stateProvince')) {
       form.setValue('city', '');
     }
   }, [selectedState, form]);
 
   const handleStateChange = (stateName: string) => {
-    form.setValue('state', stateName);
+    form.setValue('stateProvince', stateName);
     const stateData = indianStates.find(s => s.name === stateName);
     setCities(stateData ? stateData.cities.map(c => c.name) : []);
     form.setValue('city', '');
@@ -184,8 +184,7 @@ export default function ClinicianPatientRegistrationPage() {
     const patientToSave = {
         ...values,
         dateOfBirth: values.dateOfBirth.toISOString(),
-        pdStartDate: values.pdStartDate?.toISOString(), // Correctly convert Date to string
-        stateProvince: values.state,
+        pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
     };
     
     const result = await registerNewPatient(patientToSave as any);
@@ -286,7 +285,7 @@ export default function ClinicianPatientRegistrationPage() {
                         <FormField control={form.control} name="addressLine1" render={({ field }) => (
                             <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Enter street address" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem>
                         )} />
-                        <FormField control={form.control} name="state" render={({ field }) => (
+                        <FormField control={form.control} name="stateProvince" render={({ field }) => (
                             <FormItem><FormLabel>State</FormLabel>
                                 <Select onValueChange={handleStateChange} value={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a state" /></SelectTrigger></FormControl>
