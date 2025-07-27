@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
-import { format, subYears, parse, isValid } from 'date-fns';
+import { format, subYears, parse, isValid, startOfDay } from 'date-fns';
 import { CalendarIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { useState, useEffect }from 'react';
 import { useRouter } from 'next/navigation';
@@ -43,24 +43,7 @@ const formSchema = z.object({
   nephroId: z.string().min(1, { message: 'Nephro ID / UHID is required.' }),
   dateOfBirth: z.date({
     required_error: 'Date of birth is required.',
-  }).refine((date) => {
-    const today = new Date();
-    const age = today.getFullYear() - date.getFullYear();
-    const m = today.getMonth() - date.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
-      return age - 1 >= 12;
-    }
-    return age >= 12;
-  }, { message: "Patient must be at least 12 years old." })
-  .refine((date) => {
-     const today = new Date();
-    const age = today.getFullYear() - date.getFullYear();
-    const m = today.getMonth() - date.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
-      return age - 1 <= 90;
-    }
-    return age <= 90;
-  }, { message: "Patient cannot be more than 90 years old." }),
+  }).refine((date) => date <= new Date(), { message: "Date of birth cannot be in the future." }),
   gender: z.enum(['Male', 'Female']),
   educationLevel: z.string().optional(),
   
@@ -91,6 +74,22 @@ const formSchema = z.object({
         if (m < 0 || (m === 0 && today.getDate() < data.dateOfBirth.getDate())) {
             calculatedAge--;
         }
+
+        if (calculatedAge < 12) {
+             ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Patient must be at least 12 years old.",
+                path: ["dateOfBirth"],
+            });
+        }
+        if (calculatedAge > 90) {
+             ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Patient cannot be more than 90 years old.",
+                path: ["dateOfBirth"],
+            });
+        }
+
         if (calculatedAge < 18 && !data.emergencyContactName) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
@@ -101,6 +100,7 @@ const formSchema = z.object({
     }
 });
 
+
 const DateInput = ({
   value,
   onChange,
@@ -110,7 +110,7 @@ const DateInput = ({
 }: {
   value?: Date;
   onChange: (date?: Date) => void;
-  disabled: (date: Date) => boolean;
+  disabled?: (date: Date) => boolean;
   from?: Date;
   to?: Date;
 }) => {
@@ -125,17 +125,17 @@ const DateInput = ({
   }, [value]);
 
   const handleManualDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setManualDate(value);
+    const inputValue = e.target.value;
+    setManualDate(inputValue);
     
-    if (value.length === 10) {
-      const parsedDate = parse(value, 'dd-MM-yyyy', new Date());
+    if (inputValue.length === 10) {
+      const parsedDate = parse(inputValue, 'dd-MM-yyyy', new Date());
       if (isValid(parsedDate)) {
-        onChange(parsedDate);
+        onChange(startOfDay(parsedDate));
       } else {
         onChange(undefined);
       }
-    } else {
+    } else if (inputValue.length === 0) {
       onChange(undefined);
     }
   };
@@ -256,13 +256,8 @@ export default function ClinicianPatientRegistrationPage() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const patientToSave = {
-      ...values,
-      dateOfBirth: values.dateOfBirth.toISOString(),
-      pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
-    };
     
-    const result = await registerNewPatient(patientToSave);
+    const result = await registerNewPatient(values);
     
     if (result.success && result.patientId) {
         toast({
@@ -318,7 +313,7 @@ export default function ClinicianPatientRegistrationPage() {
                                   <DateInput
                                     value={field.value}
                                     onChange={field.onChange}
-                                    disabled={(date) => date > new Date() || date < subYears(new Date(), 90) }
+                                    disabled={(date) => date > new Date()}
                                     from={subYears(new Date(), 90)}
                                     to={new Date()}
                                   />
@@ -498,5 +493,3 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
-
-    

@@ -18,18 +18,25 @@ const PATIENTS_COLLECTION = 'patients';
  * @param patient The patient data to save, coming from the registration form.
  * @returns The ID of the newly created patient.
  */
-export async function registerNewPatient(patient: Omit<PatientData, 'patientId' | 'currentStatus' | 'lastUpdated' | 'prescription' | 'vitals' | 'labResults' | 'pdEvents' | 'medications' | 'peritonitisEpisodes' | 'urineOutputLogs' | 'pdAdequacy' | 'patientReportedOutcomes' | 'uploadedImages' | 'admissions' | 'nutritionLifestyle' | 'patientEducation' | 'contactInfo'> & { emergencyContactWhatsapp?: string, emergencyContactRelation?: string }) {
+export async function registerNewPatient(patient: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'> & { pdStartDate?: Date, dateOfBirth: Date, emergencyContactWhatsapp?: string, emergencyContactRelation?: string }) {
     try {
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
 
+        // Convert Date objects to ISO strings before saving
+        const patientForDb = {
+            ...patient,
+            dateOfBirth: patient.dateOfBirth.toISOString(),
+            pdStartDate: patient.pdStartDate ? patient.pdStartDate.toISOString() : undefined,
+        };
+
         const newPatientData: PatientData = {
             // Directly from form
-            ...patient,
+            ...patientForDb,
             
             // Generated/Default values
             patientId: newPatientId,
-            currentStatus: patient.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
+            currentStatus: patientForDb.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
             
             // Default nested objects
