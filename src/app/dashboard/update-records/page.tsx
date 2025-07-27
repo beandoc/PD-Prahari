@@ -81,11 +81,14 @@ export default function UpdateRecordsPage() {
   });
 
   useEffect(() => {
-      const data = getLiveAllPatientData();
-      setAllPatients(data);
-      if (data.length > 0) {
-          setSelectedPatientId(data[0].patientId);
-      }
+    const fetchData = async () => {
+        const data = await getLiveAllPatientData();
+        setAllPatients(data);
+        if (data.length > 0) {
+            setSelectedPatientId(data[0].patientId);
+        }
+    };
+    fetchData();
   }, []);
 
   const selectedState = form.watch('state');
@@ -330,3 +333,5 @@ export default function UpdateRecordsPage() {
     </div>
   );
 }
+
+    

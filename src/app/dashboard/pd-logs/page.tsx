@@ -43,15 +43,19 @@ export default function PdLogsPage() {
     const [allPatients, setAllPatients] = useState<PatientData[]>([]);
 
     useEffect(() => {
-        const data = getLiveAllPatientData();
-        const sorted = [...data].sort((a, b) => a.firstName.localeCompare(b.firstName));
-        setAllPatients(sorted);
-        if (sorted.length > 0) {
-            const firstPatientId = sorted[0].patientId;
-            setSelectedPatientId(firstPatientId);
-            setPatientData(sorted[0]);
+        const fetchData = async () => {
+            setIsLoading(true);
+            const data = await getLiveAllPatientData();
+            const sorted = [...data].sort((a, b) => a.firstName.localeCompare(b.firstName));
+            setAllPatients(sorted);
+            if (sorted.length > 0) {
+                const firstPatientId = sorted[0].patientId;
+                setSelectedPatientId(firstPatientId);
+                setPatientData(sorted[0]);
+            }
+            setIsLoading(false);
         }
-        setIsLoading(false);
+        fetchData();
     }, []);
 
     const handlePatientChange = (patientId: string) => {
@@ -382,3 +386,5 @@ export default function PdLogsPage() {
         </div>
     );
 }
+
+    

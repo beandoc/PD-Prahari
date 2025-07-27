@@ -25,10 +25,13 @@ export default function NotificationsCard() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        getLiveAllPatientData().then(data => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const data = await getLiveAllPatientData();
             setAllPatientData(data);
             setIsLoading(false);
-        });
+        };
+        fetchData();
     }, []);
 
     const notifications: Notification[] = useMemo(() => {
@@ -131,3 +134,5 @@ export default function NotificationsCard() {
     </Card>
   );
 }
+
+    

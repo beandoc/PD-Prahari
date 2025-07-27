@@ -63,7 +63,9 @@ export default function NurseDashboardPage() {
     const [activeFilter, setActiveFilter] = useState<FilterType>('all');
     
     useEffect(() => {
-        getLiveAllPatientData().then(data => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const data = await getLiveAllPatientData();
             setAllPatientData(data);
 
             const alerts: AlertItem[] = [];
@@ -83,7 +85,8 @@ export default function NurseDashboardPage() {
 
             setUrgentAlerts(alerts.sort((a, b) => b.date.getTime() - a.date.getTime()));
             setIsLoading(false);
-        });
+        }
+        fetchData();
     }, []);
 
     const {
@@ -408,3 +411,5 @@ export default function NurseDashboardPage() {
         </div>
     );
 }
+
+    

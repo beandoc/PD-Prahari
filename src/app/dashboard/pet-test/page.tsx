@@ -75,7 +75,9 @@ export default function PetTestPage() {
     const [ratios, setRatios] = useState<CalculatedRatios | null>(null);
 
     useEffect(() => {
-        getLiveAllPatientData().then(data => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const data = await getLiveAllPatientData();
             setAllPatients(data);
             if (data.length > 0) {
                 const firstPatientId = data[0].patientId;
@@ -83,7 +85,8 @@ export default function PetTestPage() {
                 setPatient(data[0]);
             }
             setIsLoading(false);
-        });
+        }
+        fetchData();
     }, []);
 
     const handlePatientChange = (patientId: string) => {
@@ -292,3 +295,5 @@ export default function PetTestPage() {
         </div>
     );
 }
+
+    
