@@ -43,7 +43,7 @@ const formSchema = z.object({
   nephroId: z.string().min(1, { message: 'Nephro ID / UHID is required.' }),
   dateOfBirth: z.date({
     required_error: 'Date of birth is required.',
-  }).refine((date) => date <= new Date(), { message: "Date of birth cannot be in the future." }),
+  }).refine((dob) => dob <= new Date(), { message: "Date of birth cannot be in the future." }),
   gender: z.enum(['Male', 'Female']),
   educationLevel: z.string().optional(),
   
@@ -101,25 +101,19 @@ const formSchema = z.object({
 });
 
 
-const DateInput = ({
+const DateOfBirthInput = ({
   value,
   onChange,
-  disabled,
-  from,
-  to
 }: {
   value?: Date;
   onChange: (date?: Date) => void;
-  disabled?: (date: Date) => boolean;
-  from?: Date;
-  to?: Date;
 }) => {
-  const [manualDate, setManualDate] = useState<string>('');
+  const [manualDate, setManualDate] = useState<string>(value ? format(value, 'dd-MM-yyyy') : '');
 
   useEffect(() => {
     if (value && isValid(value)) {
       setManualDate(format(value, 'dd-MM-yyyy'));
-    } else {
+    } else if (!value) {
       setManualDate('');
     }
   }, [value]);
@@ -128,7 +122,7 @@ const DateInput = ({
     const inputValue = e.target.value;
     setManualDate(inputValue);
     
-    if (inputValue.length >= 8) { // Basic check for length
+    if (inputValue.length === 10) { 
       const parsedDate = parse(inputValue, 'dd-MM-yyyy', new Date());
       if (isValid(parsedDate)) {
         onChange(startOfDay(parsedDate));
@@ -163,11 +157,78 @@ const DateInput = ({
                   setManualDate(format(date, 'dd-MM-yyyy'));
                 }
               }}
-              disabled={disabled}
+              disabled={(date) => date > new Date()}
               initialFocus
               captionLayout="dropdown-buttons"
-              fromDate={from}
-              toDate={to}
+              fromDate={subYears(new Date(), 90)}
+              toDate={subYears(new Date(), 12)}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+  )
+}
+
+const OptionalDateInput = ({
+  value,
+  onChange,
+}: {
+  value?: Date;
+  onChange: (date?: Date) => void;
+}) => {
+  const [manualDate, setManualDate] = useState<string>(value ? format(value, 'dd-MM-yyyy') : '');
+
+  useEffect(() => {
+    if (value && isValid(value)) {
+      setManualDate(format(value, 'dd-MM-yyyy'));
+    } else if (!value) {
+        setManualDate('');
+    }
+  }, [value]);
+
+  const handleManualDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setManualDate(inputValue);
+    
+    if (inputValue.length === 10) {
+      const parsedDate = parse(inputValue, 'dd-MM-yyyy', new Date());
+      if (isValid(parsedDate)) {
+        onChange(startOfDay(parsedDate));
+      } else {
+        onChange(undefined);
+      }
+    } else if (inputValue.length === 0) {
+      onChange(undefined);
+    }
+  };
+
+  return (
+     <div className="relative">
+       <Input 
+        placeholder="dd-MM-yyyy"
+        value={manualDate}
+        onChange={handleManualDateChange}
+       />
+        <Popover>
+          <PopoverTrigger asChild>
+             <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                <CalendarIcon className="h-4 w-4 opacity-70" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={value}
+              onSelect={(date) => {
+                onChange(date);
+                if (date && isValid(date)) {
+                  setManualDate(format(date, 'dd-MM-yyyy'));
+                }
+              }}
+              disabled={(date) => date > new Date()}
+              initialFocus
+              captionLayout="dropdown-buttons"
+              toDate={new Date()}
             />
           </PopoverContent>
         </Popover>
@@ -256,16 +317,7 @@ export default function ClinicianPatientRegistrationPage() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    
-    // Convert dates to ISO strings before sending to the server
-    const dataToSubmit = {
-        ...values,
-        dateOfBirth: values.dateOfBirth.toISOString(),
-        pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
-    };
-
-    // @ts-ignore
-    const result = await registerNewPatient(dataToSubmit);
+    const result = await registerNewPatient(values);
     
     if (result.success && result.patientId) {
         toast({
@@ -311,27 +363,24 @@ export default function ClinicianPatientRegistrationPage() {
                         <FormField control={form.control} name="nephroId" render={({ field }) => (
                             <FormItem><FormLabel>Nephro ID / UHID <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                       <FormField
-                          control={form.control}
-                          name="dateOfBirth"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
-                               <FormControl>
-                                  <DateInput
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    disabled={(date) => date > new Date()}
-                                    from={subYears(new Date(), 90)}
-                                    to={new Date()}
-                                  />
-                               </FormControl>
+                        <FormField
+                            control={form.control}
+                            name="dateOfBirth"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                <FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
+                                <FormControl>
+                                    <DateOfBirthInput
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                </FormControl>
                                 {age !== null && age < 18 && (
                                     <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor (Age: {age}). Guardian details are mandatory.</FormDescription>
                                 )}
                                 <FormMessage />
-                            </FormItem>
-                          )}
+                                </FormItem>
+                            )}
                         />
                         <FormField control={form.control} name="gender" render={({ field }) => (
                             <FormItem><FormLabel>Gender</FormLabel>
@@ -452,11 +501,9 @@ export default function ClinicianPatientRegistrationPage() {
                              <FormItem className="flex flex-col">
                               <FormLabel>PD Start Date</FormLabel>
                                 <FormControl>
-                                  <DateInput
+                                  <OptionalDateInput
                                     value={field.value}
                                     onChange={field.onChange}
-                                    disabled={(date) => date > new Date()}
-                                    to={new Date()}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -501,5 +548,3 @@ export default function ClinicianPatientRegistrationPage() {
     </div>
   );
 }
-
-    
