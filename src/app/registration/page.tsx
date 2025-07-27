@@ -325,7 +325,7 @@ export default function ClinicianPatientRegistrationPage() {
         pdStartDate: values.pdStartDate?.toISOString(),
     };
 
-    const result = await registerNewPatient(dataForAction);
+    const result = await registerNewPatient(dataForAction as any);
     
     if (result.success && result.patientId) {
         toast({

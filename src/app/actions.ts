@@ -28,7 +28,7 @@ export async function registerNewPatient(patientFormData: Omit<Patient, 'patient
             firstName: patientFormData.firstName,
             lastName: patientFormData.lastName,
             nephroId: patientFormData.nephroId,
-            dateOfBirth: patientFormData.dateOfBirth,
+            dateOfBirth: patientFormData.dateOfBirth, // This will be an ISO string
             gender: patientFormData.gender,
             contactPhone: patientFormData.contactPhone,
             addressLine1: patientFormData.addressLine1,
@@ -36,7 +36,7 @@ export async function registerNewPatient(patientFormData: Omit<Patient, 'patient
             stateProvince: patientFormData.stateProvince,
             postalCode: patientFormData.postalCode,
             physician: patientFormData.physician,
-            pdStartDate: patientFormData.pdStartDate || '',
+            pdStartDate: patientFormData.pdStartDate || '', // This will be an ISO string or empty
             underlyingKidneyDisease: patientFormData.underlyingKidneyDisease,
             educationLevel: patientFormData.educationLevel,
             pdExchangeType: patientFormData.pdExchangeType,
