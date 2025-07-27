@@ -182,9 +182,9 @@ export default function ClinicianPatientRegistrationPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const patientToSave = {
-        ...values,
-        dateOfBirth: values.dateOfBirth.toISOString(),
-        pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
+      ...values,
+      dateOfBirth: values.dateOfBirth.toISOString(),
+      pdStartDate: values.pdStartDate ? values.pdStartDate.toISOString() : undefined,
     };
     
     const result = await registerNewPatient(patientToSave);
@@ -268,13 +268,12 @@ export default function ClinicianPatientRegistrationPage() {
                                       mode="single"
                                       selected={field.value}
                                       onSelect={field.onChange}
-                                      toDate={subYears(new Date(), 12)}
                                       fromDate={subYears(new Date(), 90)}
                                       disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                                       initialFocus
                                       captionLayout="dropdown-buttons"
                                       fromYear={new Date().getFullYear() - 90}
-                                      toYear={new Date().getFullYear() - 12}
+                                      toYear={new Date().getFullYear()}
                                     />
                                   </PopoverContent>
                                 </Popover>
