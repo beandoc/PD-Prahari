@@ -56,11 +56,17 @@ async function seedInitialData() {
  */
 export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
     try {
-        await seedInitialData(); // Ensure data exists before trying to fetch
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
         const patientSnap = await getDoc(patientDocRef);
         if (patientSnap.exists()) {
             return patientSnap.data() as PatientData;
+        } else {
+            // If one patient doesn't exist, the DB might be empty. Try seeding.
+            await seedInitialData();
+            const patientSnapAfterSeed = await getDoc(patientDocRef);
+             if (patientSnapAfterSeed.exists()) {
+                return patientSnapAfterSeed.data() as PatientData;
+            }
         }
         return null;
     } catch (error) {
@@ -76,10 +82,17 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
  */
 export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
     try {
-        await seedInitialData(); // Ensure data exists before trying to fetch
-        console.log('[FIRESTORE] Fetching all patient data from Firestore...');
         const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
         const querySnapshot = await getDocs(patientsCollectionRef);
+
+        if (querySnapshot.empty) {
+            console.log('[FIRESTORE] Collection is empty, attempting to seed data...');
+            await seedInitialData();
+            // Re-fetch after seeding
+            const afterSeedSnapshot = await getDocs(patientsCollectionRef);
+            return afterSeedSnapshot.docs.map(doc => doc.data() as PatientData);
+        }
+
         return querySnapshot.docs.map(doc => doc.data() as PatientData);
     } catch (error) {
         console.error("Error reading all patient data from Firestore:", error);
@@ -378,5 +391,7 @@ export async function getClinicKpis() {
         missedVisits,
     };
 }
+
+    
 
     
