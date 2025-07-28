@@ -42,7 +42,7 @@ export default function WelcomePage() {
                         </div>
                         <h2 className="text-2xl font-semibold mb-2">PD Nurse</h2>
                         <p className="text-muted-foreground mb-6 h-12">Access checklists and patient reference sheets.</p>
-                        <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
+                        <Button asChild className="w-full theme-nurse">
                            <Link href="/nurse-portal/login">Nurse Login</Link>
                         </Button>
                     </CardContent>
@@ -54,7 +54,7 @@ export default function WelcomePage() {
                         </div>
                         <h2 className="text-2xl font-semibold mb-2">Patient</h2>
                         <p className="text-muted-foreground mb-6 h-12">Log your daily exchanges and view your health summary.</p>
-                        <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
+                        <Button asChild className="w-full theme-patient">
                             <Link href="/patient-login">Patient Login</Link>
                         </Button>
                     </CardContent>
