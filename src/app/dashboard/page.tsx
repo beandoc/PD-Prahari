@@ -119,27 +119,29 @@ export default function DoctorDashboard() {
   useEffect(() => {
     getLiveAllPatientData().then(data => {
         setAllPatientData(data);
-        
-        // Check for a recently completed patient from session storage
-        const completedId = sessionStorage.getItem('justCompletedPatient');
-        if (completedId) {
-            setCompletedConsultations(prev => {
-                const newSet = new Set(prev);
-                newSet.add(completedId);
-                sessionStorage.setItem('completedConsultations', JSON.stringify(Array.from(newSet)));
-                return newSet;
-            });
-            sessionStorage.removeItem('justCompletedPatient');
-        } else {
-             const storedCompleted = sessionStorage.getItem('completedConsultations');
-            if (storedCompleted) {
-                setCompletedConsultations(new Set(JSON.parse(storedCompleted)));
-            }
-        }
-        
         setIsLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    // This effect runs only on the client, so it's safe to access sessionStorage
+    const completedId = sessionStorage.getItem('justCompletedPatient');
+    if (completedId) {
+        setCompletedConsultations(prev => {
+            const newSet = new Set(prev);
+            newSet.add(completedId);
+            sessionStorage.setItem('completedConsultations', JSON.stringify(Array.from(newSet)));
+            return newSet;
+        });
+        sessionStorage.removeItem('justCompletedPatient');
+    } else {
+         const storedCompleted = sessionStorage.getItem('completedConsultations');
+        if (storedCompleted) {
+            setCompletedConsultations(new Set(JSON.parse(storedCompleted)));
+        }
+    }
+  }, []);
+
 
   const {
       totalPatients,
@@ -540,3 +542,5 @@ export default function DoctorDashboard() {
     </div>
   );
 }
+
+    
