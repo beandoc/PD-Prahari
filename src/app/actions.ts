@@ -183,8 +183,14 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
       if (newEvents.length > 0) {
         updatePayload.pdEvents = arrayUnion(...newEvents);
       }
-      if (newVital && Object.keys(newVital).length > 1) { // check for more than just vitalId
-        updatePayload.vitals = arrayUnion(newVital as Vital);
+      
+      // CRITICAL FIX: Ensure no `undefined` values are in the vital object before sending to Firestore.
+      const cleanedVital = Object.fromEntries(
+        Object.entries(newVital).filter(([, value]) => value !== undefined && value !== null && !isNaN(value as number))
+      );
+
+      if (cleanedVital && Object.keys(cleanedVital).length > 1) { // check for more than just vitalId
+        updatePayload.vitals = arrayUnion(cleanedVital);
       }
 
       await updateDoc(patientDocRef, updatePayload);
