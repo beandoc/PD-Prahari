@@ -7,10 +7,11 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, History, User, ArrowRight, Loader2 } from 'lucide-react';
-import { getSyncedPatientData } from '@/app/actions';
 import type { PatientData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { doc } from 'firebase/firestore';
+import { db, onSnapshot } from '@/lib/firebase';
 
 export default function PatientPortalDashboard() {
   const router = useRouter();
@@ -26,16 +27,23 @@ export default function PatientPortalDashboard() {
           return;
       }
       
-      getSyncedPatientData(patientId).then(data => {
-          if (data) {
-              setPatient(data);
-          } else {
-              toast({ title: "Error", description: "Could not load patient data.", variant: "destructive" });
-              sessionStorage.removeItem('loggedInPatientId');
-              router.push('/patient-login');
-          }
-          setIsLoading(false);
+      const patientDocRef = doc(db, 'patients', patientId);
+      const unsubscribe = onSnapshot(patientDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setPatient(docSnap.data() as PatientData);
+        } else {
+          toast({ title: "Error", description: "Could not load patient data.", variant: "destructive" });
+          sessionStorage.removeItem('loggedInPatientId');
+          router.push('/patient-login');
+        }
+        setIsLoading(false);
+      }, (error) => {
+        console.error("Error fetching real-time patient data:", error);
+        toast({ title: "Error", description: "Could not load real-time data.", variant: "destructive" });
+        setIsLoading(false);
       });
+
+      return () => unsubscribe();
   }, [router, toast]);
 
   if (isLoading || !patient) {

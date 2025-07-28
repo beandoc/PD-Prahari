@@ -26,10 +26,11 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
-import { getSyncedPatientData } from '../actions';
 import { PatientData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { doc } from 'firebase/firestore';
+import { db, onSnapshot } from '@/lib/firebase';
 
 const patientNavLinks = [
   { href: '/patient-portal', label: 'Dashboard', icon: LayoutDashboard },
@@ -58,16 +59,23 @@ export default function PatientPortalLayout({
       return;
     }
     
-    getSyncedPatientData(patientId).then(data => {
-      if (data) {
-        setPatient(data);
-      } else {
-         toast({ title: "Error", description: "Could not load patient data.", variant: "destructive" });
-         sessionStorage.removeItem('loggedInPatientId');
-         router.push('/patient-login');
-      }
-      setIsLoading(false);
+    const patientDocRef = doc(db, 'patients', patientId);
+    const unsubscribe = onSnapshot(patientDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setPatient(docSnap.data() as PatientData);
+        } else {
+          toast({ title: "Error", description: "Could not load patient data.", variant: "destructive" });
+          sessionStorage.removeItem('loggedInPatientId');
+          router.push('/patient-login');
+        }
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Error fetching real-time patient data:", error);
+        toast({ title: "Error", description: "Could not load real-time data.", variant: "destructive" });
+        setIsLoading(false);
     });
+
+    return () => unsubscribe();
   }, [router, toast]);
 
   const handleLogout = () => {

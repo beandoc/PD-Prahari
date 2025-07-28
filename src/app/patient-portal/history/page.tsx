@@ -7,13 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart as BarChartIcon } from 'recharts';
 import { Droplets, History, TrendingUp, Loader2 } from 'lucide-react';
-import { getSyncedPatientData } from '@/app/actions';
 import type { PatientData, PDEvent } from '@/lib/types';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { doc } from 'firebase/firestore';
+import { db, onSnapshot } from '@/lib/firebase';
 
 export default function LogHistoryPage() {
     const router = useRouter();
@@ -31,8 +32,10 @@ export default function LogHistoryPage() {
             return;
         }
 
-        getSyncedPatientData(patientId).then(data => {
-            if (data) {
+        const patientDocRef = doc(db, 'patients', patientId);
+        const unsubscribe = onSnapshot(patientDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data() as PatientData;
                 setPatientData(data);
                 const events = [...data.pdEvents].sort((a, b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
                 
@@ -54,7 +57,13 @@ export default function LogHistoryPage() {
                 setAllEvents(events);
             }
             setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching real-time patient data:", error);
+            toast({ title: "Error", description: "Could not load real-time data.", variant: "destructive" });
+            setIsLoading(false);
         });
+        
+        return () => unsubscribe();
     }, [router, toast]);
 
   if (isLoading) {

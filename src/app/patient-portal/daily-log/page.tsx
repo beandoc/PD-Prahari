@@ -18,11 +18,12 @@ import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { savePatientLog, getSyncedPatientData, triggerCloudyFluidAlert } from '@/app/actions';
+import { savePatientLog, triggerCloudyFluidAlert } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { PatientData, Vital, PDEvent } from '@/lib/types';
-import { postDataUpdate } from '@/lib/broadcast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { doc } from 'firebase/firestore';
+import { db, onSnapshot } from '@/lib/firebase';
 
 
 interface ExchangeLog {
@@ -73,25 +74,33 @@ export default function PatientDailyLogPage() {
         return;
     }
 
-    getSyncedPatientData(patientId).then(data => {
-      if (data) {
-        setPatientData(data);
-        if (data.prescription?.regimen?.length) {
-          const initialExchanges = data.prescription.regimen.map((item, index) => ({
-              id: index,
-              name: item.name,
-              dialysateType: item.dialysateType,
-              fillVolume: String(item.fillVolumeML),
-              dwellTime: String(item.dwellTimeHours),
-              drainVolume: '',
-              notes: '',
-              isCloudy: false,
-          }));
-          setExchanges(initialExchanges);
+    const patientDocRef = doc(db, 'patients', patientId);
+    const unsubscribe = onSnapshot(patientDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data() as PatientData;
+            setPatientData(data);
+            if (data.prescription?.regimen?.length) {
+                const initialExchanges = data.prescription.regimen.map((item, index) => ({
+                    id: index,
+                    name: item.name,
+                    dialysateType: item.dialysateType,
+                    fillVolume: String(item.fillVolumeML),
+                    dwellTime: String(item.dwellTimeHours),
+                    drainVolume: '',
+                    notes: '',
+                    isCloudy: false,
+                }));
+                setExchanges(initialExchanges);
+            }
         }
-      }
-      setIsLoading(false);
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Error fetching real-time patient data:", error);
+        toast({ title: "Error", description: "Could not load real-time data." , variant: "destructive"});
+        setIsLoading(false);
     });
+
+    return () => unsubscribe();
   }, [router, toast]);
 
   
@@ -192,9 +201,6 @@ export default function PatientDailyLogPage() {
 
     await savePatientLog(patientData.patientId, newEvents, newVital);
     
-    // Broadcast the update
-    postDataUpdate();
-
     toast({
         title: "Log Submitted!",
         description: "Your health data has been successfully saved.",

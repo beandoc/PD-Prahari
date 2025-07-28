@@ -17,41 +17,39 @@ import CareTeamNotesCard from '@/components/dashboard/CareTeamNotesCard';
 import ConsultationActionsCard from '@/components/dashboard/ConsultationActionsCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect, useCallback, use } from 'react';
-import { addDataUpdateListener } from '@/lib/broadcast';
+import { doc } from 'firebase/firestore';
+import { db, onSnapshot } from '@/lib/firebase';
 
 function PatientDetailView({ patientId }: { patientId: string }) {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  useEffect(() => {
     if (!patientId) {
       setLoading(false);
       return;
     }
-    try {
-      setLoading(true);
-      const data = await getSyncedPatientData(patientId);
-      setPatientData(data);
-    } catch (error) {
-      console.error("Failed to fetch patient data:", error);
-      setPatientData(null);
-    } finally {
+    
+    setLoading(true);
+    const patientDocRef = doc(db, 'patients', patientId);
+
+    const unsubscribe = onSnapshot(patientDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setPatientData(docSnap.data() as PatientData);
+      } else {
+        console.error("No such patient!");
+        setPatientData(null);
+      }
       setLoading(false);
-    }
-  }, [patientId]);
-
-  useEffect(() => {
-    fetchData();
-
-    // Set up broadcast channel listener
-    const cleanup = addDataUpdateListener(() => {
-      console.log('Patient detail page received data update broadcast. Refetching...');
-      fetchData();
+    }, (error) => {
+      console.error("Failed to fetch patient data in real-time:", error);
+      setPatientData(null);
+      setLoading(false);
     });
 
     // Cleanup listener on component unmount
-    return cleanup;
-  }, [fetchData]);
+    return () => unsubscribe();
+  }, [patientId]);
   
   if (loading || !patientData) {
     return (
