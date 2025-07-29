@@ -7,6 +7,7 @@ import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { db } from '@/lib/firebase';
 import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, setDoc, query, where } from 'firebase/firestore';
+import { z } from 'zod';
 
 
 // --- Firestore Data Store (Server-Side) ---
@@ -20,30 +21,61 @@ const PATIENTS_COLLECTION = 'patients';
  */
 export async function registerNewPatient(patientFormData: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'>) {
     try {
+        // Zod schema for server-side validation
+        const PatientDataForDbSchema = z.object({
+          firstName: z.string().min(1),
+          lastName: z.string().min(1),
+          nephroId: z.string().min(1),
+          dateOfBirth: z.string().min(1), // ISO String
+          gender: z.enum(['Male', 'Female']),
+          contactPhone: z.string().optional(),
+          addressLine1: z.string().optional(),
+          city: z.string().optional(),
+          stateProvince: z.string().optional(),
+          postalCode: z.string().optional(),
+          physician: z.string().min(1),
+          pdStartDate: z.string().optional(),
+          underlyingKidneyDisease: z.string().optional(),
+          educationLevel: z.string().optional(),
+          pdExchangeType: z.enum(['Assisted', 'Self']),
+          emergencyContactEmail: z.string().email().optional().or(z.literal('')), // FIX: Allow empty string
+          emergencyContactName: z.string().optional(),
+          emergencyContactPhone: z.string().optional(),
+          emergencyContactRelation: z.string().optional(),
+          emergencyContactWhatsapp: z.string().optional(),
+        });
+        
+        // This will throw an error if validation fails, which will be caught
+        const validatedData = PatientDataForDbSchema.parse(patientFormData);
+
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
 
         const newPatientData: PatientData = {
-            // Directly from form
-            firstName: patientFormData.firstName,
-            lastName: patientFormData.lastName,
-            nephroId: patientFormData.nephroId,
-            dateOfBirth: patientFormData.dateOfBirth, // This will be an ISO string
-            gender: patientFormData.gender,
-            contactPhone: patientFormData.contactPhone,
-            addressLine1: patientFormData.addressLine1,
-            city: patientFormData.city,
-            stateProvince: patientFormData.stateProvince,
-            postalCode: patientFormData.postalCode,
-            physician: patientFormData.physician,
-            pdStartDate: patientFormData.pdStartDate || '', // This will be an ISO string or empty
-            underlyingKidneyDisease: patientFormData.underlyingKidneyDisease,
-            educationLevel: patientFormData.educationLevel,
-            pdExchangeType: patientFormData.pdExchangeType,
+            // Directly from validated form data
+            firstName: validatedData.firstName,
+            lastName: validatedData.lastName,
+            nephroId: validatedData.nephroId,
+            dateOfBirth: validatedData.dateOfBirth, // Is already an ISO string
+            gender: validatedData.gender,
+            contactPhone: validatedData.contactPhone,
+            addressLine1: validatedData.addressLine1,
+            city: validatedData.city,
+            stateProvince: validatedData.stateProvince,
+            postalCode: validatedData.postalCode,
+            physician: validatedData.physician,
+            pdStartDate: validatedData.pdStartDate || '', // Is already an ISO string or becomes empty
+            underlyingKidneyDisease: validatedData.underlyingKidneyDisease,
+            educationLevel: validatedData.educationLevel,
+            pdExchangeType: validatedData.pdExchangeType,
+            emergencyContactName: validatedData.emergencyContactName,
+            emergencyContactPhone: validatedData.emergencyContactPhone,
+            emergencyContactRelation: validatedData.emergencyContactRelation,
+            emergencyContactEmail: validatedData.emergencyContactEmail,
             
             // Generated/Default values
             patientId: newPatientId,
-            currentStatus: patientFormData.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
+            currentStatus: validatedData.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
             
             // Default nested objects
@@ -95,7 +127,10 @@ export async function registerNewPatient(patientFormData: Omit<Patient, 'patient
         return { success: true, patientId: newPatientId };
     } catch (error) {
         console.error("Error registering new patient:", error);
-        return { success: false, error: 'Failed to register new patient.' };
+        if (error instanceof z.ZodError) {
+             return { success: false, error: `Validation failed: ${error.errors.map(e => e.message).join(', ')}` };
+        }
+        return { success: false, error: 'Failed to register new patient due to a server error.' };
     }
 }
 
