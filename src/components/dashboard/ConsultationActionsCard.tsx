@@ -7,6 +7,7 @@ import { Hospital, ClipboardCheck, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { postDataUpdate } from '@/lib/broadcast';
 
 interface ConsultationActionsCardProps {
     patientId: string;
@@ -22,13 +23,14 @@ export default function ConsultationActionsCard({ patientId }: ConsultationActio
             description: "Patient's status has been updated on the dashboard.",
         });
         
-        // Use session storage to pass the "completed" status back to the dashboard
+        // Use sessionStorage to mark as completed for this session
         if (typeof window !== 'undefined') {
             const completed = new Set(JSON.parse(sessionStorage.getItem('completedConsultations') || '[]'));
             completed.add(patientId);
             sessionStorage.setItem('completedConsultations', JSON.stringify(Array.from(completed)));
-            // Set a temporary flag that the dashboard page can read on load
-            sessionStorage.setItem('justCompletedPatient', patientId);
+            
+            // Notify other tabs that data has changed
+            postDataUpdate();
         }
 
         router.push('/dashboard');

@@ -32,5 +32,3 @@ export function addDataUpdateListener(callback: () => void) {
   // Return a no-op cleanup function if channel isn't available
   return () => {};
 }
-
-    
