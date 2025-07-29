@@ -133,8 +133,8 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
             // Assuming nephroId is unique, return the first match
             const patientDoc = querySnapshot.docs[0];
             return {
-                ...patientDoc.data(),
-                patientId: patientDoc.id, // Ensure patientId is included
+                ...(patientDoc.data() as Omit<PatientData, 'patientId'>),
+                patientId: patientDoc.id, // Ensure patientId is explicitly included from the document ID
             } as PatientData;
         }
         return null;
@@ -186,7 +186,7 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
       
       // CRITICAL FIX: Ensure no `undefined` values are in the vital object before sending to Firestore.
       const cleanedVital = Object.fromEntries(
-        Object.entries(newVital).filter(([, value]) => value !== undefined && value !== null && !isNaN(value as number))
+        Object.entries(newVital).filter(([, value]) => value !== undefined && value !== null && (typeof value !== 'number' || !isNaN(value)))
       );
 
       if (cleanedVital && Object.keys(cleanedVital).length > 1) { // check for more than just vitalId

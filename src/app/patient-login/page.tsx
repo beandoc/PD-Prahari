@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Lock, User, HeartPulse, Loader2 } from 'lucide-react';
 import { getPatientByNephroId } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { format, parse } from 'date-fns';
+import { format, parse, parseISO } from 'date-fns';
 
 export default function PatientLoginPage() {
   const router = useRouter();
@@ -37,9 +37,16 @@ export default function PatientLoginPage() {
       if (patient && patient.dateOfBirth) {
         // This is an insecure comparison and only for demonstration.
         // A real app must use a proper authentication system.
-        const formattedStoredDob = format(new Date(patient.dateOfBirth), 'yyyy-MM-dd');
         
-        if (dob === formattedStoredDob) {
+        // Robust date comparison to avoid timezone issues
+        const storedDob = parseISO(patient.dateOfBirth);
+        const inputDob = parse(dob, 'yyyy-MM-dd', new Date());
+
+        if (
+          storedDob.getFullYear() === inputDob.getFullYear() &&
+          storedDob.getMonth() === inputDob.getMonth() &&
+          storedDob.getDate() === inputDob.getDate()
+        ) {
            toast({
             title: "Login Successful",
             description: `Welcome back, ${patient.firstName}!`,
