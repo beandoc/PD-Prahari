@@ -165,7 +165,8 @@ export function generatePatientAlerts(patient: PatientData): Alert[] {
   }
 
   // 14. Non-compliance (simplified)
-  const prescriptionExchanges = patient.prescription.regimen?.length || 4; // Use regimen length or default
+  // FIX: Added a check for patient.prescription and patient.prescription.regimen
+  const prescriptionExchanges = (patient.prescription && Array.isArray(patient.prescription.regimen)) ? patient.prescription.regimen.length : 4;
   const today = new Date();
   const yesterday = subDays(today, 1);
   const eventsYesterday = patient.pdEvents.filter(e => {
