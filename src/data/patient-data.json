@@ -1,0 +1,330 @@
+
+[
+  {
+    "patientId": "PAT-001",
+    "nephroId": "NPH-1234",
+    "firstName": "Rohan",
+    "lastName": "Mehra",
+    "dateOfBirth": "1985-05-15T00:00:00.000Z",
+    "gender": "Male",
+    "contactPhone": "9876543210",
+    "addressLine1": "123, Harmony Apartments",
+    "city": "Pune",
+    "stateProvince": "Maharashtra",
+    "postalCode": "411007",
+    "physician": "Dr. Sachin",
+    "pdStartDate": "2024-01-10T00:00:00.000Z",
+    "pdTrainingEndDate": "2024-01-20T00:00:00.000Z",
+    "lastHomeVisitDate": "2024-04-15T00:00:00.000Z",
+    "membraneTransportType": "High-Average",
+    "underlyingKidneyDisease": "Diabetic Nephropathy",
+    "educationLevel": "Bachelors Degree",
+    "pdExchangeType": "Self",
+    "currentStatus": "Active PD",
+    "lastUpdated": "2024-07-28T10:00:00.000Z",
+    "prescription": {
+      "exchange": "CAPD",
+      "pdStrength": "1.5%, 2.5%",
+      "dwellTimeHours": 4,
+      "dwellVolumeML": 2000,
+      "exchangeTimeMinutes": 30,
+      "regimen": [
+        { "name": "Morning", "dialysateType": "1.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 4 },
+        { "name": "Afternoon", "dialysateType": "2.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 4 },
+        { "name": "Evening", "dialysateType": "1.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 4 },
+        { "name": "Night", "dialysateType": "7.5% Icodextrin", "fillVolumeML": 2000, "dwellTimeHours": 8 }
+      ]
+    },
+    "contactInfo": {
+      "clinicName": "PD Prahari Clinic",
+      "clinicPhone": "9876543210",
+      "coordinatorName": "Mr. Kamlesh",
+      "coordinatorPhone": "9876543211"
+    },
+    "nutritionLifestyle": {
+      "dailyProtein": { "current": 75, "target": 80 },
+      "fluidRestriction": { "current": 1.2, "limit": 1.5 },
+      "caloriesToday": { "current": 1800, "target": 2200 },
+      "dailyActivity": { "current": 4500, "target": 5000 },
+      "homeBP": { "averageSystolic": 135, "averageDiastolic": 82, "trend": "Stable" },
+      "bloodSugar": { "lastReading": 140, "unit": "mg/dL", "trend": "Stable" }
+    },
+    "clinicVisits": {
+      "nextAppointment": "2024-08-10T11:00:00.000Z",
+      "lastVisitSummary": "Patient stable. BP under control. Advised to monitor fluid intake closely."
+    },
+    "patientEducation": [
+      { "id": "1", "title": "Intro to Peritoneal Dialysis", "description": "Learn the basics of PD therapy.", "icon": "Video" },
+      { "id": "2", "title": "Aseptic Technique Guide", "description": "How to prevent infections.", "icon": "ShieldCheck" },
+      { "id": "3", "title": "Renal Diet Essentials", "description": "Managing your diet on dialysis.", "icon": "Apple" }
+    ],
+    "vitals": [
+      { "vitalId": "VIT-001", "measurementDateTime": "2024-07-28T09:00:00.000Z", "systolicBP": 138, "diastolicBP": 84, "heartRateBPM": 72, "temperatureCelsius": 36.8, "weightKG": 70.5, "fluidStatusNotes": "No edema" },
+      { "vitalId": "VIT-002", "measurementDateTime": "2024-07-15T09:00:00.000Z", "systolicBP": 140, "diastolicBP": 85, "heartRateBPM": 75, "temperatureCelsius": 36.7, "weightKG": 70.2 }
+    ],
+    "labResults": [
+      { "labResultId": "LAB-001", "resultDateTime": "2024-07-20T08:00:00.000Z", "testName": "Hemoglobin", "resultValue": 10.5, "units": "g/dL", "referenceRangeLow": 13.5, "referenceRangeHigh": 17.5 },
+      { "labResultId": "LAB-002", "resultDateTime": "2024-07-20T08:00:00.000Z", "testName": "Creatinine", "resultValue": 8.2, "units": "mg/dL", "referenceRangeLow": 0.7, "referenceRangeHigh": 1.3 },
+      { "labResultId": "LAB-003", "resultDateTime": "2024-07-20T08:00:00.000Z", "testName": "Albumin", "resultValue": 3.8, "units": "g/dL", "referenceRangeLow": 3.5, "referenceRangeHigh": 5.5 },
+      { "labResultId": "LAB-004", "resultDateTime": "2024-07-20T08:00:00.000Z", "testName": "Calcium", "resultValue": 8.9, "units": "mg/dL", "referenceRangeLow": 8.6, "referenceRangeHigh": 10.3 },
+      { "labResultId": "LAB-005", "resultDateTime": "2024-07-20T08:00:00.000Z", "testName": "Phosphorus", "resultValue": 5.1, "units": "mg/dL", "referenceRangeLow": 2.5, "referenceRangeHigh": 4.5 },
+      { "labResultId": "LAB-006", "resultDateTime": "2024-07-20T08:00:00.000Z", "testName": "iPTH", "resultValue": 350, "units": "pg/mL", "referenceRangeLow": 150, "referenceRangeHigh": 300 }
+    ],
+    "pdEvents": [
+      { "exchangeId": "PD-001", "exchangeDateTime": "2024-07-28T08:00:00.000Z", "dialysateType": "1.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 4, "drainVolumeML": 2150, "ultrafiltrationML": 150, "isEffluentCloudy": false, "recordedBy": "Patient" },
+      { "exchangeId": "PD-002", "exchangeDateTime": "2024-07-28T13:00:00.000Z", "dialysateType": "2.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 4, "drainVolumeML": 2250, "ultrafiltrationML": 250, "isEffluentCloudy": false, "recordedBy": "Patient" }
+    ],
+    "medications": [
+      { "medicationId": "MED-001", "medicationName": "Amlodipine", "dosage": "10 mg", "frequency": "Once daily", "startDate": "2023-11-01T00:00:00.000Z", "status": "ok", "reason": "Blood Pressure" },
+      { "medicationId": "MED-002", "medicationName": "Calcium Carbonate", "dosage": "500 mg", "frequency": "With meals", "startDate": "2024-01-10T00:00:00.000Z", "status": "ok", "reason": "Phosphate Binder" },
+      { "medicationId": "MED-003", "medicationName": "Mircera", "dosage": "75 mcg", "frequency": "Once monthly", "startDate": "2024-02-01T00:00:00.000Z", "status": "ok", "reason": "Anemia Management" }
+    ],
+    "peritonitisEpisodes": [],
+    "urineOutputLogs": [
+        { "logId": "UO-001", "logDate": "2024-07-28T00:00:00.000Z", "volumeML": 250 }
+    ],
+    "pdAdequacy": [
+      { "testId": "ADEQ-001", "testDate": "2024-04-10T00:00:00.000Z", "totalKtV": 1.8, "peritonealKtV": 1.6 }
+    ],
+    "patientReportedOutcomes": [
+      { "surveyId": "PRO-001", "surveyDate": "2024-07-01T00:00:00.000Z", "surveyTool": "KDQOL-36", "score": 78, "summary": "Patient reports good energy levels but some sleep disturbance." }
+    ],
+    "uploadedImages": [],
+    "admissions": []
+  },
+  {
+    "patientId": "PAT-002",
+    "nephroId": "NPH-5678",
+    "firstName": "Sunita",
+    "lastName": "Sharma",
+    "dateOfBirth": "1972-11-20T00:00:00.000Z",
+    "gender": "Female",
+    "contactPhone": "9876543211",
+    "addressLine1": "B-404, Rosewood Estate",
+    "city": "Mumbai",
+    "stateProvince": "Maharashtra",
+    "postalCode": "400063",
+    "physician": "Dr. Atul",
+    "pdStartDate": "2024-03-01T00:00:00.000Z",
+    "underlyingKidneyDisease": "Polycystic Kidney Disease (PKD)",
+    "educationLevel": "High School",
+    "pdExchangeType": "Assisted",
+    "currentStatus": "Active PD",
+    "lastUpdated": "2024-07-27T14:00:00.000Z",
+    "prescription": {
+      "exchange": "APD",
+      "pdStrength": "Varies",
+      "dwellTimeHours": 1.5,
+      "dwellVolumeML": 1800,
+      "exchangeTimeMinutes": 10,
+      "regimen": [
+        { "name": "Cycler Fill 1", "dialysateType": "1.5% Dextrose", "fillVolumeML": 1800, "dwellTimeHours": 1.5 },
+        { "name": "Cycler Fill 2", "dialysateType": "1.5% Dextrose", "fillVolumeML": 1800, "dwellTimeHours": 1.5 },
+        { "name": "Cycler Fill 3", "dialysateType": "2.5% Dextrose", "fillVolumeML": 1800, "dwellTimeHours": 1.5 },
+        { "name": "Cycler Fill 4", "dialysateType": "2.5% Dextrose", "fillVolumeML": 1800, "dwellTimeHours": 1.5 },
+        { "name": "Last Fill", "dialysateType": "7.5% Icodextrin", "fillVolumeML": 1500, "dwellTimeHours": 10 }
+      ]
+    },
+    "contactInfo": {
+      "clinicName": "PD Prahari Clinic",
+      "clinicPhone": "9876543210",
+      "coordinatorName": "Mr. Kamlesh",
+      "coordinatorPhone": "9876543211"
+    },
+    "nutritionLifestyle": {
+      "dailyProtein": { "current": 60, "target": 70 },
+      "fluidRestriction": { "current": 1.0, "limit": 1.2 },
+      "caloriesToday": { "current": 1600, "target": 2000 },
+      "dailyActivity": { "current": 3000, "target": 4000 }
+    },
+    "clinicVisits": {
+      "nextAppointment": "2024-08-15T14:00:00.000Z",
+      "lastVisitSummary": "Patient required assistance with cycler setup. Family member trained."
+    },
+    "patientEducation": [
+      { "id": "1", "title": "APD Cycler Training", "description": "How to operate your cycler.", "icon": "Video" },
+      { "id": "2", "title": "Infection Prevention at Home", "description": "Keeping your space safe.", "icon": "ShieldCheck" },
+      { "id": "3", "title": "Low Sodium Diet", "description": "Managing salt intake.", "icon": "Apple" }
+    ],
+    "vitals": [
+      { "vitalId": "VIT-003", "measurementDateTime": "2024-07-27T13:00:00.000Z", "systolicBP": 145, "diastolicBP": 88, "heartRateBPM": 80, "temperatureCelsius": 37.0, "weightKG": 65.0, "fluidStatusNotes": "Mild ankle edema noted." }
+    ],
+    "labResults": [
+      { "labResultId": "LAB-007", "resultDateTime": "2024-07-15T09:00:00.000Z", "testName": "Hemoglobin", "resultValue": 9.8, "units": "g/dL", "referenceRangeLow": 12.0, "referenceRangeHigh": 15.5 },
+      { "labResultId": "LAB-008", "resultDateTime": "2024-07-15T09:00:00.000Z", "testName": "Albumin", "resultValue": 3.4, "units": "g/dL", "referenceRangeLow": 3.5, "referenceRangeHigh": 5.5 }
+    ],
+    "pdEvents": [
+      { "exchangeId": "PD-003", "exchangeDateTime": "2024-07-27T22:00:00.000Z", "dialysateType": "APD", "fillVolumeML": 7200, "dwellTimeHours": 8, "drainVolumeML": 7800, "ultrafiltrationML": 600, "isEffluentCloudy": false, "recordedBy": "Automated Machine" }
+    ],
+    "medications": [
+      { "medicationId": "MED-004", "medicationName": "Telmisartan", "dosage": "40 mg", "frequency": "Once daily", "startDate": "2024-01-01T00:00:00.000Z", "status": "ok" },
+      { "medicationId": "MED-005", "medicationName": "Sevelamer", "dosage": "800 mg", "frequency": "With meals", "startDate": "2024-03-01T00:00:00.000Z", "status": "ok" }
+    ],
+    "peritonitisEpisodes": [
+        { "episodeId": "PERI-001", "diagnosisDate": "2024-05-10T00:00:00.000Z", "organismIsolated": "Staphylococcus epidermidis", "treatmentRegimen": "Intraperitoneal Vancomycin", "outcome": "Resolved", "resolutionDate": "2024-05-24T00:00:00.000Z" }
+    ],
+    "urineOutputLogs": [],
+    "pdAdequacy": [
+      { "testId": "ADEQ-002", "testDate": "2024-06-05T00:00:00.000Z", "totalKtV": 1.9 }
+    ],
+    "patientReportedOutcomes": [],
+    "uploadedImages": [],
+    "admissions": [
+        { "admissionId": "ADM-001", "admissionDate": "2024-05-10T00:00:00.000Z", "dischargeDate": "2024-05-14T00:00:00.000Z", "reason": "Peritonitis Treatment" }
+    ],
+    "esiCount": 1
+  },
+  {
+    "patientId": "PAT-003",
+    "nephroId": "NPH-9101",
+    "firstName": "Priya",
+    "lastName": "Das",
+    "dateOfBirth": "1995-02-18T00:00:00.000Z",
+    "gender": "Female",
+    "contactPhone": "9876543212",
+    "addressLine1": "789, Lakeview Towers",
+    "city": "Bengaluru",
+    "stateProvince": "Karnataka",
+    "postalCode": "560037",
+    "physician": "Dr. Parikshit",
+    "pdStartDate": "2024-05-20T00:00:00.000Z",
+    "underlyingKidneyDisease": "Lupus Nephritis",
+    "educationLevel": "Masters Degree",
+    "pdExchangeType": "Self",
+    "currentStatus": "Awaiting Catheter",
+    "lastUpdated": "2024-07-26T18:00:00.000Z",
+    "prescription": {
+      "exchange": "CAPD",
+      "pdStrength": "",
+      "dwellTimeHours": 0,
+      "dwellVolumeML": 0,
+      "exchangeTimeMinutes": 0,
+      "regimen": []
+    },
+    "contactInfo": {
+      "clinicName": "PD Prahari Clinic",
+      "clinicPhone": "9876543210",
+      "coordinatorName": "Mr. Kamlesh",
+      "coordinatorPhone": "9876543211"
+    },
+    "nutritionLifestyle": {
+      "dailyProtein": { "current": 0, "target": 75 },
+      "fluidRestriction": { "current": 0, "limit": 2.0 },
+      "caloriesToday": { "current": 0, "target": 2100 },
+      "dailyActivity": { "current": 0, "target": 6000 }
+    },
+    "clinicVisits": {
+      "nextAppointment": "2024-08-05T10:00:00.000Z",
+      "lastVisitSummary": "Patient is pre-dialysis, awaiting catheter placement. Counseled on procedure."
+    },
+    "patientEducation": [
+      { "id": "1", "title": "Intro to Peritoneal Dialysis", "description": "Learn the basics of PD therapy.", "icon": "Video" },
+      { "id": "2", "title": "Aseptic Technique Guide", "description": "How to prevent infections.", "icon": "ShieldCheck" }
+    ],
+    "vitals": [
+      { "vitalId": "VIT-004", "measurementDateTime": "2024-07-26T17:00:00.000Z", "systolicBP": 130, "diastolicBP": 80, "heartRateBPM": 78, "weightKG": 62.0 }
+    ],
+    "labResults": [
+      { "labResultId": "LAB-009", "resultDateTime": "2024-07-10T09:00:00.000Z", "testName": "Creatinine", "resultValue": 6.8, "units": "mg/dL", "referenceRangeLow": 0.6, "referenceRangeHigh": 1.1 }
+    ],
+    "pdEvents": [],
+    "medications": [
+      { "medicationId": "MED-006", "medicationName": "Prednisolone", "dosage": "5 mg", "frequency": "Once daily", "startDate": "2023-01-01T00:00:00.000Z", "status": "ok" },
+      { "medicationId": "MED-007", "medicationName": "Mycophenolate Mofetil", "dosage": "500 mg", "frequency": "Twice daily", "startDate": "2023-01-01T00:00:00.000Z", "status": "ok" }
+    ],
+    "peritonitisEpisodes": [],
+    "urineOutputLogs": [],
+    "pdAdequacy": [],
+    "patientReportedOutcomes": [],
+    "uploadedImages": [
+      {
+        "imageId": "IMG-001",
+        "type": "exit-site",
+        "uploadDate": "2024-07-28T12:00:00Z",
+        "imageUrl": "https://placehold.co/400x300.png",
+        "requiresReview": true
+      }
+    ],
+    "admissions": [],
+    "doctorNotes": "Please schedule a follow-up PET test for Priya D.",
+    "newCloudyAlert": {
+      "details": "Patient reports cloudy fluid in last exchange.",
+      "date": "2024-07-28T14:30:00Z"
+    }
+  },
+  {
+    "patientId": "PAT-004",
+    "nephroId": "NPH-4826",
+    "firstName": "Anita",
+    "lastName": "Desai",
+    "dateOfBirth": "1968-09-15T00:00:00.000Z",
+    "gender": "Female",
+    "contactPhone": "9876543214",
+    "addressLine1": "101 Palm Meadows",
+    "city": "Mumbai",
+    "stateProvince": "Maharashtra",
+    "postalCode": "400050",
+    "physician": "Dr. Parikshit",
+    "pdStartDate": "2024-06-15T00:00:00.000Z",
+    "underlyingKidneyDisease": "Hypertensive Nephropathy",
+    "educationLevel": "Bachelors Degree",
+    "pdExchangeType": "Self",
+    "currentStatus": "Active PD",
+    "lastUpdated": "2024-07-28T11:00:00.000Z",
+    "prescription": {
+      "exchange": "CAPD",
+      "pdStrength": "1.5%",
+      "dwellTimeHours": 5,
+      "dwellVolumeML": 2000,
+      "exchangeTimeMinutes": 30,
+      "regimen": [
+        { "name": "Morning", "dialysateType": "1.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 5 },
+        { "name": "Afternoon", "dialysateType": "1.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 5 },
+        { "name": "Evening", "dialysateType": "1.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 5 }
+      ]
+    },
+    "contactInfo": {
+      "clinicName": "PD Prahari Clinic",
+      "clinicPhone": "9876543210",
+      "coordinatorName": "Mr. Kamlesh",
+      "coordinatorPhone": "9876543211"
+    },
+    "nutritionLifestyle": {
+      "dailyProtein": { "current": 65, "target": 75 },
+      "fluidRestriction": { "current": 1.4, "limit": 1.8 },
+      "caloriesToday": { "current": 1900, "target": 2100 },
+      "dailyActivity": { "current": 5500, "target": 5000 }
+    },
+    "clinicVisits": {
+      "nextAppointment": "2024-09-01T12:00:00.000Z",
+      "lastVisitSummary": "Patient adapting well to self-performed CAPD. No major issues reported."
+    },
+    "patientEducation": [
+      { "id": "1", "title": "Intro to Peritoneal Dialysis", "description": "Learn the basics of PD therapy.", "icon": "Video" },
+      { "id": "2", "title": "Aseptic Technique Guide", "description": "How to prevent infections.", "icon": "ShieldCheck" },
+      { "id": "3", "title": "Renal Diet Essentials", "description": "Managing your diet on dialysis.", "icon": "Apple" }
+    ],
+    "vitals": [
+      { "vitalId": "VIT-005", "measurementDateTime": "2024-07-28T09:30:00.000Z", "systolicBP": 142, "diastolicBP": 88, "heartRateBPM": 76, "temperatureCelsius": 36.9, "weightKG": 72.1 }
+    ],
+    "labResults": [
+      { "labResultId": "LAB-010", "resultDateTime": "2024-07-18T08:00:00.000Z", "testName": "Hemoglobin", "resultValue": 11.2, "units": "g/dL", "referenceRangeLow": 12.0, "referenceRangeHigh": 15.5 },
+      { "labResultId": "LAB-011", "resultDateTime": "2024-07-18T08:00:00.000Z", "testName": "Creatinine", "resultValue": 7.5, "units": "mg/dL", "referenceRangeLow": 0.6, "referenceRangeHigh": 1.1 },
+      { "labResultId": "LAB-012", "resultDateTime": "2024-07-18T08:00:00.000Z", "testName": "Albumin", "resultValue": 4.1, "units": "g/dL", "referenceRangeLow": 3.5, "referenceRangeHigh": 5.5 }
+    ],
+    "pdEvents": [
+      { "exchangeId": "PD-004", "exchangeDateTime": "2024-07-28T07:00:00.000Z", "dialysateType": "1.5% Dextrose", "fillVolumeML": 2000, "dwellTimeHours": 5, "drainVolumeML": 2100, "ultrafiltrationML": 100, "isEffluentCloudy": false, "recordedBy": "Patient" }
+    ],
+    "medications": [
+      { "medicationId": "MED-008", "medicationName": "Lisinopril", "dosage": "20 mg", "frequency": "Once daily", "startDate": "2023-10-01T00:00:00.000Z", "status": "ok", "reason": "Blood Pressure" }
+    ],
+    "peritonitisEpisodes": [],
+    "urineOutputLogs": [
+      { "logId": "UO-002", "logDate": "2024-07-28T00:00:00.000Z", "volumeML": 400 }
+    ],
+    "pdAdequacy": [],
+    "patientReportedOutcomes": [],
+    "uploadedImages": [],
+    "admissions": []
+  }
+]
