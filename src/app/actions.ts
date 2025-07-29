@@ -38,7 +38,7 @@ export async function registerNewPatient(patientFormData: Omit<Patient, 'patient
           underlyingKidneyDisease: z.string().optional(),
           educationLevel: z.string().optional(),
           pdExchangeType: z.enum(['Assisted', 'Self']),
-          emergencyContactEmail: z.string().email().optional().or(z.literal('')), // FIX: Allow empty string
+          emergencyContactEmail: z.string().email().optional().or(z.literal('')),
           emergencyContactName: z.string().optional(),
           emergencyContactPhone: z.string().optional(),
           emergencyContactRelation: z.string().optional(),
