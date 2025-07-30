@@ -14,12 +14,12 @@ import { z } from 'zod';
 
 const PATIENTS_COLLECTION = 'patients';
 
-// Zod schema for server-side validation of incoming form data
+// Zod schema for server-side validation. Dates are expected as ISO strings.
 const NewPatientFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   nephroId: z.string().min(1, 'Nephro ID is required'),
-  dateOfBirth: z.date({ required_error: 'Date of birth is required' }),
+  dateOfBirth: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" }),
   gender: z.enum(['Male', 'Female']),
   contactPhone: z.string().optional(),
   addressLine1: z.string().optional(),
@@ -27,7 +27,7 @@ const NewPatientFormSchema = z.object({
   stateProvince: z.string().optional(),
   postalCode: z.string().optional(),
   physician: z.string().min(1, 'Attending nephrologist is required'),
-  pdStartDate: z.date().optional(),
+  pdStartDate: z.string().optional(),
   underlyingKidneyDisease: z.string().optional(),
   educationLevel: z.string().optional(),
   pdExchangeType: z.enum(['Assisted', 'Self']),
@@ -41,23 +41,21 @@ const NewPatientFormSchema = z.object({
 
 /**
  * Creates a new patient document in Firestore from the registration form data.
- * @param patientFormData The patient data to save, coming directly from the registration form.
+ * @param patientFormData The patient data to save, with dates already converted to ISO strings.
  * @returns The ID of the newly created patient.
  */
 export async function registerNewPatient(patientFormData: z.infer<typeof NewPatientFormSchema>) {
     try {
-        // This will throw an error if validation fails, which will be caught
         const validatedData = NewPatientFormSchema.parse(patientFormData);
 
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
 
         const newPatientData: PatientData = {
-            // Data from the validated form
             firstName: validatedData.firstName,
             lastName: validatedData.lastName,
             nephroId: validatedData.nephroId,
-            dateOfBirth: validatedData.dateOfBirth.toISOString(), // Convert date to ISO string
+            dateOfBirth: validatedData.dateOfBirth,
             gender: validatedData.gender,
             contactPhone: validatedData.contactPhone,
             addressLine1: validatedData.addressLine1,
@@ -65,7 +63,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             stateProvince: validatedData.stateProvince,
             postalCode: validatedData.postalCode,
             physician: validatedData.physician,
-            pdStartDate: validatedData.pdStartDate?.toISOString() || '', // Convert optional date to ISO string
+            pdStartDate: validatedData.pdStartDate || '',
             underlyingKidneyDisease: validatedData.underlyingKidneyDisease,
             educationLevel: validatedData.educationLevel,
             pdExchangeType: validatedData.pdExchangeType,
@@ -74,12 +72,10 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             emergencyContactRelation: validatedData.emergencyContactRelation,
             emergencyContactEmail: validatedData.emergencyContactEmail,
             
-            // Generated/Default values
             patientId: newPatientId,
             currentStatus: validatedData.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
             
-            // Default nested objects
             prescription: {
                 exchange: 'CAPD',
                 pdStrength: '',
@@ -110,7 +106,6 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
                 { id: '3', title: 'Renal Diet Essentials', description: 'Managing your diet on dialysis.', icon: 'Apple' },
             ],
 
-            // Empty arrays for clinical data
             vitals: [],
             labResults: [],
             pdEvents: [],
@@ -166,11 +161,10 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
         const q = query(collection(db, PATIENTS_COLLECTION), where("nephroId", "==", nephroId));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
-            // Assuming nephroId is unique, return the first match
             const patientDoc = querySnapshot.docs[0];
             return {
                 ...(patientDoc.data() as Omit<PatientData, 'patientId'>),
-                patientId: patientDoc.id, // Ensure patientId is explicitly included from the document ID
+                patientId: patientDoc.id,
             } as PatientData;
         }
         return null;
@@ -220,7 +214,6 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
         updatePayload.pdEvents = arrayUnion(...newEvents);
       }
       
-      // CRITICAL FIX: Ensure no `undefined` values are in the vital object before sending to Firestore.
       const cleanedVital = Object.fromEntries(
         Object.entries(newVital).filter(([, value]) => value !== undefined && value !== null && (typeof value !== 'number' || !isNaN(value)))
       );

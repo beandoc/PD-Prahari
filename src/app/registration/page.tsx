@@ -317,9 +317,13 @@ export default function ClinicianPatientRegistrationPage() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const dataToSend = {
+        ...values,
+        dateOfBirth: values.dateOfBirth.toISOString(),
+        pdStartDate: values.pdStartDate?.toISOString(),
+    };
     
-    // The server action now correctly handles date objects
-    const result = await registerNewPatient(values);
+    const result = await registerNewPatient(dataToSend);
     
     if (result.success && result.patientId) {
         toast({
