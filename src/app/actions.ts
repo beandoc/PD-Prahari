@@ -14,7 +14,7 @@ import { z } from 'zod';
 
 const PATIENTS_COLLECTION = 'patients';
 
-// Zod schema for server-side validation. Dates are expected as ISO strings.
+// Zod schema for server-side validation.
 const NewPatientFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
@@ -40,7 +40,7 @@ const NewPatientFormSchema = z.object({
 
 /**
  * Creates a new patient document in Firestore from the registration form data.
- * @param patientFormData The patient data to save, with dates already converted to ISO strings.
+ * @param patientFormData The patient data to save.
  * @returns The ID of the newly created patient.
  */
 export async function registerNewPatient(patientFormData: z.infer<typeof NewPatientFormSchema>) {
