@@ -183,7 +183,8 @@ export default function ClinicianPatientRegistrationPage() {
                             <FormItem><FormLabel>Nephro ID / UHID <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="age" render={({ field }) => (
-                            <FormItem><FormLabel>Age (years) <span className="text-destructive">*</span></FormLabel><FormControl><Input type="number" placeholder="Enter age" {...field} /></FormControl>
+                            <FormItem><FormLabel>Age (years) <span className="text-destructive">*</span></FormLabel>
+                            <FormControl><Input type="number" placeholder="Enter age" {...field} value={field.value ?? ''} /></FormControl>
                             {age && age < 18 && (
                                 <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor. Guardian details are mandatory.</FormDescription>
                             )}
