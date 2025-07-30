@@ -5,7 +5,7 @@ import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjust
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
 import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
-import { db } from '@/lib/firebase';
+import { db } from '@/lib/firebase-admin';
 import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, setDoc, query, where } from 'firebase/firestore';
 import { z } from 'zod';
 
@@ -14,7 +14,6 @@ import { z } from 'zod';
 
 const PATIENTS_COLLECTION = 'patients';
 
-// Zod schema for server-side validation.
 const NewPatientFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
@@ -34,7 +33,6 @@ const NewPatientFormSchema = z.object({
   emergencyContactPhone: z.string().optional(),
   emergencyContactRelation: z.string().optional(),
   emergencyContactEmail: z.string().email().optional().or(z.literal('')),
-  emergencyContactWhatsapp: z.string().optional(),
 });
 
 

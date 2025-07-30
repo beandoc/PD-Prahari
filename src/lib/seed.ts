@@ -1,5 +1,5 @@
 
-import { db } from './firebase';
+import { db } from './firebase-admin'; // Use the admin SDK for seeding
 import { collection, doc, writeBatch } from 'firebase/firestore';
 import { promises as fs } from 'fs';
 import path from 'path';
