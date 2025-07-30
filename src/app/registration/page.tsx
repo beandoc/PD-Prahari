@@ -318,14 +318,8 @@ export default function ClinicianPatientRegistrationPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     
-    // Convert dates to ISO strings for the server action
-    const dataForAction = {
-        ...values,
-        dateOfBirth: values.dateOfBirth.toISOString(),
-        pdStartDate: values.pdStartDate?.toISOString(),
-    };
-
-    const result = await registerNewPatient(dataForAction as any);
+    // The server action now correctly handles date objects
+    const result = await registerNewPatient(values);
     
     if (result.success && result.patientId) {
         toast({

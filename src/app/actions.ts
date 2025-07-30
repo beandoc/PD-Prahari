@@ -14,49 +14,50 @@ import { z } from 'zod';
 
 const PATIENTS_COLLECTION = 'patients';
 
+// Zod schema for server-side validation of incoming form data
+const NewPatientFormSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  nephroId: z.string().min(1, 'Nephro ID is required'),
+  dateOfBirth: z.date({ required_error: 'Date of birth is required' }),
+  gender: z.enum(['Male', 'Female']),
+  contactPhone: z.string().optional(),
+  addressLine1: z.string().optional(),
+  city: z.string().optional(),
+  stateProvince: z.string().optional(),
+  postalCode: z.string().optional(),
+  physician: z.string().min(1, 'Attending nephrologist is required'),
+  pdStartDate: z.date().optional(),
+  underlyingKidneyDisease: z.string().optional(),
+  educationLevel: z.string().optional(),
+  pdExchangeType: z.enum(['Assisted', 'Self']),
+  emergencyContactName: z.string().optional(),
+  emergencyContactPhone: z.string().optional(),
+  emergencyContactRelation: z.string().optional(),
+  emergencyContactEmail: z.string().email().optional().or(z.literal('')),
+  emergencyContactWhatsapp: z.string().optional(),
+});
+
+
 /**
  * Creates a new patient document in Firestore from the registration form data.
  * @param patientFormData The patient data to save, coming directly from the registration form.
  * @returns The ID of the newly created patient.
  */
-export async function registerNewPatient(patientFormData: Omit<Patient, 'patientId' | 'currentStatus' | 'lastUpdated'>) {
+export async function registerNewPatient(patientFormData: z.infer<typeof NewPatientFormSchema>) {
     try {
-        // Zod schema for server-side validation
-        const PatientDataForDbSchema = z.object({
-          firstName: z.string().min(1),
-          lastName: z.string().min(1),
-          nephroId: z.string().min(1),
-          dateOfBirth: z.string().min(1), // ISO String
-          gender: z.enum(['Male', 'Female']),
-          contactPhone: z.string().optional(),
-          addressLine1: z.string().optional(),
-          city: z.string().optional(),
-          stateProvince: z.string().optional(),
-          postalCode: z.string().optional(),
-          physician: z.string().min(1),
-          pdStartDate: z.string().optional(),
-          underlyingKidneyDisease: z.string().optional(),
-          educationLevel: z.string().optional(),
-          pdExchangeType: z.enum(['Assisted', 'Self']),
-          emergencyContactEmail: z.string().email().optional().or(z.literal('')),
-          emergencyContactName: z.string().optional(),
-          emergencyContactPhone: z.string().optional(),
-          emergencyContactRelation: z.string().optional(),
-          emergencyContactWhatsapp: z.string().optional(),
-        });
-        
         // This will throw an error if validation fails, which will be caught
-        const validatedData = PatientDataForDbSchema.parse(patientFormData);
+        const validatedData = NewPatientFormSchema.parse(patientFormData);
 
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
 
         const newPatientData: PatientData = {
-            // Directly from validated form data
+            // Data from the validated form
             firstName: validatedData.firstName,
             lastName: validatedData.lastName,
             nephroId: validatedData.nephroId,
-            dateOfBirth: validatedData.dateOfBirth, // Is already an ISO string
+            dateOfBirth: validatedData.dateOfBirth.toISOString(), // Convert date to ISO string
             gender: validatedData.gender,
             contactPhone: validatedData.contactPhone,
             addressLine1: validatedData.addressLine1,
@@ -64,7 +65,7 @@ export async function registerNewPatient(patientFormData: Omit<Patient, 'patient
             stateProvince: validatedData.stateProvince,
             postalCode: validatedData.postalCode,
             physician: validatedData.physician,
-            pdStartDate: validatedData.pdStartDate || '', // Is already an ISO string or becomes empty
+            pdStartDate: validatedData.pdStartDate?.toISOString() || '', // Convert optional date to ISO string
             underlyingKidneyDisease: validatedData.underlyingKidneyDisease,
             educationLevel: validatedData.educationLevel,
             pdExchangeType: validatedData.pdExchangeType,
@@ -128,7 +129,7 @@ export async function registerNewPatient(patientFormData: Omit<Patient, 'patient
     } catch (error) {
         console.error("Error registering new patient:", error);
         if (error instanceof z.ZodError) {
-             return { success: false, error: `Validation failed: ${error.errors.map(e => e.message).join(', ')}` };
+             return { success: false, error: `Validation failed: ${error.errors.map(e => `${e.path.join('.')} - ${e.message}`).join(', ')}` };
         }
         return { success: false, error: 'Failed to register new patient due to a server error.' };
     }
