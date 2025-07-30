@@ -105,12 +105,12 @@ export default function PatientProfilePage() {
             <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div className="space-y-1"><p className="font-medium">Name</p><p className="text-muted-foreground">{patient.firstName} {patient.lastName}</p></div>
                 <div className="space-y-1"><p className="font-medium">Nephro ID</p><p className="text-muted-foreground">{patient.nephroId}</p></div>
-                <div className="space-y-1"><p className="font-medium">Date of Birth</p><p className="text-muted-foreground">{patient.dateOfBirth ? format(parseISO(patient.dateOfBirth), 'PPP') : 'N/A'}</p></div>
+                <div className="space-y-1"><p className="font-medium">Age</p><p className="text-muted-foreground">{patient.age} years</p></div>
                 <div className="space-y-1"><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
                 <div className="space-y-1"><p className="font-medium">Primary Nephrologist</p><p className="text-muted-foreground">{patient.physician}</p></div>
                 <div className="space-y-1 md:col-span-3"><p className="font-medium">Native Kidney Disease</p><p className="text-muted-foreground">{patient.underlyingKidneyDisease}</p></div>
                  <div className="flex items-center gap-2 text-muted-foreground"><Users2 className="h-4 w-4" /><span>{patient.pdExchangeType}</span></div>
-                <div className="flex items-center gap-2 text-muted-foreground"><CalendarClock className="h-4 w-4" /><span>PD Vintage: {getPDVintage(patient.pdStartDate)}</span></div>
+                <div className="flex items-center gap-2 text-muted-foreground"><CalendarClock className="h-4 w-4" /><span>PD Vintage: {getPDVintage(patient.pdStartDate || '')}</span></div>
             </CardContent>
           </Card>
           

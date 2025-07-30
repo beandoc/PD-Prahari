@@ -101,7 +101,7 @@ const ChecklistContent = () => {
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
                        <MetricItem label="Patient Name" value={`${patient.firstName} ${patient.lastName}`} />
-                       <MetricItem label="Date of Birth" value={patient.dateOfBirth ? format(parseISO(patient.dateOfBirth), 'PPP') : 'N/A'} />
+                       <MetricItem label="Age" value={`${patient.age} years`} />
                        <MetricItem label="Patient Number" value={patient.nephroId} />
                        <MetricItem label="Telephone" value={patient.contactPhone} />
                        <MetricItem label="Address" value={fullAddress} />

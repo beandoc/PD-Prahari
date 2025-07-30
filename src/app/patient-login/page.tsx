@@ -11,19 +11,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Lock, User, HeartPulse, Loader2 } from 'lucide-react';
 import { getPatientByNephroId } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { format, parse, parseISO } from 'date-fns';
+import { Label } from '@/components/ui/label';
 
 export default function PatientLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [nephroId, setNephroId] = useState('');
-  const [dob, setDob] = useState(''); // Date of Birth as YYYY-MM-DD
+  const [age, setAge] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    if (!nephroId || !dob) {
-      setError('Please enter both your Patient ID and your Date of Birth.');
+    if (!nephroId || !age) {
+      setError('Please enter both your Patient ID and your Age.');
       return;
     }
     
@@ -33,20 +33,8 @@ export default function PatientLoginPage() {
     try {
       const patient = await getPatientByNephroId(nephroId);
 
-      // In a real app, you'd use a secure password. Here, we're checking against DOB.
-      if (patient && patient.dateOfBirth) {
-        // This is an insecure comparison and only for demonstration.
-        // A real app must use a proper authentication system.
-        
-        // Robust date comparison to avoid timezone issues
-        const storedDob = parseISO(patient.dateOfBirth);
-        const inputDob = parse(dob, 'yyyy-MM-dd', new Date());
-
-        if (
-          storedDob.getFullYear() === inputDob.getFullYear() &&
-          storedDob.getMonth() === inputDob.getMonth() &&
-          storedDob.getDate() === inputDob.getDate()
-        ) {
+      if (patient && patient.age) {
+        if (patient.age === parseInt(age, 10)) {
            toast({
             title: "Login Successful",
             description: `Welcome back, ${patient.firstName}!`,
@@ -56,10 +44,10 @@ export default function PatientLoginPage() {
           sessionStorage.setItem('loggedInPatientId', patient.patientId);
           router.push('/patient-portal');
         } else {
-           setError('Invalid credentials. Please check your ID and Date of Birth.');
+           setError('Invalid credentials. Please check your ID and Age.');
         }
       } else {
-        setError('Invalid credentials. Patient not found.');
+        setError('Invalid credentials. Patient not found or age not set.');
       }
     } catch (err) {
       console.error(err);
@@ -84,33 +72,39 @@ export default function PatientLoginPage() {
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Patient Portal Login</h1>
             <p className="text-balance text-muted-foreground">
-              Enter your ID and Date of Birth to access your health dashboard.
+              Enter your ID and Age to access your health dashboard.
             </p>
           </div>
           <div className="grid gap-4">
-            <div className="relative">
-              <Input 
-                id="patientId" 
-                type="text" 
-                placeholder="Patient ID / UHID" 
-                value={nephroId}
-                onChange={(e) => setNephroId(e.target.value)}
-                required 
-                className="pl-10" 
-              />
-              <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="space-y-1">
+              <Label htmlFor="patientId">Patient ID / UHID</Label>
+              <div className="relative">
+                <Input 
+                  id="patientId" 
+                  type="text" 
+                  placeholder="Patient ID / UHID" 
+                  value={nephroId}
+                  onChange={(e) => setNephroId(e.target.value)}
+                  required 
+                  className="pl-10" 
+                />
+                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
             </div>
-            <div className="relative">
-              <Input 
-                id="dob" 
-                type="date"
-                placeholder="Date of Birth"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                required 
-                className="pl-10" 
-              />
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="space-y-1">
+              <Label htmlFor="age">Age (in years)</Label>
+              <div className="relative">
+                <Input 
+                  id="age" 
+                  type="number"
+                  placeholder="Your current age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  required 
+                  className="pl-10" 
+                />
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
             </div>
             {error && <p className="text-sm text-destructive text-center">{error}</p>}
             <Button type="submit" className="w-full" onClick={handleLogin} disabled={isLoading}>

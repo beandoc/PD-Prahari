@@ -19,7 +19,7 @@ const NewPatientFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   nephroId: z.string().min(1, 'Nephro ID is required'),
-  dateOfBirth: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" }),
+  age: z.coerce.number().min(12).max(90),
   gender: z.enum(['Male', 'Female']),
   contactPhone: z.string().optional(),
   addressLine1: z.string().optional(),
@@ -27,7 +27,6 @@ const NewPatientFormSchema = z.object({
   stateProvince: z.string().optional(),
   postalCode: z.string().optional(),
   physician: z.string().min(1, 'Attending nephrologist is required'),
-  pdStartDate: z.string().optional(),
   underlyingKidneyDisease: z.string().optional(),
   educationLevel: z.string().optional(),
   pdExchangeType: z.enum(['Assisted', 'Self']),
@@ -55,7 +54,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             firstName: validatedData.firstName,
             lastName: validatedData.lastName,
             nephroId: validatedData.nephroId,
-            dateOfBirth: validatedData.dateOfBirth,
+            age: validatedData.age,
             gender: validatedData.gender,
             contactPhone: validatedData.contactPhone,
             addressLine1: validatedData.addressLine1,
@@ -63,7 +62,6 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             stateProvince: validatedData.stateProvince,
             postalCode: validatedData.postalCode,
             physician: validatedData.physician,
-            pdStartDate: validatedData.pdStartDate || '',
             underlyingKidneyDisease: validatedData.underlyingKidneyDisease,
             educationLevel: validatedData.educationLevel,
             pdExchangeType: validatedData.pdExchangeType,
@@ -73,7 +71,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             emergencyContactEmail: validatedData.emergencyContactEmail,
             
             patientId: newPatientId,
-            currentStatus: validatedData.pdStartDate ? 'Active PD' : 'Awaiting Catheter',
+            currentStatus: 'Awaiting Catheter',
             lastUpdated: new Date().toISOString(),
             
             prescription: {
@@ -240,8 +238,16 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
 export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
     try {
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
-        await updateDoc(patientDocRef, { ...updatedData, lastUpdated: new Date().toISOString() });
-        console.log(`[FIRESTORE] Patient data updated for ${patientId}.`, updatedData);
+        
+        const dataToUpdate = { ...updatedData, lastUpdated: new Date().toISOString() };
+        
+        // Convert any date objects to ISO strings before saving
+        if (dataToUpdate.pdStartDate && dataToUpdate.pdStartDate instanceof Date) {
+            dataToUpdate.pdStartDate = dataToUpdate.pdStartDate.toISOString();
+        }
+
+        await updateDoc(patientDocRef, dataToUpdate);
+        console.log(`[FIRESTORE] Patient data updated for ${patientId}.`, dataToUpdate);
         return { success: true };
     } catch (error) {
         console.error("Error updating patient data in Firestore:", error);

@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getLiveAllPatientData } from '@/app/actions';
 import type { PatientData } from '@/lib/types';
-import { format, parseISO, differenceInYears } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { FlaskConical, Beaker, BarChart3, Calculator } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,11 +44,6 @@ const transportClassifications = [
     { type: 'Low Average (LA)', dpCreatinine: '0.50 - 0.64' },
     { type: 'Low (L)', dpCreatinine: '0.34 - 0.49' },
 ];
-
-const calculateAge = (dob: string) => {
-    if (!dob) return '';
-    return differenceInYears(new Date(), parseISO(dob));
-}
 
 const getTransportType = (dpCreatinine4: number | null): string => {
     if (dpCreatinine4 === null) return 'N/A';
@@ -159,7 +154,7 @@ export default function PetTestPage() {
                         <div><p className="font-medium">Patient Name</p><p className="text-muted-foreground">{patient.firstName} {patient.lastName}</p></div>
                         <div><p className="font-medium">ID Number</p><p className="text-muted-foreground">{patient.nephroId}</p></div>
                         <div><p className="font-medium">Gender</p><p className="text-muted-foreground">{patient.gender}</p></div>
-                        <div><p className="font-medium">Age</p><p className="text-muted-foreground">{patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A'} years</p></div>
+                        <div><p className="font-medium">Age</p><p className="text-muted-foreground">{patient.age} years</p></div>
                         <div><p className="font-medium">Catheter Date</p><p className="text-muted-foreground">{patient.pdStartDate ? format(parseISO(patient.pdStartDate), 'PPP') : 'N/A'}</p></div>
                     </CardContent>
                 </Card>
@@ -295,5 +290,3 @@ export default function PetTestPage() {
         </div>
     );
 }
-
-    

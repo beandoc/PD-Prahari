@@ -5,7 +5,8 @@ export interface Patient {
   nephroId: string;
   firstName: string;
   lastName: string;
-  dateOfBirth: string;
+  age: number;
+  dateOfBirth?: string; // Keep optional for existing data
   gender: 'Male' | 'Female' | 'Other';
   contactPhone?: string;
   contactEmail?: string;
@@ -19,7 +20,7 @@ export interface Patient {
   emergencyContactPhone?: string;
   physician: string;
   pdNurseId?: string; // NEW: Link to primary PD nurse
-  pdStartDate: string;
+  pdStartDate?: string;
   underlyingKidneyDisease?: string;
   comorbidities?: string[];
   currentStatus: 'Active PD' | 'Transferred to HD' | 'Transplanted' | 'Deceased' | 'Awaiting Catheter' | 'Catheter Removed';

@@ -5,14 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
-import { format, subYears, parse, isValid, startOfDay } from 'date-fns';
-import { CalendarIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { useState, useEffect }from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
@@ -23,7 +20,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -31,19 +27,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { indianStates } from '@/data/locations';
 import { registerNewPatient } from '@/app/actions';
+import { AlertTriangle, UserPlus } from 'lucide-react';
 
 const formSchema = z.object({
   // Demographics
   firstName: z.string().min(1, { message: 'First name is required.' }),
   lastName: z.string().min(1, { message: 'Last name is required.' }),
   nephroId: z.string().min(1, { message: 'Nephro ID / UHID is required.' }),
-  dateOfBirth: z.date({
-    required_error: 'Date of birth is required.',
-  }).refine((dob) => dob <= new Date(), { message: "Date of birth cannot be in the future." }),
+  age: z.coerce.number({ invalid_type_error: 'Age must be a number.' }).min(12, { message: 'Patient must be at least 12 years old.' }).max(90, { message: 'Patient cannot be more than 90 years old.' }),
   gender: z.enum(['Male', 'Female']),
   educationLevel: z.string().optional(),
   
@@ -64,183 +58,21 @@ const formSchema = z.object({
   // Clinical
   physician: z.string().min(1, { message: 'Attending nephrologist is required.' }),
   underlyingKidneyDisease: z.string().optional(),
-  pdStartDate: z.date().optional(),
   pdExchangeType: z.enum(['Assisted', 'Self']),
 }).superRefine((data, ctx) => {
-    if (data.dateOfBirth) {
-        const today = new Date();
-        let calculatedAge = today.getFullYear() - data.dateOfBirth.getFullYear();
-        const m = today.getMonth() - data.dateOfBirth.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < data.dateOfBirth.getDate())) {
-            calculatedAge--;
-        }
-
-        if (calculatedAge < 12) {
-             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Patient must be at least 12 years old.",
-                path: ["dateOfBirth"],
-            });
-        }
-        if (calculatedAge > 90) {
-             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Patient cannot be more than 90 years old.",
-                path: ["dateOfBirth"],
-            });
-        }
-
-        if (calculatedAge < 18 && !data.emergencyContactName) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Guardian details are mandatory for minors.",
-                path: ["emergencyContactName"],
-            });
-        }
+    if (data.age < 18 && !data.emergencyContactName) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Guardian details are mandatory for minors.",
+            path: ["emergencyContactName"],
+        });
     }
 });
-
-
-const DateOfBirthInput = ({
-  value,
-  onChange,
-}: {
-  value?: Date;
-  onChange: (date?: Date) => void;
-}) => {
-  const [manualDate, setManualDate] = useState<string>('');
-
-  useEffect(() => {
-    if (value && isValid(value)) {
-      setManualDate(format(value, 'dd-MM-yyyy'));
-    } else {
-      setManualDate('');
-    }
-  }, [value]);
-
-  const handleManualDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    setManualDate(inputValue);
-    
-    if (inputValue.length === 10) { 
-      const parsedDate = parse(inputValue, 'dd-MM-yyyy', new Date());
-      if (isValid(parsedDate)) {
-        onChange(startOfDay(parsedDate));
-      } else {
-        onChange(undefined);
-      }
-    } else if (inputValue.length === 0) {
-      onChange(undefined);
-    }
-  };
-
-  return (
-     <div className="relative">
-       <Input 
-        placeholder="dd-MM-yyyy"
-        value={manualDate}
-        onChange={handleManualDateChange}
-       />
-        <Popover>
-          <PopoverTrigger asChild>
-             <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
-                <CalendarIcon className="h-4 w-4 opacity-70" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={value}
-              onSelect={(date) => {
-                onChange(date);
-                if (date && isValid(date)) {
-                  setManualDate(format(date, 'dd-MM-yyyy'));
-                }
-              }}
-              disabled={(date) => date > new Date()}
-              initialFocus
-              captionLayout="dropdown-buttons"
-              fromDate={subYears(new Date(), 90)}
-              toDate={subYears(new Date(), 12)}
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-  )
-}
-
-const OptionalDateInput = ({
-  value,
-  onChange,
-}: {
-  value?: Date;
-  onChange: (date?: Date) => void;
-}) => {
-  const [manualDate, setManualDate] = useState<string>('');
-
-  useEffect(() => {
-    if (value && isValid(value)) {
-        setManualDate(format(value, 'dd-MM-yyyy'));
-    } else {
-        setManualDate('');
-    }
-  }, [value]);
-
-  const handleManualDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    setManualDate(inputValue);
-    
-    if (inputValue.length === 10) {
-      const parsedDate = parse(inputValue, 'dd-MM-yyyy', new Date());
-      if (isValid(parsedDate)) {
-        onChange(startOfDay(parsedDate));
-      } else {
-        onChange(undefined);
-      }
-    } else if (inputValue.length === 0) {
-      onChange(undefined);
-    }
-  };
-
-  return (
-     <div className="relative">
-       <Input 
-        placeholder="dd-MM-yyyy"
-        value={manualDate}
-        onChange={handleManualDateChange}
-       />
-        <Popover>
-          <PopoverTrigger asChild>
-             <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
-                <CalendarIcon className="h-4 w-4 opacity-70" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={value}
-              onSelect={(date) => {
-                onChange(date);
-                if (date && isValid(date)) {
-                  setManualDate(format(date, 'dd-MM-yyyy'));
-                }
-              }}
-              disabled={(date) => date > new Date()}
-              initialFocus
-              captionLayout="dropdown-buttons"
-              toDate={new Date()}
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-  )
-}
 
 export default function ClinicianPatientRegistrationPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [age, setAge] = useState<number | null>(null);
   const [cities, setCities] = useState<string[]>([]);
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -266,22 +98,8 @@ export default function ClinicianPatientRegistrationPage() {
     },
   });
 
-  const dob = form.watch('dateOfBirth');
+  const age = form.watch('age');
   const selectedState = form.watch('stateProvince');
-
-  useEffect(() => {
-    if (dob && isValid(dob)) {
-      const today = new Date();
-      let calculatedAge = today.getFullYear() - dob.getFullYear();
-      const m = today.getMonth() - dob.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-        calculatedAge--;
-      }
-      setAge(calculatedAge);
-    } else {
-      setAge(null);
-    }
-  }, [dob]);
 
   useEffect(() => {
     const stateData = indianStates.find(s => s.name === selectedState);
@@ -301,7 +119,7 @@ export default function ClinicianPatientRegistrationPage() {
   const nextStep = async () => {
     let fieldsToValidate: (keyof z.infer<typeof formSchema>)[];
     if (step === 1) {
-        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'dateOfBirth', 'gender', 'emergencyContactName'];
+        fieldsToValidate = ['firstName', 'lastName', 'nephroId', 'age', 'gender', 'emergencyContactName'];
     } else {
         return;
     }
@@ -317,13 +135,7 @@ export default function ClinicianPatientRegistrationPage() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const dataToSend = {
-        ...values,
-        dateOfBirth: values.dateOfBirth.toISOString(),
-        pdStartDate: values.pdStartDate?.toISOString(),
-    };
-    
-    const result = await registerNewPatient(dataToSend);
+    const result = await registerNewPatient(values);
     
     if (result.success && result.patientId) {
         toast({
@@ -369,25 +181,14 @@ export default function ClinicianPatientRegistrationPage() {
                         <FormField control={form.control} name="nephroId" render={({ field }) => (
                             <FormItem><FormLabel>Nephro ID / UHID <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="e.g., NPH-12345" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                        <Controller
-                            control={form.control}
-                            name="dateOfBirth"
-                            render={({ field, fieldState }) => (
-                                <FormItem className="flex flex-col">
-                                <FormLabel>Date of Birth <span className="text-destructive">*</span></FormLabel>
-                                <FormControl>
-                                    <DateOfBirthInput
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                    />
-                                </FormControl>
-                                {age !== null && age < 18 && (
-                                    <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor (Age: {age}). Guardian details are mandatory.</FormDescription>
-                                )}
-                                <FormMessage>{fieldState.error?.message}</FormMessage>
-                                </FormItem>
+                        <FormField control={form.control} name="age" render={({ field }) => (
+                            <FormItem><FormLabel>Age (years) <span className="text-destructive">*</span></FormLabel><FormControl><Input type="number" placeholder="Enter age" {...field} /></FormControl>
+                            {age && age < 18 && (
+                                <FormDescription className="text-yellow-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" />Patient is a minor. Guardian details are mandatory.</FormDescription>
                             )}
-                        />
+                            <FormMessage />
+                            </FormItem>
+                        )} />
                         <FormField control={form.control} name="gender" render={({ field }) => (
                             <FormItem><FormLabel>Gender</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
@@ -450,7 +251,7 @@ export default function ClinicianPatientRegistrationPage() {
                     <h3 className="text-lg font-semibold mb-4 border-b pb-2">Emergency Contact / Guardian</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="emergencyContactName" render={({ field }) => (
-                            <FormItem><FormLabel>Contact Name {age !== null && age < 18 && (<span className="text-destructive">*</span>)}</FormLabel><FormControl><Input placeholder="Enter guardian/contact name" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Contact Name {age && age < 18 && (<span className="text-destructive">*</span>)}</FormLabel><FormControl><Input placeholder="Enter guardian/contact name" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="emergencyContactPhone" render={({ field }) => (
                             <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Enter guardian/contact phone" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
@@ -503,22 +304,6 @@ export default function ClinicianPatientRegistrationPage() {
                         <FormField control={form.control} name="underlyingKidneyDisease" render={({ field }) => (
                             <FormItem><FormLabel>Underlying Kidney Disease</FormLabel><FormControl><Input placeholder="e.g., Diabetic Nephropathy" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem>
                         )} />
-                        <Controller
-                            control={form.control}
-                            name="pdStartDate"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                <FormLabel>PD Start Date</FormLabel>
-                                    <FormControl>
-                                    <OptionalDateInput
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                    />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
                         <FormField control={form.control} name="pdExchangeType" render={({ field }) => (
                             <FormItem><FormLabel>PD Exchange Type <span className="text-destructive">*</span></FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
