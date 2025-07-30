@@ -6,7 +6,7 @@ import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, st
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
-import { db } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, setDoc, query, where } from 'firebase/firestore';
 
 
@@ -44,6 +44,7 @@ const NewPatientFormSchema = z.object({
 export async function registerNewPatient(patientFormData: z.infer<typeof NewPatientFormSchema>) {
     try {
         const validatedData = NewPatientFormSchema.parse(patientFormData);
+        const db = await getAdminDb();
 
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
@@ -135,6 +136,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
  */
 export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
     try {
+        const db = await getAdminDb();
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
         const patientSnap = await getDoc(patientDocRef);
         if (patientSnap.exists()) {
@@ -154,6 +156,7 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
  */
 export async function getPatientByNephroId(nephroId: string): Promise<PatientData | null> {
     try {
+        const db = await getAdminDb();
         const q = query(collection(db, PATIENTS_COLLECTION), where("nephroId", "==", nephroId));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
@@ -178,6 +181,7 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
  */
 export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
     try {
+        const db = await getAdminDb();
         const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
         const querySnapshot = await getDocs(patientsCollectionRef);
 
@@ -201,6 +205,7 @@ export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
  */
 export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
   try {
+      const db = await getAdminDb();
       const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
       const updatePayload: any = {
         lastUpdated: new Date().toISOString()
@@ -235,6 +240,7 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
  */
 export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
     try {
+        const db = await getAdminDb();
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
         
         const dataToUpdate = { ...updatedData, lastUpdated: new Date().toISOString() };
@@ -272,6 +278,7 @@ export async function updatePatientNotes(patientId: string, note: string) {
  */
 export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
     try {
+        const db = await getAdminDb();
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
         await updateDoc(patientDocRef, {
             labResults: arrayUnion(...newLabs),
