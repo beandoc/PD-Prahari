@@ -42,9 +42,13 @@ export default function MessagesPage() {
             setPatientList(data);
             
             if (data.length > 0) {
+                const lastMessageForNurse = data.length > 1 
+                    ? `Please check the latest checklist for ${data[1].firstName} ${data[1].lastName}.`
+                    : 'Please review nurse assignments.';
+
                 const generatedConversations = [
                     { id: 1, name: `${data[0].firstName} ${data[0].lastName}`, role: 'Patient', lastMessage: 'Okay, thank you, doctor.', time: '10:42 AM', unread: 0, avatar: '/patient-avatar-1.png' },
-                    { id: 2, name: 'PD Nurse Team', role: 'Nurse', lastMessage: 'Please check the latest checklist for Priya D.', time: '9:15 AM', unread: 2, avatar: '/nurse-avatar.png' },
+                    { id: 2, name: 'PD Nurse Team', role: 'Nurse', lastMessage: lastMessageForNurse, time: '9:15 AM', unread: 2, avatar: '/nurse-avatar.png' },
                 ];
                 if (data.length > 2) {
                     generatedConversations.push(
