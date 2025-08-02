@@ -1,6 +1,6 @@
 
-import { db } from './firebase-admin'; // Use the admin SDK for seeding
-import { collection, doc, writeBatch } from 'firebase/firestore';
+import { initializeApp, getApps, App } from 'firebase-admin/app';
+import { getFirestore, writeBatch } from 'firebase-admin/firestore';
 import { promises as fs } from 'fs';
 import path from 'path';
 import type { PatientData } from './types';
@@ -10,18 +10,29 @@ const PATIENTS_COLLECTION = 'patients';
 async function seedDatabase() {
     console.log('[SEED] Starting database seed process...');
 
+    let adminApp: App;
+    if (!getApps().length) {
+        console.log('[SEED] Initializing Firebase Admin SDK for seeding...');
+        // Note: For local seeding, you might need to set up GOOGLE_APPLICATION_CREDENTIALS
+        // See: https://firebase.google.com/docs/admin/setup#initialize-sdk
+        adminApp = initializeApp({
+            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        });
+    } else {
+        adminApp = getApps()[0];
+    }
+    
+    const db = getFirestore(adminApp);
     const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
     const batch = writeBatch(db);
 
     try {
-        // Read the local JSON file
         const jsonPath = path.join(process.cwd(), 'src', 'data', 'patient-data.json');
         const fileContents = await fs.readFile(jsonPath, 'utf8');
         const patients: PatientData[] = JSON.parse(fileContents);
         
         console.log(`[SEED] Found ${patients.length} patients in the JSON file.`);
 
-        // Write each patient to Firestore
         patients.forEach((patient) => {
             const patientDocRef = doc(db, PATIENTS_COLLECTION, patient.patientId);
             batch.set(patientDocRef, patient);
@@ -39,12 +50,8 @@ async function seedDatabase() {
 
 seedDatabase().then(() => {
     console.log('[SEED] Process finished.');
-    // Firestore connections can keep the script running. 
-    // We explicitly exit after a short delay to ensure writes complete.
     setTimeout(() => process.exit(0), 2000);
 }).catch(e => {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
 });
-
-// To run this script, use the command: `npm run seed` or `tsx src/lib/seed.ts`

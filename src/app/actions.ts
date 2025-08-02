@@ -2,7 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
+import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek, formatISO } from 'date-fns';
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
@@ -19,7 +19,7 @@ const NewPatientFormSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   nephroId: z.string().min(1, 'Nephro ID is required'),
   age: z.coerce.number().min(12).max(90),
-  gender: z.enum(['Male', 'Female']),
+  gender: z.enum(['Male', 'Female', 'Other']),
   contactPhone: z.string().optional(),
   addressLine1: z.string().optional(),
   city: z.string().optional(),
@@ -71,7 +71,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             
             patientId: newPatientId,
             currentStatus: 'Awaiting Catheter',
-            lastUpdated: new Date().toISOString(),
+            lastUpdated: formatISO(new Date()),
             
             prescription: {
                 exchange: 'CAPD',
@@ -110,7 +110,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             peritonitisEpisodes: [],
             urineOutputLogs: [],
             pdAdequacy: [],
-            patientReportedOutcomes: [],
+            patientReportedOutcomes: [], // Ensure this matches the PatientData type
             uploadedImages: [],
             admissions: [],
         };
@@ -162,7 +162,8 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const patientDoc = querySnapshot.docs[0];
-            return {
+            // Explicitly cast to PatientData to ensure type safety, handles missing fields
+ return {
                 ...(patientDoc.data() as Omit<PatientData, 'patientId'>),
                 patientId: patientDoc.id,
             } as PatientData;
@@ -197,7 +198,15 @@ export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
         return [];
     }
 };
+interface SaveLogUpdatePayload {
+  lastUpdated: string;
+  pdEvents?: ReturnType<typeof arrayUnion>;
+  vitals?: ReturnType<typeof arrayUnion>;
+  // Add other fields if savePatientLog is extended
+  // [key: string]: any; // Or allow any for simplicity if necessary
+}
 
+;
 /**
  * Saves new patient log data (PD events and vitals) to Firestore.
  * @param patientId The ID of the patient document.
@@ -208,14 +217,14 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
   try {
       const db = await getAdminDb();
       const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
-      const updatePayload: any = {
-        lastUpdated: new Date().toISOString()
+      const updatePayload: SaveLogUpdatePayload = {
+        lastUpdated: formatISO(new Date())
       };
       
       if (newEvents.length > 0) {
         updatePayload.pdEvents = arrayUnion(...newEvents);
       }
-      
+
       const cleanedVital = Object.fromEntries(
         Object.entries(newVital).filter(([, value]) => value !== undefined && value !== null && (typeof value !== 'number' || !isNaN(value)))
       );
@@ -243,14 +252,14 @@ export async function updatePatientData(patientId: string, updatedData: Partial<
     try {
         const db = await getAdminDb();
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
-        
-        const dataToUpdate = { ...updatedData, lastUpdated: new Date().toISOString() };
-        
-        // Convert any date objects to ISO strings before saving
-        if (dataToUpdate.pdStartDate && dataToUpdate.pdStartDate instanceof Date) {
-            dataToUpdate.pdStartDate = dataToUpdate.pdStartDate.toISOString();
-        }
 
+        const dataToUpdate: Partial<PatientData> & { lastUpdated: string } = { ...updatedData, lastUpdated: formatISO(new Date()) };
+
+        // Convert any date objects to ISO strings before saving
+        if (dataToUpdate.pdStartDate) {
+             // Assuming pdStartDate in updatedData might be a Date object or string
+            dataToUpdate.pdStartDate = typeof dataToUpdate.pdStartDate === 'string' ? dataToUpdate.pdStartDate : formatISO(dataToUpdate.pdStartDate);
+        }
         await updateDoc(patientDocRef, dataToUpdate);
         console.log(`[FIRESTORE] Patient data updated for ${patientId}.`, dataToUpdate);
         return { success: true };
@@ -283,7 +292,7 @@ export async function updatePatientLabs(patientId: string, newLabs: LabResult[])
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
         await updateDoc(patientDocRef, {
             labResults: arrayUnion(...newLabs),
-            lastUpdated: new Date().toISOString()
+            lastUpdated: formatISO(new Date())
         });
         console.log(`[FIRESTORE] Lab results updated for ${patientId}.`);
         return { success: true };

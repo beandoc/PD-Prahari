@@ -19,6 +19,7 @@ export interface Patient {
   emergencyContactName?: string;
   emergencyContactPhone?: string;
   physician: string;
+  emergencyContactRelation: string | undefined;
   pdNurseId?: string; // NEW: Link to primary PD nurse
   pdStartDate?: string;
   underlyingKidneyDisease?: string;
@@ -234,5 +235,6 @@ export interface PatientData extends Patient {
   nurseCounselingNotes?: string;
   doctorNotes?: string;
   trainingDay?: number;
+  emergencyContactEmail?: string;
 }
     
