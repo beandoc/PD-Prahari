@@ -1,6 +1,6 @@
 
 import { initializeApp, getApps, App } from 'firebase-admin/app';
-import { getFirestore, writeBatch } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import { promises as fs } from 'fs';
 import path from 'path';
 import type { PatientData } from './types';
@@ -23,8 +23,8 @@ async function seedDatabase() {
     }
     
     const db = getFirestore(adminApp);
-    const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
-    const batch = writeBatch(db);
+    const patientsCollectionRef = db.collection(PATIENTS_COLLECTION);
+    const batch = db.batch();
 
     try {
         const jsonPath = path.join(process.cwd(), 'src', 'data', 'patient-data.json');
@@ -34,7 +34,7 @@ async function seedDatabase() {
         console.log(`[SEED] Found ${patients.length} patients in the JSON file.`);
 
         patients.forEach((patient) => {
-            const patientDocRef = doc(db, PATIENTS_COLLECTION, patient.patientId);
+            const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patient.patientId);
             batch.set(patientDocRef, patient);
         });
         
