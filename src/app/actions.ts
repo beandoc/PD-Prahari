@@ -115,6 +115,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             admissions: [],
         };
 
+        console.log("[FIRESTORE] Attempting to set patient document with data:", newPatientData);
         await setDoc(patientDocRef, newPatientData);
         console.log(`[FIRESTORE] New patient registered with ID: ${newPatientId}`);
         return { success: true, patientId: newPatientId };
