@@ -7,7 +7,7 @@ import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjust
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
 import { getAdminDb } from '@/lib/firebase-admin';
-import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, setDoc, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, query, where } from 'firebase/firestore';
 
 
 // --- Firestore Data Store (Server-Side) ---
@@ -47,7 +47,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
         const db = await getAdminDb();
 
         const newPatientId = `PAT-${Date.now()}`;
-        const patientDocRef = doc(db, PATIENTS_COLLECTION, newPatientId);
+        const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(newPatientId);
 
         const newPatientData: PatientData = {
             firstName: validatedData.firstName,
@@ -116,7 +116,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
         };
 
         console.log("[FIRESTORE] Attempting to set patient document with data:", newPatientData);
-        await setDoc(patientDocRef, newPatientData);
+        await patientDocRef.set(newPatientData);
         console.log(`[FIRESTORE] New patient registered with ID: ${newPatientId}`);
         return { success: true, patientId: newPatientId };
     } catch (error) {
@@ -138,9 +138,9 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
 export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
     try {
         const db = await getAdminDb();
-        const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
-        const patientSnap = await getDoc(patientDocRef);
-        if (patientSnap.exists()) {
+        const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
+        const patientSnap = await patientDocRef.get();
+        if (patientSnap.exists) {
             return patientSnap.data() as PatientData;
         }
         return null;
@@ -158,12 +158,11 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
 export async function getPatientByNephroId(nephroId: string): Promise<PatientData | null> {
     try {
         const db = await getAdminDb();
-        const q = query(collection(db, PATIENTS_COLLECTION), where("nephroId", "==", nephroId));
-        const querySnapshot = await getDocs(q);
+        const patientsRef = db.collection(PATIENTS_COLLECTION);
+        const querySnapshot = await patientsRef.where("nephroId", "==", nephroId).get();
         if (!querySnapshot.empty) {
             const patientDoc = querySnapshot.docs[0];
-            // Explicitly cast to PatientData to ensure type safety, handles missing fields
- return {
+            return {
                 ...(patientDoc.data() as Omit<PatientData, 'patientId'>),
                 patientId: patientDoc.id,
             } as PatientData;
@@ -184,8 +183,8 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
 export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
     try {
         const db = await getAdminDb();
-        const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
-        const querySnapshot = await getDocs(patientsCollectionRef);
+        const patientsCollectionRef = db.collection(PATIENTS_COLLECTION);
+        const querySnapshot = await patientsCollectionRef.get();
 
         if (querySnapshot.empty) {
             console.warn('[FIRESTORE] The "patients" collection is empty. Run `npm run seed` locally to populate it with sample data.');
@@ -216,7 +215,7 @@ interface SaveLogUpdatePayload {
 export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
   try {
       const db = await getAdminDb();
-      const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
+      const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
       const updatePayload: SaveLogUpdatePayload = {
         lastUpdated: formatISO(new Date())
       };
@@ -233,7 +232,7 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
         updatePayload.vitals = arrayUnion(cleanedVital);
       }
 
-      await updateDoc(patientDocRef, updatePayload);
+      await patientDocRef.set(updatePayload);
 
       console.log(`[FIRESTORE] Patient log saved for ${patientId}.`);
       return { success: true };
@@ -251,7 +250,7 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
 export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
     try {
         const db = await getAdminDb();
-        const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
+        const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
 
         const dataToUpdate: Partial<PatientData> & { lastUpdated: string } = { ...updatedData, lastUpdated: formatISO(new Date()) };
 
@@ -260,7 +259,7 @@ export async function updatePatientData(patientId: string, updatedData: Partial<
              // Assuming pdStartDate in updatedData might be a Date object or string
             dataToUpdate.pdStartDate = typeof dataToUpdate.pdStartDate === 'string' ? dataToUpdate.pdStartDate : formatISO(dataToUpdate.pdStartDate);
         }
-        await updateDoc(patientDocRef, dataToUpdate);
+        await patientDocRef.set(dataToUpdate);
         console.log(`[FIRESTORE] Patient data updated for ${patientId}.`, dataToUpdate);
         return { success: true };
     } catch (error) {
@@ -289,11 +288,24 @@ export async function updatePatientNotes(patientId: string, note: string) {
 export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
     try {
         const db = await getAdminDb();
-        const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
-        await updateDoc(patientDocRef, {
-            labResults: arrayUnion(...newLabs),
+        const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
+
+        // Get current labResults
+        const patientSnap = await patientDocRef.get();
+        let currentLabs: LabResult[] = [];
+        if (patientSnap.exists) {
+            const data = patientSnap.data();
+            currentLabs = Array.isArray(data && data.labResults) ? data && data.labResults : [];
+        }
+
+        // Append new labs
+        const updatedLabs = [...currentLabs, ...newLabs];
+
+        await patientDocRef.update({
+            labResults: updatedLabs,
             lastUpdated: formatISO(new Date())
         });
+
         console.log(`[FIRESTORE] Lab results updated for ${patientId}.`);
         return { success: true };
     } catch (error) {
@@ -301,7 +313,6 @@ export async function updatePatientLabs(patientId: string, newLabs: LabResult[])
         return { success: false, error: 'Failed to update lab results.' };
     }
 }
-
 /**
  * Saves an updated list of medications for a patient.
  * @param patientId The ID of the patient.
