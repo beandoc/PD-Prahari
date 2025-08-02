@@ -4,30 +4,17 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Boxes, Package, Droplets, Replace } from 'lucide-react';
+import { Boxes, Package, Droplets, Replace, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useState, useEffect } from 'react';
+import { getInventoryData } from '@/app/actions';
 
-const inventoryData = {
-  catheters: [
-    { type: 'Straight', quantity: 42, nextArrival: '2024-08-15' },
-    { type: 'Coiled', quantity: 28, nextArrival: '2024-08-15' },
-  ],
-  pdFluids: [
-    { type: '1.5% Dextrose', quantity: 250, unit: 'bags', nextArrival: '2024-08-07' },
-    { type: '2.5% Dextrose', quantity: 180, unit: 'bags', nextArrival: '2024-08-07' },
-    { type: '7.5% Icodextrin', quantity: 95, unit: 'bags', nextArrival: '2024-08-20' },
-  ],
-  apdFluids: [
-    { type: 'Dianeal Low Calcium (1.5%)', quantity: 150, unit: 'bags', nextArrival: '2024-08-10' },
-    { type: 'Dianeal Low Calcium (2.5%)', quantity: 120, unit: 'bags', nextArrival: '2024-08-10' },
-    { type: 'Extraneal (7.5% Icodextrin)', quantity: 80, unit: 'bags', nextArrival: '2024-08-25' },
-  ],
-  transferSets: {
-    quantity: 150,
-    unit: 'sets',
-    nextArrival: '2024-08-05'
-  }
-};
+interface InventoryData {
+  catheters: { type: string; quantity: number; nextArrival: string }[];
+  pdFluids: { type: string; quantity: number; unit: string; nextArrival: string }[];
+  apdFluids: { type: string; quantity: number; unit: string; nextArrival: string }[];
+  transferSets: { quantity: number; unit: string; nextArrival: string };
+}
 
 const getStatusVariant = (quantity: number): "destructive" | "outline" | "secondary" => {
   if (quantity < 50) return 'destructive';
@@ -43,6 +30,27 @@ const getStatusLabel = (quantity: number) => {
 
 
 export default function InventoryPage() {
+  const [inventoryData, setInventoryData] = useState<InventoryData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const data = await getInventoryData();
+      setInventoryData(data);
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  if (isLoading || !inventoryData) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <header>

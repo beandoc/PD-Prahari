@@ -7,12 +7,13 @@ import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjust
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
 import { getAdminDb } from '@/lib/firebase-admin';
-import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, query, where, QueryDocumentSnapshot } from 'firebase/firestore';
 
 
 // --- Firestore Data Store (Server-Side) ---
 
 const PATIENTS_COLLECTION = 'patients';
+const INVENTORY_COLLECTION = 'inventory';
 
 const NewPatientFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -76,9 +77,9 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
             prescription: {
                 exchange: 'CAPD',
                 pdStrength: '',
-                dwellTimeHours: 4,
-                dwellVolumeML: 2000,
-                exchangeTimeMinutes: 30,
+                dwellTimeHours: '4',
+                dwellVolumeML: '2000',
+                exchangeTimeMinutes: '30',
                 regimen: [],
             },
             contactInfo: {
@@ -197,6 +198,34 @@ export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
         return [];
     }
 };
+
+/**
+ * Retrieves all inventory data from Firestore.
+ */
+export async function getInventoryData() {
+    try {
+        const db = await getAdminDb();
+        const inventoryRef = db.collection(INVENTORY_COLLECTION);
+        const snapshot = await inventoryRef.get();
+        
+        const inventoryData: Record<string, any> = {};
+        snapshot.forEach(doc => {
+            inventoryData[doc.id] = doc.data();
+        });
+
+        // The component expects a specific structure, so we transform it here.
+        return {
+            catheters: inventoryData.catheters?.items || [],
+            pdFluids: inventoryData['pd-fluids']?.items || [],
+            apdFluids: inventoryData['apd-fluids']?.items || [],
+            transferSets: inventoryData['transfer-sets'] || { quantity: 0, unit: 'sets', nextArrival: '' },
+        };
+    } catch (error) {
+        console.error("Error fetching inventory data from Firestore:", error);
+        return { catheters: [], pdFluids: [], apdFluids: [], transferSets: { quantity: 0, unit: 'sets', nextArrival: '' } };
+    }
+}
+
 interface SaveLogUpdatePayload {
   lastUpdated: string;
   pdEvents?: ReturnType<typeof arrayUnion>;

@@ -12,15 +12,17 @@ import { cn } from '@/lib/utils';
 import { getLiveAllPatientData } from '@/app/actions';
 import type { PatientData } from '@/lib/types';
 
+// NOTE: In a real application, messages would be fetched from a dedicated 'conversations' collection
+// in Firestore. This is a simplified, hardcoded simulation for demonstration purposes.
 const messages = {
     '1': [
-        { from: 'other', text: 'Hi Rohan, your latest lab results are in. Everything looks stable.', time: '10:40 AM' },
+        { from: 'other', text: 'Hi, your latest lab results are in. Everything looks stable.', time: '10:40 AM' },
         { from: 'me', text: 'That\'s great news!', time: '10:41 AM' },
         { from: 'other', text: 'Keep up the good work with your logs.', time: '10:41 AM' },
         { from: 'me', text: 'Okay, thank you, doctor.', time: '10:42 AM' },
     ],
     '2': [
-        { from: 'other', text: 'Please check the latest checklist for Priya D.', time: '9:15 AM' },
+        { from: 'other', text: 'Please check the latest checklist for your assigned patient.', time: '9:15 AM' },
     ],
     '3': [
          { from: 'other', text: 'The fluid bag looks cloudy, what should I do?', time: 'Yesterday' },
@@ -42,13 +44,10 @@ export default function MessagesPage() {
             setPatientList(data);
             
             if (data.length > 0) {
-                const lastMessageForNurse = data.length > 1 
-                    ? `Please check the latest checklist for ${data[1].firstName} ${data[1].lastName}.`
-                    : 'Please review nurse assignments.';
-
+                 // Dynamically create conversation list using fetched patient data
                 const generatedConversations = [
                     { id: 1, name: `${data[0].firstName} ${data[0].lastName}`, role: 'Patient', lastMessage: 'Okay, thank you, doctor.', time: '10:42 AM', unread: 0, avatar: '/patient-avatar-1.png' },
-                    { id: 2, name: 'PD Nurse Team', role: 'Nurse', lastMessage: lastMessageForNurse, time: '9:15 AM', unread: 2, avatar: '/nurse-avatar.png' },
+                    { id: 2, name: 'PD Nurse Team', role: 'Nurse', lastMessage: `Checklist for ${data[1].firstName} ready.`, time: '9:15 AM', unread: 2, avatar: '/nurse-avatar.png' },
                 ];
                 if (data.length > 2) {
                     generatedConversations.push(

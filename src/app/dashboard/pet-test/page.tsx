@@ -61,11 +61,11 @@ export default function PetTestPage() {
     const [patient, setPatient] = useState<PatientData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [labValues, setLabValues] = useState<LabValues>({
-        serumBun: '56.50', serumCreatinine: '12.00', serumGlucose: '111.00',
-        dialysateBun0: '7.09', dialysateCreatinine0: '0.80', dialysateGlucose0: '1800.00',
-        dialysateBun120: '37.38', dialysateCreatinine120: '5.80', dialysateGlucose120: '995.00',
-        dialysateBun240: '52.33', dialysateCreatinine240: '8.65', dialysateGlucose240: '622.00',
-        drainVolume: '2200'
+        serumBun: '', serumCreatinine: '', serumGlucose: '',
+        dialysateBun0: '', dialysateCreatinine0: '', dialysateGlucose0: '',
+        dialysateBun120: '', dialysateCreatinine120: '', dialysateGlucose120: '',
+        dialysateBun240: '', dialysateCreatinine240: '', dialysateGlucose240: '',
+        drainVolume: ''
     });
     const [ratios, setRatios] = useState<CalculatedRatios | null>(null);
 

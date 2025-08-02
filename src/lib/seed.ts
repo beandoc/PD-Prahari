@@ -6,6 +6,36 @@ import path from 'path';
 import type { PatientData } from './types';
 
 const PATIENTS_COLLECTION = 'patients';
+const INVENTORY_COLLECTION = 'inventory';
+
+const inventoryData = {
+  catheters: {
+    items: [
+      { type: 'Straight', quantity: 42, nextArrival: '2024-08-15' },
+      { type: 'Coiled', quantity: 28, nextArrival: '2024-08-15' },
+    ]
+  },
+  'pd-fluids': {
+    items: [
+      { type: '1.5% Dextrose', quantity: 250, unit: 'bags', nextArrival: '2024-08-07' },
+      { type: '2.5% Dextrose', quantity: 180, unit: 'bags', nextArrival: '2024-08-07' },
+      { type: '7.5% Icodextrin', quantity: 95, unit: 'bags', nextArrival: '2024-08-20' },
+    ]
+  },
+  'apd-fluids': {
+    items: [
+      { type: 'Dianeal Low Calcium (1.5%)', quantity: 150, unit: 'bags', nextArrival: '2024-08-10' },
+      { type: 'Dianeal Low Calcium (2.5%)', quantity: 120, unit: 'bags', nextArrival: '2024-08-10' },
+      { type: 'Extraneal (7.5% Icodextrin)', quantity: 80, unit: 'bags', nextArrival: '2024-08-25' },
+    ]
+  },
+  'transfer-sets': {
+    quantity: 150,
+    unit: 'sets',
+    nextArrival: '2024-08-05'
+  }
+};
+
 
 async function seedDatabase() {
     console.log('[SEED] Starting database seed process...');
@@ -23,9 +53,9 @@ async function seedDatabase() {
     }
     
     const db = getFirestore(adminApp);
-    const patientsCollectionRef = db.collection(PATIENTS_COLLECTION);
     const batch = db.batch();
 
+    // Seed Patients
     try {
         const jsonPath = path.join(process.cwd(), 'src', 'data', 'patient-data.json');
         const fileContents = await fs.readFile(jsonPath, 'utf8');
@@ -38,13 +68,30 @@ async function seedDatabase() {
             batch.set(patientDocRef, patient);
         });
         
-        await batch.commit();
-        console.log('[SEED] Successfully seeded initial patient data to Firestore.');
-        console.log('[SEED] NOTE: This script does not check for existing data. It will overwrite patients with the same ID.');
-
+        console.log('[SEED] Successfully prepared patient data for Firestore.');
     } catch (error) {
-        console.error('[SEED] Error seeding data:', error);
-        console.log('[SEED] Please make sure `src/data/patient-data.json` exists and is correctly formatted.');
+        console.error('[SEED] Error reading or preparing patient data:', error);
+    }
+    
+    // Seed Inventory
+    try {
+        console.log('[SEED] Preparing inventory data for Firestore.');
+        for (const [docId, data] of Object.entries(inventoryData)) {
+            const docRef = db.collection(INVENTORY_COLLECTION).doc(docId);
+            batch.set(docRef, data);
+        }
+        console.log('[SEED] Successfully prepared inventory data for Firestore.');
+    } catch (error) {
+         console.error('[SEED] Error preparing inventory data:', error);
+    }
+
+    // Commit all data
+    try {
+        await batch.commit();
+        console.log('[SEED] Successfully committed all data to Firestore.');
+        console.log('[SEED] NOTE: This script does not check for existing data. It will overwrite documents with the same ID.');
+    } catch (error) {
+        console.error('[SEED] Error committing data to Firestore:', error);
     }
 }
 

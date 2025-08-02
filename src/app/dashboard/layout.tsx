@@ -75,6 +75,8 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [isNurseView, setIsNurseView] = useState(false);
+  // This state would eventually be replaced by a real auth system
+  const [userName, setUserName] = useState('Clinician');
 
   useEffect(() => {
     // This logic determines which set of navigation links to show.
@@ -84,12 +86,14 @@ export default function DashboardLayout({
                         pathname === '/dashboard/update-records';
 
     setIsNurseView(isNursePath);
+    // In a real app, you would fetch user data here.
+    setUserName(isNursePath ? 'PD Nurse' : 'Doctor');
+
   }, [pathname]);
 
   const navLinks = isNurseView ? nurseNavLinks : doctorNavLinks;
   const isDashboardPage = pathname === '/dashboard' || pathname === '/dashboard/nurse-dashboard';
   const backLinkHref = isNurseView ? '/dashboard/nurse-dashboard' : '/dashboard';
-  const userName = isNurseView ? 'Mr. Kamlesh' : 'Dr. Sachin';
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
