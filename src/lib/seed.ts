@@ -4,25 +4,14 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { promises as fs } from 'fs';
 import path from 'path';
 import type { PatientData } from './types';
+import { db } from './firebase-admin'; // Import the initialized db instance
 
 const PATIENTS_COLLECTION = 'patients';
 
 async function seedDatabase() {
     console.log('[SEED] Starting database seed process...');
 
-    let adminApp: App;
-    if (!getApps().length) {
-        console.log('[SEED] Initializing Firebase Admin SDK for seeding...');
-        // Note: For local seeding, you might need to set up GOOGLE_APPLICATION_CREDENTIALS
-        // See: https://firebase.google.com/docs/admin/setup#initialize-sdk
-        adminApp = initializeApp({
-            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        });
-    } else {
-        adminApp = getApps()[0];
-    }
-    
-    const db = getFirestore(adminApp);
+    // The db instance is already initialized in firebase-admin.ts
     const patientsCollectionRef = db.collection(PATIENTS_COLLECTION);
     const batch = db.batch();
 
@@ -34,7 +23,7 @@ async function seedDatabase() {
         console.log(`[SEED] Found ${patients.length} patients in the JSON file.`);
 
         patients.forEach((patient) => {
-            const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patient.patientId);
+            const patientDocRef = patientsCollectionRef.doc(patient.patientId);
             batch.set(patientDocRef, patient);
         });
         

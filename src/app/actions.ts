@@ -6,7 +6,7 @@ import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, st
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { db } from '@/lib/firebase-admin';
 import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, query, where } from 'firebase/firestore';
 
 
@@ -44,7 +44,6 @@ const NewPatientFormSchema = z.object({
 export async function registerNewPatient(patientFormData: z.infer<typeof NewPatientFormSchema>) {
     try {
         const validatedData = NewPatientFormSchema.parse(patientFormData);
-        const db = getAdminDb();
 
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(newPatientId);
@@ -137,7 +136,6 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
  */
 export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
     try {
-        const db = getAdminDb();
         const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
         const patientSnap = await patientDocRef.get();
         if (patientSnap.exists) {
@@ -157,7 +155,6 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
  */
 export async function getPatientByNephroId(nephroId: string): Promise<PatientData | null> {
     try {
-        const db = getAdminDb();
         const patientsRef = db.collection(PATIENTS_COLLECTION);
         const q = query(patientsRef, where("nephroId", "==", nephroId));
         const querySnapshot = await getDocs(q);
@@ -184,7 +181,6 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
  */
 export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
     try {
-        const db = getAdminDb();
         const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
         const querySnapshot = await getDocs(patientsCollectionRef);
 
@@ -216,7 +212,6 @@ interface SaveLogUpdatePayload {
  */
 export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
   try {
-      const db = getAdminDb();
       const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
       const updatePayload: SaveLogUpdatePayload = {
         lastUpdated: formatISO(new Date())
@@ -251,7 +246,6 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
  */
 export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
     try {
-        const db = getAdminDb();
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
 
         const dataToUpdate: Partial<PatientData> & { lastUpdated: string } = { ...updatedData, lastUpdated: formatISO(new Date()) };
@@ -288,7 +282,6 @@ export async function updatePatientNotes(patientId: string, note: string) {
  */
 export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
     try {
-        const db = getAdminDb();
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
 
         await updateDoc(patientDocRef, {
@@ -425,7 +418,6 @@ export async function triggerCloudyFluidAlert(patientData: PatientData, event: P
 
 export async function getPeritonitisRate(): Promise<number | null> {
     try {
-        const db = getAdminDb();
         const patientsRef = collection(db, PATIENTS_COLLECTION);
         // Query for patients who have started PD. This is much more efficient.
         const q = query(patientsRef, where('pdStartDate', '!=', null));
@@ -489,7 +481,6 @@ export async function getPeritonitisRate(): Promise<number | null> {
 
 export async function getClinicKpis() {
     try {
-        const db = getAdminDb();
         const patientsRef = collection(db, PATIENTS_COLLECTION);
         const today = startOfDay(new Date());
 
