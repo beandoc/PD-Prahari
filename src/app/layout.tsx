@@ -1,14 +1,26 @@
 
-'use client';
-
-import { usePathname } from 'next/navigation';
-import { useEffect, type ReactNode } from 'react';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { cn } from '@/lib/utils';
+import { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
-// This new component will manage the theme based on the current path.
+const fontInter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+export const metadata: Metadata = {
+  title: 'DialysisCare',
+  description: 'Your Guardian in Peritoneal Dialysis',
+};
+
 function ThemeManager({ children }: { children: ReactNode }) {
+  'use client';
   const pathname = usePathname();
 
   useEffect(() => {
@@ -24,7 +36,6 @@ function ThemeManager({ children }: { children: ReactNode }) {
       themeClass = 'theme-nurse';
     }
     
-    // Clear existing theme classes and add the new one
     document.body.classList.remove('theme-doctor', 'theme-nurse', 'theme-patient');
     document.body.classList.add(themeClass);
 
@@ -41,14 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <title>PD Prahari</title>
-        <meta name="description" content="Your Guardian in Peritoneal Dialysis" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></link>
-      </head>
-      <body className={cn("font-body antialiased")}>
+      <body className={cn("font-body antialiased", fontInter.variable)}>
           <ThemeManager>
             {children}
           </ThemeManager>
