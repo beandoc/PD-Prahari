@@ -5,6 +5,8 @@
 # These variables are sourced from the .env file in your project directory.
 # This allows the backend to securely connect to your Firebase project.
 env:
+  - variable: FIREBASE_PROJECT_ID
+  - variable: FIREBASE_CLIENT_EMAIL
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
   - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
@@ -12,6 +14,7 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
   - secret: RESEND_API_KEY
+  - secret: FIREBASE_PRIVATE_KEY
 
 runConfig:
   # Increase this value if you'd like to automatically spin up
