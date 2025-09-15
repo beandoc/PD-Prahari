@@ -2,7 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek, formatISO } from 'date-fns';
+import { differenceInMonths, parseISO, isAfter, startOfDay, isWithinInterval, startOfMonth, subMonths, endOfMonth, startOfWeek, endOfWeek, formatISO, isToday } from 'date-fns';
 import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjustment-suggestions';
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
@@ -44,7 +44,7 @@ const NewPatientFormSchema = z.object({
 export async function registerNewPatient(patientFormData: z.infer<typeof NewPatientFormSchema>) {
     try {
         const validatedData = NewPatientFormSchema.parse(patientFormData);
-        const db = await getAdminDb();
+        const db = getAdminDb();
 
         const newPatientId = `PAT-${Date.now()}`;
         const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(newPatientId);
@@ -137,7 +137,7 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
  */
 export async function getSyncedPatientData(patientId: string): Promise<PatientData | null> {
     try {
-        const db = await getAdminDb();
+        const db = getAdminDb();
         const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
         const patientSnap = await patientDocRef.get();
         if (patientSnap.exists) {
@@ -157,7 +157,7 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
  */
 export async function getPatientByNephroId(nephroId: string): Promise<PatientData | null> {
     try {
-        const db = await getAdminDb();
+        const db = getAdminDb();
         const patientsRef = db.collection(PATIENTS_COLLECTION);
         const q = query(patientsRef, where("nephroId", "==", nephroId));
         const querySnapshot = await getDocs(q);
@@ -184,7 +184,7 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
  */
 export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
     try {
-        const db = await getAdminDb();
+        const db = getAdminDb();
         const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
         const querySnapshot = await getDocs(patientsCollectionRef);
 
@@ -216,7 +216,7 @@ interface SaveLogUpdatePayload {
  */
 export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
   try {
-      const db = await getAdminDb();
+      const db = getAdminDb();
       const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
       const updatePayload: SaveLogUpdatePayload = {
         lastUpdated: formatISO(new Date())
@@ -251,7 +251,7 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
  */
 export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
     try {
-        const db = await getAdminDb();
+        const db = getAdminDb();
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
 
         const dataToUpdate: Partial<PatientData> & { lastUpdated: string } = { ...updatedData, lastUpdated: formatISO(new Date()) };
@@ -288,7 +288,7 @@ export async function updatePatientNotes(patientId: string, note: string) {
  */
 export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
     try {
-        const db = await getAdminDb();
+        const db = getAdminDb();
         const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
 
         await updateDoc(patientDocRef, {
@@ -425,9 +425,9 @@ export async function triggerCloudyFluidAlert(patientData: PatientData, event: P
 
 export async function getPeritonitisRate(): Promise<number | null> {
     try {
-        const db = await getAdminDb();
+        const db = getAdminDb();
         const patientsRef = collection(db, PATIENTS_COLLECTION);
-        // Query for patients who have started PD.
+        // Query for patients who have started PD. This is much more efficient.
         const q = query(patientsRef, where('pdStartDate', '!=', null));
         const querySnapshot = await getDocs(q);
 
@@ -442,6 +442,7 @@ export async function getPeritonitisRate(): Promise<number | null> {
         querySnapshot.docs.forEach(doc => {
             const patient = doc.data() as PatientData;
             
+            // The check for pdStartDate is already handled by the query, but we keep it for type safety.
             if (patient.pdStartDate) {
                 const startDate = parseISO(patient.pdStartDate);
                 const endDate = patient.currentStatus === 'Active PD'
@@ -453,8 +454,8 @@ export async function getPeritonitisRate(): Promise<number | null> {
                     totalPatientMonths += monthsOnDialysis;
                 }
                 
-                // Relapse logic remains the same
                 if (patient.peritonitisEpisodes && patient.peritonitisEpisodes.length > 0) {
+                    // This logic to count unique episodes remains the same.
                     const sortedEpisodes = [...patient.peritonitisEpisodes].sort((a, b) => parseISO(a.diagnosisDate).getTime() - parseISO(b.diagnosisDate).getTime());
                     let lastEpisodeDate: Date | null = null;
                     let lastOrganism: string | null = null;
@@ -488,30 +489,44 @@ export async function getPeritonitisRate(): Promise<number | null> {
 
 export async function getClinicKpis() {
     try {
-        const db = await getAdminDb();
+        const db = getAdminDb();
         const patientsRef = collection(db, PATIENTS_COLLECTION);
         const today = startOfDay(new Date());
 
+        // Helper to run a simple count query.
         const getCount = async (field: string, operator: FirebaseFirestore.WhereFilterOp, value: any) => {
             const q = query(patientsRef, where(field, operator, value));
             const snapshot = await getDocs(q);
             return snapshot.size;
         };
         
-        const allPatientsSnapshot = await getDocs(patientsRef);
+        // Fetch all data in parallel using efficient queries.
+        const [
+            totalActivePDPatients,
+            awaitingInsertion,
+            deceasedCount,
+            transferredToHdCount,
+            catheterRemovedCount,
+            transplantedCount,
+            allPatientsSnapshot // We still need all data for date-based calculations
+        ] = await Promise.all([
+            getCount('currentStatus', '==', 'Active PD'),
+            getCount('currentStatus', '==', 'Awaiting Catheter'),
+            getCount('currentStatus', '==', 'Deceased'),
+            getCount('currentStatus', '==', 'Transferred to HD'),
+            getCount('currentStatus', '==', 'Catheter Removed'),
+            getCount('currentStatus', '==', 'Transplanted'),
+            getDocs(patientsRef) // This is for appointment/date filtering which is harder to query directly
+        ]);
+
         const allPatientData = allPatientsSnapshot.docs.map(doc => doc.data() as PatientData);
         
-        const totalActivePDPatients = await getCount('currentStatus', '==', 'Active PD');
-        const awaitingInsertion = await getCount('currentStatus', '==', 'Awaiting Catheter');
-        
-        const dropoutStatuses = ['Deceased', 'Transferred to HD', 'Catheter Removed', 'Transplanted'];
-        const dropoutsPromises = dropoutStatuses.map(status => getCount('currentStatus', '==', status));
-        const dropoutsArray = await Promise.all(dropoutsPromises);
-        const dropouts = dropoutsArray.reduce((sum, count) => sum + count, 0);
+        const dropouts = deceasedCount + transferredToHdCount + catheterRemovedCount + transplantedCount;
 
         const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 });
         const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
         
+        // Date-based filtering still requires fetching and mapping in JS.
         const thisWeekAppointments = allPatientData.filter(p => {
             if (!p.clinicVisits?.nextAppointment) return false;
             const apptDate = parseISO(p.clinicVisits.nextAppointment);
@@ -553,5 +568,3 @@ export async function getClinicKpis() {
         };
     }
 }
-
-    
