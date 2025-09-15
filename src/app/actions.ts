@@ -7,7 +7,7 @@ import { getMedicationAdjustmentSuggestions } from '@/ai/flows/medication-adjust
 import { sendCloudyFluidAlert } from '@/ai/flows/send-alert-email-flow';
 import type { PatientData, PDEvent, Vital, LabResult, Medication, Patient } from '@/lib/types';
 import { getAdminDb } from '@/lib/firebase-admin';
-import { collection, doc, getDoc, getDocs, writeBatch, updateDoc, arrayUnion, query, where } from 'firebase/firestore';
+import { collection, doc, getDocs, writeBatch, updateDoc, arrayUnion, query, where, getDoc } from 'firebase/firestore';
 
 
 // --- Firestore Data Store (Server-Side) ---
@@ -571,3 +571,5 @@ export async function getClinicKpis() {
         };
     }
 }
+
+    
