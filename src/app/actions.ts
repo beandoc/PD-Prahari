@@ -119,8 +119,8 @@ export async function registerNewPatient(patientFormData: z.infer<typeof NewPati
         await patientDocRef.set(newPatientData);
         console.log(`[FIRESTORE] New patient registered with ID: ${newPatientId}`);
         return { success: true, patientId: newPatientId };
-    } catch (error) {
-        console.error("Error registering new patient:", error);
+    } catch (error: any) {
+        console.error("Error registering new patient:", error.message || error);
         if (error instanceof z.ZodError) {
              return { success: false, error: `Validation failed: ${error.errors.map(e => `${e.path.join('.')} - ${e.message}`).join(', ')}` };
         }
@@ -144,8 +144,8 @@ export async function getSyncedPatientData(patientId: string): Promise<PatientDa
             return patientSnap.data() as PatientData;
         }
         return null;
-    } catch (error) {
-        console.error("Error reading patient data from Firestore:", error);
+    } catch (error: any) {
+        console.error("Error reading patient data from Firestore:", error.message || error);
         return null;
     }
 }
@@ -159,7 +159,9 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
     try {
         const db = await getAdminDb();
         const patientsRef = db.collection(PATIENTS_COLLECTION);
-        const querySnapshot = await patientsRef.where("nephroId", "==", nephroId).get();
+        const q = query(patientsRef, where("nephroId", "==", nephroId));
+        const querySnapshot = await getDocs(q);
+
         if (!querySnapshot.empty) {
             const patientDoc = querySnapshot.docs[0];
             return {
@@ -168,8 +170,8 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
             } as PatientData;
         }
         return null;
-    } catch (error) {
-        console.error(`Error fetching patient by Nephro ID ${nephroId}:`, error);
+    } catch (error: any) {
+        console.error(`Error fetching patient by Nephro ID ${nephroId}:`, error.message || error);
         return null;
     }
 }
@@ -183,8 +185,8 @@ export async function getPatientByNephroId(nephroId: string): Promise<PatientDat
 export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
     try {
         const db = await getAdminDb();
-        const patientsCollectionRef = db.collection(PATIENTS_COLLECTION);
-        const querySnapshot = await patientsCollectionRef.get();
+        const patientsCollectionRef = collection(db, PATIENTS_COLLECTION);
+        const querySnapshot = await getDocs(patientsCollectionRef);
 
         if (querySnapshot.empty) {
             console.warn('[FIRESTORE] The "patients" collection is empty. Run `npm run seed` locally to populate it with sample data.');
@@ -192,8 +194,8 @@ export const getLiveAllPatientData = async (): Promise<PatientData[]> => {
         }
 
         return querySnapshot.docs.map(doc => doc.data() as PatientData);
-    } catch (error) {
-        console.error("Error reading all patient data from Firestore:", error);
+    } catch (error: any) {
+        console.error("Error reading all patient data from Firestore:", error.message || error);
         return [];
     }
 };
@@ -215,7 +217,7 @@ interface SaveLogUpdatePayload {
 export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
   try {
       const db = await getAdminDb();
-      const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
+      const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
       const updatePayload: SaveLogUpdatePayload = {
         lastUpdated: formatISO(new Date())
       };
@@ -232,12 +234,12 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
         updatePayload.vitals = arrayUnion(cleanedVital);
       }
 
-      await patientDocRef.set(updatePayload);
+      await updateDoc(patientDocRef, updatePayload);
 
       console.log(`[FIRESTORE] Patient log saved for ${patientId}.`);
       return { success: true };
-  } catch (error) {
-      console.error("Error writing patient log to Firestore:", error);
+  } catch (error: any) {
+      console.error("Error writing patient log to Firestore:", error.message || error);
       return { success: false, error: 'Failed to save patient log.' };
   }
 }
@@ -250,20 +252,19 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
 export async function updatePatientData(patientId: string, updatedData: Partial<PatientData>) {
     try {
         const db = await getAdminDb();
-        const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
+        const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
 
         const dataToUpdate: Partial<PatientData> & { lastUpdated: string } = { ...updatedData, lastUpdated: formatISO(new Date()) };
 
         // Convert any date objects to ISO strings before saving
-        if (dataToUpdate.pdStartDate) {
-             // Assuming pdStartDate in updatedData might be a Date object or string
-            dataToUpdate.pdStartDate = typeof dataToUpdate.pdStartDate === 'string' ? dataToUpdate.pdStartDate : formatISO(dataToUpdate.pdStartDate);
+        if (dataToUpdate.pdStartDate && typeof dataToUpdate.pdStartDate !== 'string') {
+            dataToUpdate.pdStartDate = formatISO(dataToUpdate.pdStartDate);
         }
-        await patientDocRef.set(dataToUpdate);
+        await updateDoc(patientDocRef, dataToUpdate);
         console.log(`[FIRESTORE] Patient data updated for ${patientId}.`, dataToUpdate);
         return { success: true };
-    } catch (error) {
-        console.error("Error updating patient data in Firestore:", error);
+    } catch (error: any) {
+        console.error("Error updating patient data in Firestore:", error.message || error);
         return { success: false, error: 'Failed to update patient data.' };
     }
 }
@@ -288,28 +289,17 @@ export async function updatePatientNotes(patientId: string, note: string) {
 export async function updatePatientLabs(patientId: string, newLabs: LabResult[]) {
     try {
         const db = await getAdminDb();
-        const patientDocRef = db.collection(PATIENTS_COLLECTION).doc(patientId);
+        const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
 
-        // Get current labResults
-        const patientSnap = await patientDocRef.get();
-        let currentLabs: LabResult[] = [];
-        if (patientSnap.exists) {
-            const data = patientSnap.data();
-            currentLabs = Array.isArray(data && data.labResults) ? data && data.labResults : [];
-        }
-
-        // Append new labs
-        const updatedLabs = [...currentLabs, ...newLabs];
-
-        await patientDocRef.update({
-            labResults: updatedLabs,
+        await updateDoc(patientDocRef, {
+            labResults: arrayUnion(...newLabs),
             lastUpdated: formatISO(new Date())
         });
 
         console.log(`[FIRESTORE] Lab results updated for ${patientId}.`);
         return { success: true };
-    } catch (error) {
-        console.error("Error updating labs in Firestore:", error);
+    } catch (error: any) {
+        console.error("Error updating labs in Firestore:", error.message || error);
         return { success: false, error: 'Failed to update lab results.' };
     }
 }
@@ -405,8 +395,8 @@ export async function getSuggestionsAction(patientData: PatientData) {
     const formattedData = formatDataForAI(patientData);
     const result = await getMedicationAdjustmentSuggestions(formattedData);
     return { success: true, suggestions: result.suggestions };
-  } catch (error) {
-    console.error('Error getting AI suggestions:', error);
+  } catch (error: any) {
+    console.error('Error getting AI suggestions:', error.message || error);
     return { success: false, error: 'Failed to get AI suggestions.' };
   }
 }
@@ -427,101 +417,141 @@ export async function triggerCloudyFluidAlert(patientData: PatientData, event: P
             clinicPhoneNumber: patientData.contactInfo?.clinicPhone,
         });
         return { success: true };
-    } catch (error) {
-        console.error('Error triggering cloudy fluid alert:', error);
+    } catch (error: any) {
+        console.error('Error triggering cloudy fluid alert:', error.message || error);
         return { success: false, error: 'Failed to trigger alert.' };
     }
 }
 
 export async function getPeritonitisRate(): Promise<number | null> {
-    const patients = await getLiveAllPatientData();
-    let totalPatientMonths = 0;
-    let totalEpisodes = 0;
-    const today = new Date();
+    try {
+        const db = await getAdminDb();
+        const patientsRef = collection(db, PATIENTS_COLLECTION);
+        // Query for patients who have started PD.
+        const q = query(patientsRef, where('pdStartDate', '!=', null));
+        const querySnapshot = await getDocs(q);
 
-    patients.forEach(patient => {
-        if (patient.pdStartDate) {
-            const startDate = parseISO(patient.pdStartDate);
-            const endDate = patient.currentStatus === 'Active PD'
-                ? today
-                : (patient.lastUpdated ? parseISO(patient.lastUpdated) : today);
-
-            const monthsOnDialysis = differenceInMonths(endDate, startDate);
-            if (monthsOnDialysis > 0) {
-                totalPatientMonths += monthsOnDialysis;
-            }
-
-            const sortedEpisodes = [...patient.peritonitisEpisodes].sort((a, b) => parseISO(a.diagnosisDate).getTime() - parseISO(b.diagnosisDate).getTime());
-            let lastEpisodeDate: Date | null = null;
-            let lastOrganism: string | null = null;
-
-            sortedEpisodes.forEach(episode => {
-                const currentEpisodeDate = parseISO(episode.diagnosisDate);
-                if (lastEpisodeDate && lastOrganism === episode.organismIsolated && differenceInMonths(currentEpisodeDate, lastEpisodeDate) < 1) {
-                    // This is a relapse, do not increment totalEpisodes
-                } else {
-                    totalEpisodes++;
-                }
-                lastEpisodeDate = currentEpisodeDate;
-                lastOrganism = episode.organismIsolated;
-            });
+        if (querySnapshot.empty) {
+            return 0.0;
         }
-    });
 
-    const totalPatientYears = totalPatientMonths / 12;
-    
-    if (totalPatientYears === 0) {
-        return totalEpisodes > 0 ? Infinity : 0.0;
+        let totalPatientMonths = 0;
+        let totalEpisodes = 0;
+        const today = new Date();
+
+        querySnapshot.docs.forEach(doc => {
+            const patient = doc.data() as PatientData;
+            
+            if (patient.pdStartDate) {
+                const startDate = parseISO(patient.pdStartDate);
+                const endDate = patient.currentStatus === 'Active PD'
+                    ? today
+                    : (patient.lastUpdated ? parseISO(patient.lastUpdated) : today);
+
+                const monthsOnDialysis = differenceInMonths(endDate, startDate);
+                if (monthsOnDialysis > 0) {
+                    totalPatientMonths += monthsOnDialysis;
+                }
+                
+                // Relapse logic remains the same
+                if (patient.peritonitisEpisodes && patient.peritonitisEpisodes.length > 0) {
+                    const sortedEpisodes = [...patient.peritonitisEpisodes].sort((a, b) => parseISO(a.diagnosisDate).getTime() - parseISO(b.diagnosisDate).getTime());
+                    let lastEpisodeDate: Date | null = null;
+                    let lastOrganism: string | null = null;
+
+                    sortedEpisodes.forEach(episode => {
+                        const currentEpisodeDate = parseISO(episode.diagnosisDate);
+                         if (lastEpisodeDate && lastOrganism === episode.organismIsolated && differenceInMonths(currentEpisodeDate, lastEpisodeDate) < 1) {
+                            // This is a relapse, do not increment totalEpisodes
+                        } else {
+                            totalEpisodes++;
+                        }
+                        lastEpisodeDate = currentEpisodeDate;
+                        lastOrganism = episode.organismIsolated;
+                    });
+                }
+            }
+        });
+
+        const totalPatientYears = totalPatientMonths / 12;
+        
+        if (totalPatientYears === 0) {
+            return totalEpisodes > 0 ? Infinity : 0.0;
+        }
+
+        return totalEpisodes / totalPatientYears;
+    } catch (error: any) {
+        console.error('Error calculating peritonitis rate:', error.message || error);
+        return null;
     }
-
-    return totalEpisodes / totalPatientYears;
 }
 
 export async function getClinicKpis() {
-    const allPatientData = await getLiveAllPatientData();
-    const today = startOfDay(new Date());
+    try {
+        const db = await getAdminDb();
+        const patientsRef = collection(db, PATIENTS_COLLECTION);
+        const today = startOfDay(new Date());
 
-    const isToday = (date: Date) => {
-        return startOfDay(date).getTime() === today.getTime();
-    };
+        const getCount = async (field: string, operator: FirebaseFirestore.WhereFilterOp, value: any) => {
+            const q = query(patientsRef, where(field, operator, value));
+            const snapshot = await getDocs(q);
+            return snapshot.size;
+        };
+        
+        const allPatientsSnapshot = await getDocs(patientsRef);
+        const allPatientData = allPatientsSnapshot.docs.map(doc => doc.data() as PatientData);
+        
+        const totalActivePDPatients = await getCount('currentStatus', '==', 'Active PD');
+        const awaitingInsertion = await getCount('currentStatus', '==', 'Awaiting Catheter');
+        
+        const dropoutStatuses = ['Deceased', 'Transferred to HD', 'Catheter Removed', 'Transplanted'];
+        const dropoutsPromises = dropoutStatuses.map(status => getCount('currentStatus', '==', status));
+        const dropoutsArray = await Promise.all(dropoutsPromises);
+        const dropouts = dropoutsArray.reduce((sum, count) => sum + count, 0);
 
-    const totalActivePDPatients = allPatientData.filter(p => p.currentStatus === 'Active PD').length;
+        const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 });
+        const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
+        
+        const thisWeekAppointments = allPatientData.filter(p => {
+            if (!p.clinicVisits?.nextAppointment) return false;
+            const apptDate = parseISO(p.clinicVisits.nextAppointment);
+            return isWithinInterval(apptDate, { start: startOfThisWeek, end: endOfThisWeek });
+        }).length;
 
-    const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 });
-    const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
-    const thisWeekAppointments = allPatientData.filter(p => {
-        if (!p.clinicVisits?.nextAppointment || p.clinicVisits.nextAppointment === '') return false;
-        const apptDate = parseISO(p.clinicVisits.nextAppointment);
-        return isWithinInterval(apptDate, { start: startOfThisWeek, end: endOfThisWeek });
-    }).length;
+        const startOfLastMonth = startOfMonth(subMonths(today, 1));
+        const endOfLastMonth = endOfMonth(subMonths(today, 1));
+        
+        const newPDPatientsLastMonth = allPatientData.filter(p => {
+            if (!p.pdStartDate) return false;
+            const startDate = parseISO(p.pdStartDate);
+            return isWithinInterval(startDate, { start: startOfLastMonth, end: endOfLastMonth });
+        }).length;
+        
+        const missedVisits = allPatientData.filter(p => {
+            if (!p.clinicVisits?.nextAppointment) return false;
+            const appointmentDate = parseISO(p.clinicVisits.nextAppointment);
+            return isAfter(today, appointmentDate) && !isToday(appointmentDate);
+        }).length;
 
-    const startOfLastMonth = startOfMonth(subMonths(today, 1));
-    const endOfLastMonth = endOfMonth(subMonths(today, 1));
-    const newPDPatientsLastMonth = allPatientData.filter(p => {
-        if (!p.pdStartDate) return false;
-        const startDate = parseISO(p.pdStartDate);
-        return isWithinInterval(startDate, { start: startOfLastMonth, end: endOfLastMonth });
-    }).length;
-
-    const dropoutStatuses = ['Deceased', 'Transferred to HD', 'Catheter Removed', 'Transplanted'];
-    const dropouts = allPatientData.filter(p => dropoutStatuses.includes(p.currentStatus)).length;
-    
-    const awaitingInsertion = allPatientData.filter(p => p.currentStatus === 'Awaiting Catheter').length;
-    
-    const missedVisits = allPatientData.filter(p => {
-        if (!p.clinicVisits?.nextAppointment || p.clinicVisits.nextAppointment === '') {
-            return false;
-        }
-        const appointmentDate = parseISO(p.clinicVisits.nextAppointment);
-        return isAfter(today, appointmentDate) && !isToday(appointmentDate);
-    }).length;
-
-    return {
-        totalActivePDPatients,
-        thisWeekAppointments,
-        newPDPatientsLastMonth,
-        dropouts,
-        awaitingInsertion,
-        missedVisits,
-    };
+        return {
+            totalActivePDPatients,
+            thisWeekAppointments,
+            newPDPatientsLastMonth,
+            dropouts,
+            awaitingInsertion,
+            missedVisits,
+        };
+    } catch (error: any) {
+        console.error('Error fetching clinic KPIs:', error.message || error);
+        return {
+            totalActivePDPatients: 0,
+            thisWeekAppointments: 0,
+            newPDPatientsLastMonth: 0,
+            dropouts: 0,
+            awaitingInsertion: 0,
+            missedVisits: 0,
+        };
+    }
 }
+
+    
