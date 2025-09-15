@@ -1,4 +1,3 @@
-
 import admin from 'firebase-admin';
 
 // This function ensures an environment variable exists, throwing a clear error if not.
@@ -10,32 +9,42 @@ function getRequiredEnvVar(key: string): string {
   return value;
 }
 
-// Check if the app is already initialized to prevent this error.
-if (!admin.apps.length) {
-  try {
-    console.log('[FIRESTORE_ADMIN] Initializing Firebase Admin SDK...');
+function getApp() {
+  // If the app is already initialized, return it.
+  if (admin.apps.length > 0) {
+    return admin.app();
+  }
 
-    // When deployed to App Hosting, the SDK is automatically initialized.
-    // Locally, it uses the service account credentials from GOOGLE_APPLICATION_CREDENTIALS if set.
-    // This explicit initialization is for other environments (like Vercel) or for local development clarity.
+  // If not, initialize a new one.
+  try {
+    console.log('[FIRESTORE_ADMIN] Initializing new Firebase Admin app...');
+    const projectId = getRequiredEnvVar('FIREBASE_PROJECT_ID');
+    const clientEmail = getRequiredEnvVar('FIREBASE_CLIENT_EMAIL');
+    const privateKey = getRequiredEnvVar('FIREBASE_PRIVATE_KEY');
+
     admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: getRequiredEnvVar('FIREBASE_PROJECT_ID'),
-        clientEmail: getRequiredEnvVar('FIREBASE_CLIENT_EMAIL'),
-        // Replace escaped newlines for environment variables
-        privateKey: getRequiredEnvVar('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n'),
+        projectId,
+        clientEmail,
+        privateKey: privateKey.replace(/\\n/g, '\n'),
       }),
     });
-    
-    console.log('[FIRESTORE_ADMIN] Firebase Admin SDK Initialized successfully.');
+
+    console.log('[FIRESTORE_ADMIN] Firebase Admin app initialized successfully.');
+    return admin.app(); // Return the newly initialized app
+
   } catch (error: any) {
-    // Re-throwing the error can make sure the build process stops if initialization fails.
-    console.error('[FIRESTORE_ADMIN] FATAL: Could not initialize Firebase Admin SDK.', error);
-    // In a serverless environment, we might not want to throw and crash the whole instance
-    // if other parts of the app don't depend on it. But for a data-driven app,
-    // this is often the right approach to fail fast.
+    console.error('[FIRESTORE_ADMIN] FATAL: Error initializing app:', error.message);
+    // This will stop the process and show a clear error.
+    throw new Error('Could not initialize Firebase Admin');
   }
 }
 
-// Export the initialized database instance.
-export const db = admin.firestore();
+/**
+ * Gets the initialized Firestore database instance.
+ * Call this function every time you need to access the db.
+ */
+export function getAdminDb() {
+  const app = getApp(); // This line guarantees the app is initialized
+  return app.firestore();
+}
