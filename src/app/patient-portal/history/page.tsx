@@ -1,52 +1,19 @@
 
-// We remove 'use client'. This is now a Server Component.
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getSyncedPatientData } from '@/app/actions';
 import { History, TrendingUp, Droplets } from 'lucide-react';
 import type { PDEvent, PatientData } from '@/lib/types';
 import { format, startOfDay } from 'date-fns';
 import { HistoryView } from '@/components/patient-portal/history-view';
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-async function getPatientIdFromServer(): Promise<string | null> {
-    // In a real app with proper auth, you'd get this from a secure, httpOnly cookie.
-    // For this demo, we'll read it from the headers which we can't do,
-    // so we will simulate this by assuming the logic is in place.
-    // This is a placeholder for server-side session management.
-    // const patientId = sessionStorage.getItem('loggedInPatientId'); // This is client-side code
-    // A real implementation would be something like:
-    // const session = await getIronSession(cookies());
-    // if (!session.patientId) redirect('/patient-login');
-    // return session.patientId;
-    
-    // For this context, we will assume a function can get it, but we can't implement it fully
-    // without a real auth mechanism. We will have to pass it down from a client component
-    // or use a temporary solution. The user's code relies on sessionStorage, so we must
-    // adapt the page to still use a client-side check and pass data to the view.
-    // Re-evaluating based on constraints: We cannot get sessionStorage on the server.
-    // The user's proposal is architecturally sound but requires an auth pattern (cookies)
-    // that isn't implemented. I will stick to the original client-side pattern but
-    // apply the component separation and dynamic loading benefits.
-    return null;
-}
-
-
-export default function LogHistoryPage() {
-  // Since we cannot get the patientId on the server without a proper auth system (like cookies),
-  // we will keep the top-level page as a client component to access sessionStorage,
-  // but we will still delegate the heavy lifting and display to the HistoryView component.
-  // This is a compromise based on the current auth implementation.
-  
-  // The user's original page.tsx was a client component, I will restore that and create the new view component.
-  return (
-     <ClientHistoryPage />
-  );
-}
-
-
-function ClientHistoryPage() {
-    'use client';
-
+// This component acts as a client-side entry point.
+// Its primary job is to handle the sessionStorage authentication check.
+export default function ClientHistoryPage() {
     const [patient, setPatient] = useState<PatientData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -128,12 +95,3 @@ function ClientHistoryPage() {
         </div>
     );
 }
-
-// Previous content of history/page.tsx moved to a client component wrapper
-// to allow for data fetching based on sessionStorage, then passing to the
-// new optimized HistoryView component.
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
