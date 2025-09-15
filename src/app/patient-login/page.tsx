@@ -61,7 +61,7 @@ export default function PatientLoginPage() {
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 theme-patient bg-background">
        <div className="relative flex items-center justify-center py-12 px-4">
         <Image
-          src="https://placehold.co/500x500.png"
+          src="https://picsum.photos/seed/patient-login-watermark/500/500"
           alt="Patient illustration watermark"
           width={500}
           height={500}
@@ -132,10 +132,10 @@ export default function PatientLoginPage() {
           <Card>
             <CardContent className="p-4">
               <Image
-                src="https://placehold.co/400x400.png"
+                src="https://picsum.photos/seed/patient-empowerment/400/400"
                 alt="Patient empowerment illustration"
-                width="400"
-                height="400"
+                width={400}
+                height={400}
                 data-ai-hint="patient health empowerment"
                 className="rounded-lg"
               />

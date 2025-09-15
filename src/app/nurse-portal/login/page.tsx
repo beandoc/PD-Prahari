@@ -44,7 +44,7 @@ export default function NurseLoginPage() {
       </div>
        <div className="hidden bg-muted lg:block">
         <Image
-          src="https://placehold.co/1200x900.png"
+          src="https://picsum.photos/seed/nurse-login/1200/900"
           alt="Nurse helping a patient"
           width="1200"
           height="900"

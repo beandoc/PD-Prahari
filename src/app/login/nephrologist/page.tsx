@@ -50,7 +50,7 @@ export default function NephrologistLoginPage() {
       </div>
        <div className="hidden bg-muted lg:block">
         <Image
-          src="https://placehold.co/1200x900.png"
+          src="https://picsum.photos/seed/nephro-login/1200/900"
           alt="Nephrologist reviewing data"
           width="1200"
           height="900"

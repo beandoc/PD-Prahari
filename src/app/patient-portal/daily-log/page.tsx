@@ -24,6 +24,7 @@ import type { PatientData, Vital, PDEvent } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { doc } from 'firebase/firestore';
 import { db, onSnapshot } from '@/lib/firebase';
+import Image from 'next/image';
 
 
 interface ExchangeLog {
@@ -165,7 +166,7 @@ export default function PatientDailyLogPage() {
         fluidStatusNotes: vitals.symptoms || undefined,
     };
 
-    const newVital = Object.fromEntries(
+    const cleanedVital = Object.fromEntries(
         Object.entries(vitalData).filter(([, value]) => value !== undefined && value !== null && !isNaN(value as number))
     ) as Partial<Vital>;
 
@@ -425,15 +426,17 @@ export default function PatientDailyLogPage() {
                     <CardDescription>If you have any concerns, upload photos of your exit site or PD fluid bag for your care team to review.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="exit-site-img">Exit Site Image</Label>
-                        <Input id="exit-site-img" type="file" accept="image/*" />
-                        <p className="text-xs text-muted-foreground">A clear, well-lit photo is best.</p>
+                    <div className="p-4 border rounded-lg bg-slate-50 flex flex-col items-center justify-center text-center">
+                        <Image src="https://picsum.photos/seed/exit-site/200/150" alt="Exit site placeholder" width={200} height={150} data-ai-hint="exit site clean" className="mb-4 rounded-md" />
+                        <Label htmlFor="exit-site-img" className="font-semibold">Exit Site Image</Label>
+                        <Input id="exit-site-img" type="file" accept="image/*" className="mt-2" />
+                        <p className="text-xs text-muted-foreground mt-1">A clear, well-lit photo is best.</p>
                     </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="pd-fluid-img">PD Fluid Bag Image</Label>
-                        <Input id="pd-fluid-img" type="file" accept="image/*" />
-                        <p className="text-xs text-muted-foreground">Capture the drained fluid against a white background.</p>
+                     <div className="p-4 border rounded-lg bg-slate-50 flex flex-col items-center justify-center text-center">
+                        <Image src="https://picsum.photos/seed/fluid-bag/200/150" alt="PD fluid bag placeholder" width={200} height={150} data-ai-hint="fluid bag clear" className="mb-4 rounded-md" />
+                        <Label htmlFor="pd-fluid-img" className="font-semibold">PD Fluid Bag Image</Label>
+                        <Input id="pd-fluid-img" type="file" accept="image/*" className="mt-2" />
+                        <p className="text-xs text-muted-foreground mt-1">Capture the drained fluid against a white background.</p>
                     </div>
                 </CardContent>
             </Card>

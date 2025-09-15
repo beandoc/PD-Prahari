@@ -1,0 +1,27 @@
+
+{
+  "nephro-login": {
+    "src": "https://picsum.photos/seed/nephro-login/1200/900",
+    "hint": "doctor medical professional"
+  },
+  "nurse-login": {
+    "src": "https://picsum.photos/seed/nurse-login/1200/900",
+    "hint": "nurse patient care"
+  },
+  "patient-login-watermark": {
+    "src": "https://picsum.photos/seed/patient-login-watermark/500/500",
+    "hint": "patient health abstract"
+  },
+  "patient-empowerment": {
+    "src": "https://picsum.photos/seed/patient-empowerment/400/400",
+    "hint": "patient health empowerment"
+  },
+  "exit-site-placeholder": {
+    "src": "https://picsum.photos/seed/exit-site/200/150",
+    "hint": "exit site clean"
+  },
+  "fluid-bag-placeholder": {
+    "src": "https://picsum.photos/seed/fluid-bag/200/150",
+    "hint": "fluid bag clear"
+  }
+}

@@ -1,34 +1,32 @@
-import { getApps, initializeApp, App } from 'firebase-admin/app';
-import { getFirestore, Firestore } from 'firebase-admin/firestore';
+
+import admin from 'firebase-admin';
 
 // This file is for SERVER-SIDE use only.
 
-let db: Firestore;
+let db: admin.firestore.Firestore;
 
-function initializeAdminApp() {
-    if (!getApps().length) {
-        console.log('[FIREBASE_ADMIN] Initializing Firebase Admin SDK...');
-        initializeApp({
-             projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        });
-        console.log('[FIREBASE_ADMIN] Firebase Admin Initialized Successfully.');
-    }
-    db = getFirestore();
+// Check if the app is already initialized to prevent errors
+if (!admin.apps.length) {
+  try {
+    console.log('[FIRESTORE_ADMIN] Initializing Firebase Admin SDK...');
+    // When deployed to App Hosting, the SDK is automatically initialized.
+    // Locally, it uses the service account credentials from GOOGLE_APPLICATION_CREDENTIALS.
+    // For Vercel/other environments, you would use admin.credential.cert().
+    // App Hosting provides the necessary environment variables automatically.
+    admin.initializeApp();
+    console.log('[FIRESTORE_ADMIN] Firebase Admin SDK Initialized.');
+  } catch (error: any) {
+    console.error('[FIRESTORE_ADMIN] Error initializing Firebase Admin SDK:', error.message);
+  }
 }
 
-// Initialize the app when this module is first loaded
-initializeAdminApp();
+db = admin.firestore();
 
 /**
  * Returns the initialized Firestore database instance.
- * @returns {Firestore} The initialized Firestore instance.
+ * This is the single entry point for accessing the admin database.
+ * @returns {admin.firestore.Firestore} The initialized Firestore instance.
  */
-export function getAdminDb(): Firestore {
-  if (!db) {
-    // This should not happen in a normal flow as initializeAdminApp is called on module load.
-    // It's a safeguard.
-    console.warn("[FIREBASE_ADMIN] Firestore not initialized, re-initializing...");
-    initializeAdminApp();
-  }
+export function getAdminDb(): admin.firestore.Firestore {
   return db;
 }
