@@ -8,8 +8,21 @@ import {
   LifeBuoy,
   Settings,
   Menu,
+  LucideIcon,
+  BarChart3,
+  Droplets,
+  LayoutGrid,
+  Video,
+  ClipboardCheck,
+  HeartPulse,
+  UserPlus,
+  Boxes,
+  Users,
+  UserCog,
+  FlaskConical,
+  MessageSquare
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,7 +44,7 @@ import { cn } from '@/lib/utils';
 interface NavLink {
     href: string;
     label: string;
-    icon: LucideIcon;
+    icon: string;
 }
 
 interface MobileNavProps {
@@ -39,6 +52,22 @@ interface MobileNavProps {
     pathname: string;
     userName: string;
 }
+
+const iconMap: { [key: string]: LucideIcon } = {
+  LayoutGrid,
+  UserPlus,
+  Droplets,
+  MessageSquare,
+  BarChart3,
+  Boxes,
+  Video,
+  Users,
+  HeartPulse,
+  ClipboardCheck,
+  FlaskConical,
+  UserCog
+};
+
 
 export function MobileNav({ navLinks, pathname, userName }: MobileNavProps) {
   return (
@@ -66,19 +95,22 @@ export function MobileNav({ navLinks, pathname, userName }: MobileNavProps) {
               </div>
               <span className="">PD Prahari</span>
             </Link>
-            {navLinks.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                   pathname === href && 'bg-muted text-foreground'
-                )}
-              >
-                <Icon className="h-5 w-5" />
-                {label}
-              </Link>
-            ))}
+            {navLinks.map(({ href, label, icon: iconName }) => {
+              const Icon = iconMap[iconName];
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
+                     pathname === href && 'bg-muted text-foreground'
+                  )}
+                >
+                  {Icon && <Icon className="h-5 w-5" />}
+                  {label}
+                </Link>
+              )
+            })}
           </nav>
            <div className="mt-auto">
              <nav className="grid gap-2 text-lg font-medium">

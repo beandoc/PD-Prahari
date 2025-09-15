@@ -25,31 +25,31 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { MobileNav } from '@/components/dashboard/mobile-nav'; // Import the new client component
+import { MobileNav } from '@/components/dashboard/mobile-nav'; 
 import { headers } from 'next/headers';
 
 
 const doctorNavLinks = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
-  { href: '/registration', label: 'Register Patient', icon: UserPlus },
-  { href: '/dashboard/pd-logs', label: 'PD Logs', icon: Droplets },
-  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/dashboard/sharesource', label: 'Analytics', icon: BarChart3 },
-  { href: '/dashboard/inventory', label: 'Inventory', icon: Boxes },
-  { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
-  { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Portal', icon: Users },
-  { href: '/patient-portal', label: 'Patient Portal (Test)', icon: HeartPulse },
+  { href: '/dashboard', label: 'Dashboard', icon: 'LayoutGrid' },
+  { href: '/registration', label: 'Register Patient', icon: 'UserPlus' },
+  { href: '/dashboard/pd-logs', label: 'PD Logs', icon: 'Droplets' },
+  { href: '/dashboard/messages', label: 'Messages', icon: 'MessageSquare' },
+  { href: '/dashboard/sharesource', label: 'Analytics', icon: 'BarChart3' },
+  { href: '/dashboard/inventory', label: 'Inventory', icon: 'Boxes' },
+  { href: '/dashboard/telehealth', label: 'Telehealth', icon: 'Video' },
+  { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Portal', icon: 'Users' },
+  { href: '/patient-portal', label: 'Patient Portal (Test)', icon: 'HeartPulse' },
 ];
 
 const nurseNavLinks = [
-  { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Dashboard', icon: LayoutGrid },
-  { href: '/dashboard/nurse-checklist', label: 'PD Nurse Checklist', icon: ClipboardCheck },
-  { href: '/dashboard/pet-test', label: 'PET Test', icon: FlaskConical },
-  { href: '/dashboard/pd-logs', label: 'Patient PD Logs', icon: Droplets },
-  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/dashboard/telehealth', label: 'Telehealth', icon: Video },
-  { href: '/dashboard/update-records', label: 'Update Records', icon: UserCog },
-  { href: '/registration', label: 'Register Patient', icon: UserPlus },
+  { href: '/dashboard/nurse-dashboard', label: 'PD Nurse Dashboard', icon: 'LayoutGrid' },
+  { href: '/dashboard/nurse-checklist', label: 'PD Nurse Checklist', icon: 'ClipboardCheck' },
+  { href: '/dashboard/pet-test', label: 'PET Test', icon: 'FlaskConical' },
+  { href: '/dashboard/pd-logs', label: 'Patient PD Logs', icon: 'Droplets' },
+  { href: '/dashboard/messages', label: 'Messages', icon: 'MessageSquare' },
+  { href: '/dashboard/telehealth', label: 'Telehealth', icon: 'Video' },
+  { href: '/dashboard/update-records', label: 'Update Records', icon: 'UserCog' },
+  { href: '/registration', label: 'Register Patient', icon: 'UserPlus' },
 ];
 
 export default function DashboardLayout({
@@ -59,7 +59,6 @@ export default function DashboardLayout({
 }) {
   const pathname = headers().get('next-url') || '';
 
-  // This logic is now safe to run on the server
   const isNursePath = pathname.startsWith('/dashboard/nurse-') ||
                       pathname === '/dashboard/pet-test' ||
                       pathname === '/dashboard/update-records';
@@ -83,7 +82,11 @@ export default function DashboardLayout({
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              {navLinks.map(({ href, label, icon: Icon }) => (
+              {navLinks.map(({ href, label, icon: IconName }) => {
+                const Icon = {
+                  LayoutGrid, BarChart3, Droplets, UserPlus, Boxes, Users, HeartPulse, Video, MessageSquare, ClipboardCheck, FlaskConical, UserCog
+                }[IconName as keyof typeof Icon];
+                return (
                 <Link
                   key={href}
                   href={href}
@@ -92,10 +95,10 @@ export default function DashboardLayout({
                     pathname === href && 'bg-muted text-primary'
                   )}
                 >
-                  <Icon className="h-4 w-4" />
+                  {Icon && <Icon className="h-4 w-4" />}
                   {label}
                 </Link>
-              ))}
+              )})}
             </nav>
           </div>
           <div className="mt-auto p-4">
