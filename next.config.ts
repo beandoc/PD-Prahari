@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Allow cross-origin requests in development from the specific Firebase Studio domains
+  ...(process.env.NODE_ENV === 'development' && {
+    experimental: {
+      allowedDevOrigins: [
+        'https://*.cloudworkstations.dev', // Whitelist all subdomains for cloud workstations
+      ],
+    },
+  }),
 };
 
 export default nextConfig;
