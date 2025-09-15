@@ -199,11 +199,9 @@ interface SaveLogUpdatePayload {
   lastUpdated: string;
   pdEvents?: ReturnType<typeof arrayUnion>;
   vitals?: ReturnType<typeof arrayUnion>;
-  // Add other fields if savePatientLog is extended
-  // [key: string]: any; // Or allow any for simplicity if necessary
+  [key: string]: any;
 }
 
-;
 /**
  * Saves new patient log data (PD events and vitals) to Firestore.
  * @param patientId The ID of the patient document.
@@ -213,11 +211,12 @@ interface SaveLogUpdatePayload {
 export async function savePatientLog(patientId: string, newEvents: PDEvent[], newVital: Partial<Vital>) {
   try {
       const patientDocRef = doc(db, PATIENTS_COLLECTION, patientId);
+      
       const updatePayload: SaveLogUpdatePayload = {
         lastUpdated: formatISO(new Date())
       };
       
-      if (newEvents.length > 0) {
+      if (newEvents && newEvents.length > 0) {
         updatePayload.pdEvents = arrayUnion(...newEvents);
       }
 
@@ -228,10 +227,15 @@ export async function savePatientLog(patientId: string, newEvents: PDEvent[], ne
       if (cleanedVital && Object.keys(cleanedVital).length > 1) { // check for more than just vitalId
         updatePayload.vitals = arrayUnion(cleanedVital);
       }
+      
+      // Only perform update if there's something to update besides the timestamp
+      if (Object.keys(updatePayload).length > 1) {
+        await updateDoc(patientDocRef, updatePayload);
+        console.log(`[FIRESTORE] Patient log saved for ${patientId}.`);
+      } else {
+        console.log(`[FIRESTORE] No new log data to save for ${patientId}.`);
+      }
 
-      await updateDoc(patientDocRef, updatePayload);
-
-      console.log(`[FIRESTORE] Patient log saved for ${patientId}.`);
       return { success: true };
   } catch (error: any) {
       console.error("Error writing patient log to Firestore:", error.message || error);
@@ -252,7 +256,7 @@ export async function updatePatientData(patientId: string, updatedData: Partial<
 
         // Convert any date objects to ISO strings before saving
         if (dataToUpdate.pdStartDate && typeof dataToUpdate.pdStartDate !== 'string') {
-            dataToUpdate.pdStartDate = formatISO(dataToUpdate.pdStartDate);
+            dataToUpdate.pdStartDate = formatISO(dataToUpdate.pdStartDate as Date);
         }
         await updateDoc(patientDocRef, dataToUpdate);
         console.log(`[FIRESTORE] Patient data updated for ${patientId}.`, dataToUpdate);
