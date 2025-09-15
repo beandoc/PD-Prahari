@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Card,
   CardContent,
@@ -10,13 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartConfig,
-} from '@/components/ui/chart';
-import { Area, AreaChart, Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import {
   HeartPulse,
   Weight,
@@ -31,6 +25,18 @@ import { getSuggestionsAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 
+// Dynamically import the chart components
+const VitalsUfChart = dynamic(() => import('@/components/charts/vitals-uf-chart').then(mod => mod.VitalsUfChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[200px] w-full" />,
+});
+
+const VitalsWeightChart = dynamic(() => import('@/components/charts/vitals-weight-chart').then(mod => mod.VitalsWeightChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[200px] w-full" />,
+});
+
+
 interface VitalsCardProps {
   vitals: Vital[];
   pdEvents: PDEvent[];
@@ -38,17 +44,6 @@ interface VitalsCardProps {
 }
 
 type TimeRange = '7d' | '30d' | '90d';
-
-const chartConfig = {
-  weight: {
-    label: 'Weight (kg)',
-    color: 'hsl(var(--chart-1))',
-  },
-  uf: {
-    label: 'UF (mL)',
-    color: 'hsl(var(--chart-2))',
-  }
-} satisfies ChartConfig;
 
 const filterDataByTimeRange = (data: {date: string}[], range: TimeRange) => {
     const now = new Date();
@@ -234,22 +229,7 @@ export default function VitalsCard({ vitals, pdEvents, patient }: VitalsCardProp
                     <Button variant={ufTimeRange === '90d' ? 'secondary' : 'ghost'} size="sm" className="h-7 px-2" onClick={() => setUfTimeRange('90d')}>3M</Button>
                 </div>
             </div>
-            <ChartContainer config={chartConfig} className="h-[200px] w-full">
-              <LineChart data={ufChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid vertical={false} />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                <YAxis domain={['dataMin - 100', 'dataMax + 100']} hide/>
-                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <Line
-                  dataKey="uf"
-                  type="monotone"
-                  stroke="hsl(var(--chart-2))"
-                  strokeWidth={2}
-                  dot={true}
-                  name="UF (mL)"
-                />
-              </LineChart>
-            </ChartContainer>
+            <VitalsUfChart data={ufChartData} />
           </div>
 
           <div>
@@ -257,47 +237,7 @@ export default function VitalsCard({ vitals, pdEvents, patient }: VitalsCardProp
                 <Weight className="h-4 w-4 text-accent" />
                 Weight Trend
             </h4>
-            <ChartContainer config={chartConfig} className="h-[200px] w-full">
-              <AreaChart
-                data={weightChartData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                />
-                <YAxis domain={['dataMin - 2', 'dataMax + 2']} hide />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent />}
-                />
-                <defs>
-                  <linearGradient id="fillWeight" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor="hsl(var(--chart-1))"
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="hsl(var(--chart-1))"
-                      stopOpacity={0.1}
-                    />
-                  </linearGradient>
-                </defs>
-                <Area
-                  dataKey="weight"
-                  type="natural"
-                  fill="url(#fillWeight)"
-                  stroke="hsl(var(--chart-1))"
-                  stackId="a"
-                  name="Weight (kg)"
-                />
-              </AreaChart>
-            </ChartContainer>
+            <VitalsWeightChart data={weightChartData} />
           </div>
 
           <div className="border-t pt-4">

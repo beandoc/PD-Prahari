@@ -9,15 +9,15 @@ import { Droplets, TrendingUp, BarChart as BarChartIcon } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { doc, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { PDEvent } from '@/lib/types';
-import { Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Skeleton } from '../ui/skeleton';
 
-const DynamicLineChart = dynamic(() => 
-  import('recharts').then(mod => mod.LineChart), {
-    ssr: false,
-    loading: () => <div className="h-[300px] w-full animate-pulse bg-muted rounded-lg" />
+// Dynamically import the chart component
+const PatientHistoryChart = dynamic(() => import('@/components/charts/patient-history-chart').then(mod => mod.PatientHistoryChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[300px] w-full" />,
 });
 
 interface HistoryViewProps {
@@ -31,12 +31,7 @@ export function HistoryView({ patientId, initialEvents, initialDailyUfData }: Hi
   const [dailyUfData, setDailyUfData] = useState(initialDailyUfData);
 
   useEffect(() => {
-    // This listener now only needs to fetch events NEWER than what we already have.
     const latestEventDate = allEvents.length > 0 ? new Date(allEvents[0].exchangeDateTime) : new Date(0);
-    
-    // In a subcollection model, this query is very efficient.
-    // In the current model, this still requires a client-side read of the whole document.
-    // The architectural benefit comes from setting up the listener correctly for a future migration.
     const patientDocRef = doc(db, 'patients', patientId);
 
     const unsubscribe = onSnapshot(patientDocRef, (docSnap) => {
@@ -46,11 +41,9 @@ export function HistoryView({ patientId, initialEvents, initialDailyUfData }: Hi
         const newEvents = freshEvents.filter(e => new Date(e.exchangeDateTime) > latestEventDate);
 
         if (newEvents.length > 0) {
-            console.log("New real-time events received:", newEvents);
             const combinedEvents = [...newEvents, ...allEvents].sort((a,b) => new Date(b.exchangeDateTime).getTime() - new Date(a.exchangeDateTime).getTime());
             setAllEvents(combinedEvents);
 
-            // Recalculate UF data
             const dailyUf: Record<string, number> = {};
             combinedEvents.forEach(event => {
                 const day = format(startOfDay(new Date(event.exchangeDateTime)), 'yyyy-MM-dd');
@@ -86,16 +79,7 @@ export function HistoryView({ patientId, initialEvents, initialDailyUfData }: Hi
         </CardHeader>
         <CardContent>
             {dailyUfData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                    <DynamicLineChart data={dailyUfData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis label={{ value: 'Total UF (mL)', angle: -90, position: 'insideLeft' }}/>
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="uf" stroke="hsl(var(--primary))" name="Total Daily UF (mL)" activeDot={{ r: 8 }} />
-                    </DynamicLineChart>
-                </ResponsiveContainer>
+                <PatientHistoryChart data={dailyUfData} />
             ) : (
                 <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-slate-50 rounded-lg border border-dashed">
                   <BarChartIcon className="h-12 w-12 mb-4" />
