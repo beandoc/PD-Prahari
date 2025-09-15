@@ -571,5 +571,6 @@ export async function getClinicKpis() {
         };
     }
 }
+    
 
     
